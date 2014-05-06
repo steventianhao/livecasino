@@ -2,8 +2,13 @@
 -behavior(gen_server).
 
 -compile([{parse_transform, lager_transform}]).
--export([start_link/1,stop/1,new_dealer/3,enter_table/2,quit_table/1]).
+
+%%API
+-export([start_link/1,stop/1,new_dealer/3,enter_table/2,quit_table/1,start_bet/1,stop_bet/1]).
+
+%% gen_server callbacks
 -export([init/1,handle_call/3,handle_cast/2,handle_info/2,terminate/2,code_change/3]).
+
 -include("dealer.hrl").
 
 -record(state, {dealer,table}).
@@ -31,9 +36,39 @@ enter_table(Name,TableId)->
 quit_table(Name)->
 	gen_server:call(?PID(Name),quit_table).
 
+start_bet(Name)->
+	gen_server:call(?PID(Name),start_bet).
+
+stop_bet(Name)->
+	gen_server:call(?PID(Name),stop_bet).
+
 handle_cast(stop,State)->
 	{stop,normal,State}.
-
+handle_call(stop_bet,_From,State=#state{table=Table})->
+	Result=case Table of
+		undefined-> dealer_status_error;
+		TableId->
+			UniqueTable=lists:concat(["table_",TableId]),
+			Pid=gproc:where({n,l,UniqueTable}),
+			case Pid of
+				undefined->table_process_not_exist;
+				_-> gen_server:call(Pid,stop_bet)
+			end
+	end,
+	{reply,Result,State};
+handle_call(start_bet,_From,State=#state{table=Table})->
+	Result=case Table of
+		undefined->dealer_status_error;
+		TableId->
+			%%look the table process, send message to it.
+			UniqueTable=lists:concat(["table_",TableId]),
+			Pid=gproc:where({n,l,UniqueTable}),
+			case Pid of
+				undefined-> table_process_not_exist;
+				_->gen_server:call(Pid,start_bet)
+			end
+	end,
+	{reply,Result,State};
 handle_call({enter_table,TableId},_From,State=#state{table=Table})->
 	UniqueTableDealer=lists:concat(["dealer_table_",TableId]),
 	%% should check the table process exist or not.
