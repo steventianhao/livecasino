@@ -8,7 +8,7 @@
 -export([stopped/3,dealing/3,betting/3]).
 
 %% API
--export([start_link/0,start_bet/0,stop_bet/0,commit/1]).
+-export([start_link/0,start_bet/0,stop_bet/0,commit/1,dealer_connected/1,dealer_disconnected/1]).
 
 -define(TICK,15).
 
@@ -18,6 +18,7 @@ start_link()->
 	gen_fsm:start_link({local,?MODULE},?MODULE,[],[]).
 
 init([])->
+	process_flag(trap_exit,true),
 	{ok,stopped,#state{}}.
 
 start_bet()->
@@ -67,9 +68,11 @@ dealing(Event,_From,State)->
 	lager:error("unexpected event when dealing, event ~p,state ~p",[Event,State]),
 	{reply,error_status,dealing,State}.	
 
+
+
 handle_info(tick,betting,State=#state{ticker=Ticker})->
 	%%send the tick to all players intrested in
-	lager:info("handle_tick when betting, state ~p",[State]),
+	lager:info("handle_info tick&betting, state ~p",[State]),
 	case Ticker of
 		{TRef,0} -> 
 			timer:cancel(TRef),
@@ -79,6 +82,15 @@ handle_info(tick,betting,State=#state{ticker=Ticker})->
 			NewState=State#state{ticker={TRef,Value-1}},
 			{next_state,betting,NewState}
 	end;
+handle_info(Info={'EXIT',FromPid,Reason},StateName,State=#state{dealer=DealerNow})->
+	lager:error("handle dealer process DOWN, info ~p,stateName ~p,state ~p",[Info,StateName,State]),
+	case DealerNow of
+		{Pdealer,_Dealer} when Pdealer==FromPid ->
+			NewState=State#state{dealer=undefined},
+			{next_state,StateName,NewState};
+		_ ->
+			{stop,Reason,State}
+	end;	
 handle_info(Info,StateName,State)->
 	lager:error("unexpected handle_info, info ~p,stateName ~p,state ~p",[Info,StateName,State]),
 	{next_state,StateName,State}.
@@ -101,7 +113,7 @@ handle_sync_event(Event={dealer_connected,Dealer},From={Pid,_},StateName,State=#
 	{Result,NewState}=case DealerNow of
 		undefined->
 		   	State2=State#state{dealer={Pid,Dealer}},
-		   	%% should monitor this Pid, when it dies, disconnect the dealer
+		   	link(Pid),
 			{ok,State2};
 		_ ->
 			{{error,dealer_existed},State}
