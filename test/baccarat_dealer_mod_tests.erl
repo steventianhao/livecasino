@@ -1,14 +1,26 @@
 -module(baccarat_dealer_mod_tests).
 -include_lib("eunit/include/eunit.hrl").
 -include("../src/baccarat.hrl").
+-define(DEBUG,true).
 
 put(List)->
-	Cards=lists:foldl(fun({Pos,Card},Acc)-> baccarat_dealer_mod:put(Pos,Card,Acc) end, #{},List),
+	Fun = fun({Pos,Card},Acc)-> 
+		baccarat_dealer_mod:put(Pos,Card,Acc) 
+	end,
+	Cards=lists:foldl(Fun, #{},List),
 	baccarat_dealer_mod:commit(Cards).
 
 add_test() ->
-	{P1,C1}=baccarat_dealer_mod:add(?ACE,#{}),
-	?assert(P1 =:= ?PLAYER_POS_1 andalso maps:get(?PLAYER_POS_1,C1) =:= ?ACE).
+	Fun = fun(Card,Acc)-> 
+		{_,Cards}=baccarat_dealer_mod:add(Card,Acc),
+		Cards 
+	end,
+	List = [?SIX,?FIVE,?SEVEN,?THREE],
+	M=lists:foldl(Fun, #{},List),
+	?debugVal(M),
+	Result=[{?PLAYER_POS_1,?SIX},{?PLAYER_POS_2,?SEVEN},{?BANKER_POS_1,?FIVE},{?BANKER_POS_2,?THREE}],
+	?debugVal(Result),
+	?assert(M == maps:from_list(Result)).
 
 put_test_()->
 	List1=[{?PLAYER_POS_1,?SIX},{?PLAYER_POS_2,?SEVEN},{?BANKER_POS_1,?FIVE},{?BANKER_POS_2,?THREE}],
