@@ -9,13 +9,19 @@ total(Cards) ->
 put(Pos,Card,Cards) when is_map(Cards) andalso is_record(Card,card) andalso is_integer(Pos)->
 	case lists:member(Pos,?ALL_POS) of
 		true->
-			maps:put(Pos,Card,Cards);
+			{ok,maps:put(Pos,Card,Cards)};
 		false->
-			Cards
+			error
 	end.
 
 remove(Pos,Cards) when is_map(Cards) andalso is_integer(Pos)->
-	maps:remove(Pos,Cards).
+	case maps:is_key(Pos,Cards) of
+		true -> 
+			{ok,maps:remove(Pos,Cards)};
+		false->
+			error
+	end.
+
 
 anyoneOf(Total,Lists) when is_integer(Total) andalso is_list(Lists)->
 	lists:member(Total,Lists).
@@ -44,7 +50,9 @@ commit(Cards=#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?BANKER_POS_1 :=B1,?BANKER_
 			Bt6=(Bt==6 andalso anyoneOf(P3v,?TOTAL67)),
 			Pt < 6 andalso (Bt <3 orelse Bt3 orelse Bt4 orelse Bt5 orelse Bt6);
 		_ -> false
-	end.
+	end;
+commit(Cards) when is_map(Cards)->
+	false.
 
 
 add(Card,Cards) when is_map(Cards) andalso is_record(Card,card)->

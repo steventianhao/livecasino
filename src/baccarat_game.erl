@@ -23,7 +23,7 @@ checkDealer(DealerNow,Pid,Fun1,Fun2)->
 stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer=DealerNow})->
 	Fun1 = fun()->
 			{ok,TRef}=timer:send_interval(1000,tick),
-			NewState=State#state{ticker={TRef,Countdown},cards=orddict:new()},
+			NewState=State#state{ticker={TRef,Countdown},cards=#{}},
 			{reply,ok,betting,NewState}
 		end,
 	Fun2= fun()-> {reply,error_channel,stopped,State} end,
@@ -59,9 +59,13 @@ dealing(Event={deal,Pos,Card},{Pid,_},State=#state{cards=Cards,dealer=DealerNow}
 	lager:info("dealing, Event ~p, State ~p",[Event,State]),
 	Fun1 = fun()->
 	%%check the pos and card to see if it's valid
-		NewCards=orddict:store(Pos,Card,Cards),
-		NewState=State#state{cards=NewCards},
-		{reply,ok,dealing,NewState}
+		case baccarat_dealer_mod:put(Pos,Card,Cards) of
+			{ok,NewCards} ->
+				NewState=State#state{cards=NewCards},
+				{reply,ok,dealing,NewState};
+			error ->
+				{reply,error,dealing,State}
+		end
 	end,
 	Fun2 = fun()-> {reply,error_channel,dealing,State} end,
 	checkDealer(DealerNow,Pid,Fun1,Fun2);
@@ -69,17 +73,28 @@ dealing(Event={deal,Pos,Card},{Pid,_},State=#state{cards=Cards,dealer=DealerNow}
 dealing(Event={clear,Pos},{Pid,_},State=#state{cards=Cards,dealer=DealerNow})->
 	lager:info("dealing, Event ~p, State ~p",[Event,State]),
 	Fun1 = fun()->
-		NewCards=orddict:erase(Pos,Cards),
-		NewState=State#state{cards=NewCards},
-		{reply,ok,dealing,NewState}
+		case baccarat_dealer_mod:remove(Pos,Cards) of
+			{ok,NewCards} ->
+				NewState=State#state{cards=NewCards},
+				{reply,ok,dealing,NewState};
+			error ->
+				{reply,error,dealing,State}
+		end
 	end,
 	Fun2 = fun()-> {reply,error_channel,dealing,State} end,
 	checkDealer(DealerNow,Pid,Fun1,Fun2);
 
-dealing(commit,{Pid,_},State=#state{dealer=DealerNow})->
+dealing(commit,{Pid,_},State=#state{cards=Cards,dealer=DealerNow})->
 	lager:info("dealing, Event ~p, State ~p",[commit,State]),
 	%%check the cards are valid in accordence with the game rule
-	Fun1 = fun()-> {reply,ok,stopped,State} end,
+	Fun1 = fun()->
+		case baccarat_dealer_mod:commit(Cards) of
+			true->
+				{reply,ok,stopped,State};
+			false->
+				{reply,error,dealing,State}
+		end
+	end,
 	Fun2 = fun()-> {reply,error_channel,dealing,State} end,
 	checkDealer(DealerNow,Pid,Fun1,Fun2);
 

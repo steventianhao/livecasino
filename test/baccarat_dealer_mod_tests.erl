@@ -5,7 +5,8 @@
 
 put(List)->
 	Fun = fun({Pos,Card},Acc)-> 
-		baccarat_dealer_mod:put(Pos,Card,Acc) 
+		{ok,Acc2}=baccarat_dealer_mod:put(Pos,Card,Acc),
+		Acc2
 	end,
 	Cards=lists:foldl(Fun, #{},List),
 	baccarat_dealer_mod:commit(Cards).
@@ -43,3 +44,10 @@ put_test_()->
 	List9=[{?PLAYER_POS_1,?TEN},{?BANKER_POS_1,?EIGHT},{?PLAYER_POS_2,?QUEEN},{?BANKER_POS_2,?EIGHT},{?PLAYER_POS_3,?TEN}],
 	All=[List1,List2,List3,List4,List5,List6,List7,List8,List9],
 	lists:map(fun(L)-> ?_assert(put(L)) end, All).
+
+commit_test_()->
+	List1=[{?PLAYER_POS_1,?JACK},{?PLAYER_POS_2,?FOUR},{?BANKER_POS_2,?TEN},{?PLAYER_POS_3,?NINE},{?BANKER_POS_3,?THREE}],
+	Result1=baccarat_dealer_mod:commit(maps:from_list(List1)),
+	List2=[{?PLAYER_POS_1,?JACK}],
+	Result2=baccarat_dealer_mod:commit(maps:from_list(List2)),
+	[?_assertNot(Result1),?_assertNot(Result2)].
