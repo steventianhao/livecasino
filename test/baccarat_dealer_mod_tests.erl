@@ -45,9 +45,24 @@ put_test_()->
 	All=[List1,List2,List3,List4,List5,List6,List7,List8,List9],
 	lists:map(fun(L)-> ?_assert(put(L)) end, All).
 
+put_test()->
+	{ok,C1}=baccarat_dealer_mod:put(?PLAYER_POS_1,?TWO,#{}),
+	?assert(C1=:=#{?PLAYER_POS_1=>?TWO}),
+	{ok,C2}=baccarat_dealer_mod:put(?PLAYER_POS_1,?TWO,C1),
+	?assert(C2=:=#{?PLAYER_POS_1=>?TWO}),
+	{ok,C3}=baccarat_dealer_mod:put(?PLAYER_POS_2,?TWO,C2),
+	?assert(C3=:=#{?PLAYER_POS_1=>?TWO,?PLAYER_POS_2=>?TWO}),
+	?assert(error=:=baccarat_dealer_mod:put(?INVALID_POS,?ACE,#{})).
+
 commit_test_()->
 	List1=[{?PLAYER_POS_1,?JACK},{?PLAYER_POS_2,?FOUR},{?BANKER_POS_2,?TEN},{?PLAYER_POS_3,?NINE},{?BANKER_POS_3,?THREE}],
 	Result1=baccarat_dealer_mod:commit(maps:from_list(List1)),
 	List2=[{?PLAYER_POS_1,?JACK}],
 	Result2=baccarat_dealer_mod:commit(maps:from_list(List2)),
 	[?_assertNot(Result1),?_assertNot(Result2)].
+
+remove_test()->
+	M=#{?PLAYER_POS_1=>?JACK,?PLAYER_POS_2=>?KING},
+	?assert({ok,#{?PLAYER_POS_2=>?KING}}=:=baccarat_dealer_mod:remove(?PLAYER_POS_1,M)),
+	?assert(error=:=baccarat_dealer_mod:remove(?BANKER_POS_2,M)).
+
