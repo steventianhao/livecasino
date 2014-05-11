@@ -8,13 +8,12 @@
 create(Cards)->
 	[Pcs,Bcs]=string:tokens(Cards,"#"),
 	CardsMap=?CARDS_MAP,
-	maps:merge(create_player_cards(Pcs,CardsMap),create_banker_cards(Bcs,CardsMap)).
-create_player_cards(Cards,CardsMap)->
-	CL=lists:reverse(string_to_cards(Cards,CardsMap)),
-	create_map(CL,[?PLAYER_POS_1,?PLAYER_POS_2,?PLAYER_POS_3]).
-create_banker_cards(Cards,CardsMap)->
-	CL=lists:reverse(string_to_cards(Cards,CardsMap)),
-	create_map(CL,[?BANKER_POS_1,?BANKER_POS_2,?BANKER_POS_3]).
+	CLp=lists:reverse(string_to_cards(Pcs,CardsMap)),
+	Mp=create_map(CLp,[?PLAYER_POS_1,?PLAYER_POS_2,?PLAYER_POS_3]),
+	CLb=lists:reverse(string_to_cards(Bcs,CardsMap)),
+	Mb=create_map(CLb,[?BANKER_POS_1,?BANKER_POS_2,?BANKER_POS_3]),
+	maps:merge(Mp,Mb).
+	
 create_map(Cards,IndexList)->
 	case {Cards,IndexList} of
 		{[],_} -> #{};
