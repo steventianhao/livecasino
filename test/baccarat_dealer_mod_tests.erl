@@ -19,23 +19,22 @@ add(List)->
 	L=[Card || {_,Card} <- List],
 	lists:foldl(Fun, #{},L).
 
-all_cases()->
-	L1=[{?PLAYER_POS_1,?SIX}, {?BANKER_POS_1,?FIVE},{?PLAYER_POS_2,?SEVEN},{?BANKER_POS_2,?THREE}],
-	L2=[{?PLAYER_POS_1,?JACK},{?BANKER_POS_1,?THREE},{?PLAYER_POS_2,?FOUR},{?BANKER_POS_2,?TEN},{?PLAYER_POS_3,?NINE},{?BANKER_POS_3,?THREE}],
-	L3=[{?PLAYER_POS_1,?TWO}, {?BANKER_POS_1,?FIVE},{?PLAYER_POS_2,?NINE},{?BANKER_POS_2,?ACE},{?PLAYER_POS_3,?ACE}],
-	L4=[{?PLAYER_POS_1,?EIGHT},{?BANKER_POS_1,?SIX},{?PLAYER_POS_2,?QUEEN},{?BANKER_POS_2,?JACK}],
-	L5=[{?PLAYER_POS_1,?ACE},{?BANKER_POS_1,?TWO}, {?PLAYER_POS_2,?SIX},{?BANKER_POS_2,?SIX}],
-	L6=[{?PLAYER_POS_1,?NINE},{?BANKER_POS_1,?KING},{?PLAYER_POS_2,?SIX},{?BANKER_POS_2,?THREE},{?PLAYER_POS_3,?EIGHT}],
-	L7=[{?PLAYER_POS_1,?THREE},{?BANKER_POS_1,?SIX},{?PLAYER_POS_2,?FOUR},{?BANKER_POS_2,?FIVE},{?BANKER_POS_3,?TWO}],
-	L8=[{?PLAYER_POS_1,?EIGHT},{?BANKER_POS_1,?FOUR},{?PLAYER_POS_2,?KING},{?BANKER_POS_2,?FOUR}],
-	L9=[{?PLAYER_POS_1,?TEN},{?BANKER_POS_1,?EIGHT},{?PLAYER_POS_2,?QUEEN},{?BANKER_POS_2,?EIGHT},{?PLAYER_POS_3,?TEN}],
-	[L1,L2,L3,L4,L5,L6,L7,L8,L9].
+results()->
+	["HQD7#HAH5C5","S7D7#H9HK","CTD7#HJH8","C4D4D7#H6ST","D9D7#CTHKD2","CTD7#HKC4DJ","DAD7#H4S3","DJD7#DKS9",
+	"HKD6D7#S3H3SK","DAS4D7#C2H2","SAD7#S3C5","D4S7D7#C9SKHA","D2C8D7#H8C2DQ","HAD7#C2H9","HAS7D7#H6DAH2",
+	"DKD7#H8D3SJ","S9D8D7#H4H2C9","S9D7#DQSQDT","H2DTD2#DKSQCJ","D4C3D8#DTC2H8","S2C3C9#S9DAD9","DQDKSQ#D5D2DT","D5HQHT#H9C6D4",
+	"C9C2CT#H9C8C2","S6SQST#H6STC6","H7CQCT#STSQHJ","C3HQS5#D2SQSJ","S5HQSJ#C4SAHK","DJH3SJ#D3DADJ",
+	"H6DKDA#CKSQCT","D4C4H7#DQDKDQ","S2CJS5#DTHTDJ","C2HJCJ#CQHKD2","C4D7C5#D6DASA","HQHAHQ#S3S3SJ",
+	"SQC8H3#D7D3C9","CKDKC4#CKHAST","S3DACT#SKS2D8","S5DTCQ#S4H5D7","S3DACT#SKS2D8"].
+
+string_cases()->
+	lists:map(fun(L)->maps:to_list(baccarat_dealer_mod:create(L)) end,results()).
 
 add_test_() ->
-	lists:map(fun(L)-> ?_assert(add(L) == maps:from_list(L)) end, all_cases()).
+	lists:map(fun(L)-> ?_assert(add(L) == maps:from_list(L)) end, string_cases()).
 
 put_test_()->
-	lists:map(fun(L)-> ?_assert(put(L)) end, all_cases()).
+	lists:map(fun(L)-> ?_assert(put(L)) end, string_cases()).
 
 put_test()->
 	{ok,C1}=baccarat_dealer_mod:put(?PLAYER_POS_1,?TWO,#{}),
