@@ -12,12 +12,14 @@ put(List)->
 	baccarat_dealer_mod:commit(Cards).
 
 add(List)->
+	add2([Card || {_,Card} <- List]).
+
+add2(List)->
 	Fun = fun(Card,Acc)-> 
 		{_,Cards}=baccarat_dealer_mod:add(Card,Acc),
 		Cards 
 	end,
-	L=[Card || {_,Card} <- List],
-	lists:foldl(Fun, #{},L).
+	lists:foldl(Fun, #{},List).
 
 results()->
 	["HQD7#HAH5C5","S7D7#H9HK","CTD7#HJH8","C4D4D7#H6ST","D9D7#CTHKD2","CTD7#HKC4DJ","DAD7#H4S3","DJD7#DKS9",
@@ -32,6 +34,25 @@ string_cases()->
 
 add_test_() ->
 	lists:map(fun(L)-> ?_assert(add(L) == maps:from_list(L)) end, string_cases()).
+
+four_add_invalid_pos(L)->
+	M=add2(L),
+	maps:size(M)==4 andalso maps:is_key(?BANKER_POS_3,M) ==false andalso maps:is_key(?PLAYER_POS_3,M) ==false.
+
+
+add2_test_()->
+	L1=[?ACE,?TWO,?EIGHT,?THREE,?FOUR],
+	L2=[?ACE,?TWO,?SEVEN,?THREE,?FOUR],
+	L3=[?TWO,?ACE,?THREE,?EIGHT,?FOUR],
+	L4=[?TWO,?ACE,?THREE,?SEVEN,?FOUR],
+	L5=[?ACE,?TWO,?FIVE,?FOUR,?SIX],
+	L6=[?ACE,?TWO,?FIVE,?FIVE,?SIX],
+	L7=[?ACE,?TWO,?SIX,?FOUR,?EIGHT],
+	L8=[?ACE,?TWO,?SIX,?FIVE,?EIGHT],
+	lists:map(fun(L)->?_assert(four_add_invalid_pos(L)) end,
+		[L1,L2,L3,L4,L5,L6,L7,L8]).	
+
+
 
 put_test_()->
 	lists:map(fun(L)-> ?_assert(put(L)) end, string_cases()).
