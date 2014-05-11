@@ -3,6 +3,8 @@
 -export([add/2,put/3,remove/2,commit/1,create/1]).
 -include("baccarat.hrl").
 
+-define(ANYONEOF(Total,Lists),lists:member(Total,Lists)).
+
 create(Cards)->
 	[Pcs,Bcs]=string:tokens(Cards,"#"),
 	CardsMap=?CARDS_MAP,
@@ -47,32 +49,28 @@ remove(Pos,Cards) when is_map(Cards) andalso is_integer(Pos)->
 			error
 	end.
 
-
-anyoneOf(Total,Lists) when is_integer(Total) andalso is_list(Lists)->
-	lists:member(Total,Lists).
-
 commit(Cards=#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?BANKER_POS_1 :=B1,?BANKER_POS_2 :=B2}) when is_map(Cards)->
 	Size = maps:size(Cards),
 	Bt=total([B1,B2]),
 	Pt=total([P1,P2]),
 	case {Size,Cards} of
 		{4,_}->
-			anyoneOf(Pt,?TOTAL89) orelse anyoneOf(Bt,?TOTAL89) orelse (anyoneOf(Pt,?TOTAL67) andalso anyoneOf(Bt,?TOTAL67));
+			?ANYONEOF(Pt,?TOTAL89) orelse ?ANYONEOF(Bt,?TOTAL89) orelse (?ANYONEOF(Pt,?TOTAL67) andalso ?ANYONEOF(Bt,?TOTAL67));
 		{5,#{?PLAYER_POS_3 :=P3}}->
 			P3v=P3#card.value,
 			Bt3=(Bt==3 andalso P3v ==8)  ,
-			Bt4=(Bt==4 andalso anyoneOf(P3v,[0,1,8,9])),
-			Bt5=(Bt==5 andalso anyoneOf(P3v,[0,1,2,3,8,9])),
-			Bt6=(Bt==6 andalso anyoneOf(P3v,[0,1,2,3,4,5,8,9])),
+			Bt4=(Bt==4 andalso ?ANYONEOF(P3v,[0,1,8,9])),
+			Bt5=(Bt==5 andalso (not ?ANYONEOF(P3v,[4,5,6,7]))),
+			Bt6=(Bt==6 andalso (not ?ANYONEOF(P3v,?TOTAL67))),
 			Pt < 6 andalso  (Bt3 orelse Bt4 orelse Bt5 orelse Bt6 orelse Bt==7);
 		{5,#{?BANKER_POS_3 :=_}}->
-			anyoneOf(Pt,?TOTAL67) andalso Bt < 6;
+			?ANYONEOF(Pt,?TOTAL67) andalso Bt < 6;
 		{6,#{?PLAYER_POS_3 :=P3,?BANKER_POS_3 :=_}}->
 			P3v=P3#card.value,
 			Bt3=(Bt==3 andalso P3v /=8) ,
-			Bt4=(Bt==4 andalso anyoneOf(P3v,[2,3,4,5,6,7])),
-			Bt5=(Bt==5 andalso anyoneOf(P3v,[4,5,6,7])),
-			Bt6=(Bt==6 andalso anyoneOf(P3v,?TOTAL67)),
+			Bt4=(Bt==4 andalso (not ?ANYONEOF(P3v,[0,1,8,9]))),
+			Bt5=(Bt==5 andalso ?ANYONEOF(P3v,[4,5,6,7])),
+			Bt6=(Bt==6 andalso ?ANYONEOF(P3v,?TOTAL67)),
 			Pt < 6 andalso (Bt <3 orelse Bt3 orelse Bt4 orelse Bt5 orelse Bt6);
 		_ -> false
 	end;
