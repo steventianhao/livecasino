@@ -1,6 +1,6 @@
 -module(baccarat_dealer_mod).
 
--export([add/2,put/3,remove/2,commit/1,create/1]).
+-export([add/2,put/3,remove/2,validate/1,create/1]).
 -include("baccarat.hrl").
 
 -define(ANYONEOF(Total,Lists),lists:member(Total,Lists)).
@@ -49,7 +49,7 @@ remove(Pos,Cards) when is_map(Cards) andalso is_integer(Pos)->
 			error
 	end.
 
-commit(Cards=#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?BANKER_POS_1 :=B1,?BANKER_POS_2 :=B2}) when is_map(Cards)->
+validate(Cards=#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?BANKER_POS_1 :=B1,?BANKER_POS_2 :=B2}) when is_map(Cards)->
 	Size = maps:size(Cards),
 	Bt=total([B1,B2]),
 	Pt=total([P1,P2]),
@@ -74,7 +74,7 @@ commit(Cards=#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?BANKER_POS_1 :=B1,?BANKER_
 			Pt < 6 andalso (Bt <3 orelse Bt3 orelse Bt4 orelse Bt5 orelse Bt6);
 		_ -> false
 	end;
-commit(Cards) when is_map(Cards)->
+validate(Cards) when is_map(Cards)->
 	false.
 
 

@@ -9,7 +9,7 @@ put(List)->
 		Acc2
 	end,
 	Cards=lists:foldl(Fun, #{},List),
-	baccarat_dealer_mod:commit(Cards).
+	baccarat_dealer_mod:validate(Cards).
 
 add(List)->
 	add2([Card || {_,Card} <- List]).
@@ -66,11 +66,11 @@ put_test()->
 	?assert(C3=:=#{?PLAYER_POS_1=>?TWO,?PLAYER_POS_2=>?TWO}),
 	?assert(error=:=baccarat_dealer_mod:put(?INVALID_POS,?ACE,#{})).
 
-commit_test_()->
+validate_test_()->
 	List1=[{?PLAYER_POS_1,?JACK},{?PLAYER_POS_2,?FOUR},{?BANKER_POS_2,?TEN},{?PLAYER_POS_3,?NINE},{?BANKER_POS_3,?THREE}],
-	Result1=baccarat_dealer_mod:commit(maps:from_list(List1)),
+	Result1=baccarat_dealer_mod:validate(maps:from_list(List1)),
 	List2=[{?PLAYER_POS_1,?JACK}],
-	Result2=baccarat_dealer_mod:commit(maps:from_list(List2)),
+	Result2=baccarat_dealer_mod:validate(maps:from_list(List2)),
 	[?_assertNot(Result1),?_assertNot(Result2)].
 
 remove_test()->
