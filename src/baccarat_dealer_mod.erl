@@ -1,7 +1,32 @@
 -module(baccarat_dealer_mod).
 
--export([add/2,put/3,remove/2,commit/1]).
+-export([add/2,put/3,remove/2,commit/1,create/1]).
 -include("baccarat.hrl").
+
+create(Cards)->
+	[Pcs,Bcs]=string:tokens(Cards,"#"),
+	CardsMap=?CARDS_MAP,
+	maps:merge(create_player_cards(Pcs,CardsMap),create_banker_cards(Bcs,CardsMap)).
+create_player_cards(Cards,CardsMap)->
+	CL=lists:reverse(string_to_cards(Cards,CardsMap)),
+	create_map(CL,[?PLAYER_POS_1,?PLAYER_POS_2,?PLAYER_POS_3]).
+create_banker_cards(Cards,CardsMap)->
+	CL=lists:reverse(string_to_cards(Cards,CardsMap)),
+	create_map(CL,[?BANKER_POS_1,?BANKER_POS_2,?BANKER_POS_3]).
+create_map(Cards,IndexList)->
+	case {Cards,IndexList} of
+		{[],_} -> #{};
+		{[H1|T1],[H2|T2]} -> 
+			Rest=create_map(T1,T2),
+			maps:put(H2,H1,Rest)
+	end.
+
+string_to_cards([],_CardsMap)->
+	[];
+string_to_cards([_,N|T],CardsMap)->
+	C= maps:get(N,CardsMap),
+	[C|string_to_cards(T,CardsMap)].
+
 
 total(Cards) ->
 	lists:foldl(fun(X,Sum)->X#card.value+Sum end,0,Cards) rem 10.
