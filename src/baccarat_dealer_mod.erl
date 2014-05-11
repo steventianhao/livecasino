@@ -82,8 +82,8 @@ add(Card,Cards) when is_map(Cards) andalso is_record(Card,card)->
 	Calc4 = fun(Pt,Bt)->
 		if
 			Pt == 8 orelse Pt ==9 orelse Bt==8 orelse Bt==9 -> ?INVALID_POS;
+			(Pt== 6 orelse Pt == 7) andalso (Bt == 6 orelse Bt==7) -> ?INVALID_POS;
 			(Pt== 6 orelse Pt == 7) andalso Bt < 6 -> ?BANKER_POS_3;
-			(Pt== 6 orelse Pt == 7) andalso Bt >= 6 -> ?INVALID_POS;
 			true -> ?PLAYER_POS_3
 		end
 	end,
@@ -92,7 +92,7 @@ add(Card,Cards) when is_map(Cards) andalso is_record(Card,card)->
 		case Bt of
 			T  when T< 3 -> ?BANKER_POS_3;
 			3 when  P3v /= 8 -> ?BANKER_POS_3;
-			4 when P3v /= 8 orelse P3v /= 9 orelse P3v /=1 -> ?BANKER_POS_3;
+			4 when P3v /= 8 orelse P3v /= 9 orelse P3v /=1 orelse P3v /=0 -> ?BANKER_POS_3;
 			5 when P3v == 4 orelse P3v == 5 orelse P3v ==6 orelse P3v ==7 -> ?BANKER_POS_3;
 			6 when P3v == 6 orelse P3v == 7 -> ?BANKER_POS_3;
 			_ ->?INVALID_POS
