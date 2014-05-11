@@ -16,8 +16,12 @@ add(List)->
 
 add2(List)->
 	Fun = fun(Card,Acc)-> 
-		{_,Cards}=baccarat_dealer_mod:add(Card,Acc),
-		Cards 
+		case baccarat_dealer_mod:add(Card,Acc) of
+			{error,Cards} ->
+				Cards;
+			{_Status,_Pos,Cards}->
+				Cards
+		end
 	end,
 	lists:foldl(Fun, #{},List).
 

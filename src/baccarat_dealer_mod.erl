@@ -77,45 +77,79 @@ validate(Cards=#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?BANKER_POS_1 :=B1,?BANKE
 validate(Cards) when is_map(Cards)->
 	false.
 
-
 add(Card,Cards) when is_map(Cards) andalso is_record(Card,card)->
+	Calc3 = fun(Pt,Bt)->
+		if
+			Pt ==8 orelse Pt==9 orelse Bt ==8 orelse Bt==9 -> 
+				{done,?BANKER_POS_2};
+			(Pt==6 orelse Pt ==7) andalso (Bt==6 orelse Bt==7) ->
+				{done,?BANKER_POS_2};
+			true -> 
+				{more,?BANKER_POS_2}
+		end
+	end,
+
 	Calc4 = fun(Pt,Bt)->
 		if
-			Pt == 8 orelse Pt ==9 orelse Bt==8 orelse Bt==9 -> ?INVALID_POS;
-			(Pt== 6 orelse Pt == 7) andalso (Bt == 6 orelse Bt==7) -> ?INVALID_POS;
-			(Pt== 6 orelse Pt == 7) andalso Bt < 6 -> ?BANKER_POS_3;
-			true -> ?PLAYER_POS_3
+			Pt == 8 orelse Pt ==9 orelse Bt==8 orelse Bt==9 -> 
+				error;
+			(Pt== 6 orelse Pt == 7) andalso (Bt == 6 orelse Bt ==7) ->
+				error;
+			(Pt== 6 orelse Pt == 7) andalso Bt < 6 -> 
+				{done,?BANKER_POS_3};
+			true ->
+				P3v=Card#card.value,
+				case Bt of
+					T when T< 3 ->
+						{more,?PLAYER_POS_3};
+					3 when P3v /=8 ->
+						{more,?PLAYER_POS_3};
+					4 when P3v /= 8 orelse P3v /= 9 orelse P3v /=1 orelse P3v /=0 -> 
+						{more,?PLAYER_POS_3};
+					5 when P3v == 4 orelse P3v == 5 orelse P3v ==6 orelse P3v ==7 -> 
+						{more,?PLAYER_POS_3};
+					6 when P3v == 6 orelse P3v == 7 -> 
+						{more,?PLAYER_POS_3};
+					_ -> 
+						{done,?PLAYER_POS_3}
+				end
 		end
 	end,
 
 	Calc5 = fun(Bt,P3v)->
 		case Bt of
-			T  when T< 3 -> ?BANKER_POS_3;
-			3 when  P3v /= 8 -> ?BANKER_POS_3;
-			4 when P3v /= 8 orelse P3v /= 9 orelse P3v /=1 orelse P3v /=0 -> ?BANKER_POS_3;
-			5 when P3v == 4 orelse P3v == 5 orelse P3v ==6 orelse P3v ==7 -> ?BANKER_POS_3;
-			6 when P3v == 6 orelse P3v == 7 -> ?BANKER_POS_3;
-			_ ->?INVALID_POS
+			T  when T< 3 -> 
+				{done,?BANKER_POS_3};
+			3 when  P3v /= 8 -> 
+				{done,?BANKER_POS_3};
+			4 when P3v /= 8 orelse P3v /= 9 orelse P3v /=1 orelse P3v /=0 -> 
+				{done,?BANKER_POS_3};
+			5 when P3v == 4 orelse P3v == 5 orelse P3v ==6 orelse P3v ==7 -> 
+				{done,?BANKER_POS_3};
+			6 when P3v == 6 orelse P3v == 7 -> 
+				{done,?BANKER_POS_3};
+			_ -> 
+				error
 		end
 	end,
 
-	Pos=case {maps:size(Cards),Cards} of
+	Result=case {maps:size(Cards),Cards} of
 		{0,_}-> 
-			?PLAYER_POS_1;
+			{more,?PLAYER_POS_1};
 		{1,#{?PLAYER_POS_1 := _}}->
-			?BANKER_POS_1;
+			{more,?BANKER_POS_1};
 		{2,#{?PLAYER_POS_1 := _, ?BANKER_POS_1 := _}}->
-			?PLAYER_POS_2;
-		{3,#{?PLAYER_POS_1 := _, ?BANKER_POS_1 := _, ?PLAYER_POS_2 :=_}}->
-			?BANKER_POS_2;
+			{more,?PLAYER_POS_2};
+		{3,#{?PLAYER_POS_1 := P1, ?BANKER_POS_1 := B1, ?PLAYER_POS_2 := P2}}->
+			Calc3(total([P1,P2]),total([B1,Card]));
 		{4,#{?PLAYER_POS_1 :=P1, ?BANKER_POS_1 :=B1,?PLAYER_POS_2 :=P2,?BANKER_POS_2 := B2}}->
 			Calc4(total([P1,P2]),total([B1,B2]));
 		{5,#{?PLAYER_POS_1:=_,?PLAYER_POS_2:=_,?PLAYER_POS_3:=P3,?BANKER_POS_1:=B1,?BANKER_POS_2:=B2}}->
 			Calc5(total([B1,B2]),P3#card.value);
 		_ -> 
-			?INVALID_POS
+			error
 	end,
-	case Pos of
-		?INVALID_POS -> {Pos,Cards};
-		_ -> {Pos,maps:put(Pos,Card,Cards)}
+	case Result of
+		error -> {error,Cards};
+		{Status,Pos}-> {Status,Pos,maps:put(Pos,Card,Cards)}
 	end.
