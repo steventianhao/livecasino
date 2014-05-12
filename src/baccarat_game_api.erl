@@ -1,11 +1,11 @@
 -module(baccarat_game_api).
--export([start_link/1]).
+-export([start_link/2]).
 -export([start_bet/0,stop_bet/0,commit/0,dealer_connect/1,
 	dealer_disconnect/1,deal/2,clear/1,update_countdown/1]).
 -define(SERVER,baccarat_game).
 
-start_link(Countdown)->
-	gen_fsm:start_link({local,?SERVER},?SERVER,Countdown,[]).
+start_link(Countdown,Table)->
+	gen_fsm:start_link({local,?SERVER},?SERVER,{Countdown,Table,undefined},[]).
 
 start_bet()->
 	gen_fsm:sync_send_event(?SERVER,start_bet).

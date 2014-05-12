@@ -6,13 +6,28 @@
 
 %% all states transitions
 -export([stopped/3,dealing/3,betting/3]).
+-include("round.hrl").
 
+-define(GAME,baccarat).
 %% API
 
--record(state,{dealer,table,ticker,cards,countdown}).
+-record(state,{dealer,table,ticker,cards,countdown,round}).
 
-init(Countdown)->
-	{ok,stopped,#state{countdown=Countdown}}.
+init({Countdown,Table,Round})->
+	StateName=case Round of
+		undefined -> 
+			stopped;
+		_->
+			case Round#round.status of
+				?BETTING -> 
+					betting;
+				?DEALING -> 
+					dealing;
+				?DONE -> 
+					stopped
+			end
+	end,
+	{ok,StateName,#state{countdown=Countdown,table=Table,round=Round}}.
 
 checkDealer(DealerNow,Pid,Fun1,Fun2)->
 	case DealerNow of
@@ -20,11 +35,26 @@ checkDealer(DealerNow,Pid,Fun1,Fun2)->
 		_ -> Fun2()
 	end.
 
-stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer=DealerNow})->
+stopped(new_shoe,{Pid,_},State=#state{dealer=DealerNow,round=Round})->
 	Fun1 = fun()->
-			{ok,TRef}=timer:send_interval(1000,tick),
-			NewState=State#state{ticker={TRef,Countdown},cards=#{}},
-			{reply,ok,betting,NewState}
+			NewRound=baccarat_round:new_shoe(Round),
+			NewState=State#state{round=NewRound},
+			{reply,ok,stopped,NewState}
+		end,
+	Fun2= fun()-> {reply,error_channel,stopped,State} end,
+	checkDealer(DealerNow,Pid,Fun1,Fun2);
+
+stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer=DealerNow,round=Round})->
+	Fun1 = fun()->
+			case Round of
+				undefined ->
+					{reply,{error,need_new_shoe},stopped,State};
+				_ ->
+					NewRound=baccarat_round:set_betting(Round,DealerNow),
+					{ok,TRef}=timer:send_interval(1000,tick),
+					NewState=State#state{ticker={TRef,Countdown},cards=#{},round=NewRound},
+					{reply,ok,betting,NewState}
+			end
 		end,
 	Fun2= fun()-> {reply,error_channel,stopped,State} end,
 	checkDealer(DealerNow,Pid,Fun1,Fun2);
@@ -35,14 +65,15 @@ stopped(Event,{Pid,_},State=#state{dealer=DealerNow})->
 	Fun2 = fun()-> {reply,error_channel,stopped,State} end,
 	checkDealer(DealerNow,Pid,Fun1,Fun2).
 
-betting(stop_bet,{Pid,_},State=#state{ticker=Ticker,dealer=DealerNow})->
+betting(stop_bet,{Pid,_},State=#state{ticker=Ticker,dealer=DealerNow,round=Round})->
 	%% if the count down still there, cancel it
 	Fun1 = fun() ->
 			case Ticker of
 				undefined-> ok;
 				{TRef,_}-> timer:cancel(TRef)
 			end,
-			NewState=State#state{ticker=undefined},
+			NewRound=baccarat_round:set_dealing(Round),
+			NewState=State#state{ticker=undefined,round=NewRound},
 			{reply,ok,dealing,NewState}
 		end,
 	Fun2= fun()-> {reply,error_channel,betting,State} end,
@@ -84,13 +115,15 @@ dealing(Event={clear,Pos},{Pid,_},State=#state{cards=Cards,dealer=DealerNow})->
 	Fun2 = fun()-> {reply,error_channel,dealing,State} end,
 	checkDealer(DealerNow,Pid,Fun1,Fun2);
 
-dealing(commit,{Pid,_},State=#state{cards=Cards,dealer=DealerNow})->
+dealing(commit,{Pid,_},State=#state{cards=Cards,dealer=DealerNow,round=Round})->
 	lager:info("dealing, Event ~p, State ~p",[commit,State]),
 	%%check the cards are valid in accordence with the game rule
 	Fun1 = fun()->
 		case baccarat_dealer_mod:commit(Cards) of
 			true->
-				{reply,ok,stopped,State};
+				NewRound=baccarat_round:set_done(Round,Cards),
+				NewState=State#state{round=NewRound},
+				{reply,ok,stopped,NewState};
 			false->
 				{reply,error,dealing,State}
 		end
