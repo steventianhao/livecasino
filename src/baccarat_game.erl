@@ -36,6 +36,7 @@ checkDealer(DealerNow,Pid,Fun1,Fun2)->
 	end.
 
 stopped(new_shoe,{Pid,_},State=#state{dealer=DealerNow,round=Round})->
+	lager:info("stopped#new_shoe,state ~p",[State]),
 	Fun1 = fun()->
 			NewRound=baccarat_round:new_shoe(Round),
 			NewState=State#state{round=NewRound},
@@ -45,6 +46,7 @@ stopped(new_shoe,{Pid,_},State=#state{dealer=DealerNow,round=Round})->
 	checkDealer(DealerNow,Pid,Fun1,Fun2);
 
 stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer=DealerNow,round=Round})->
+	lager:info("stopped#start_bet,state ~p",[State]),
 	Fun1 = fun()->
 			case Round of
 				undefined ->
@@ -59,14 +61,12 @@ stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer=DealerNow,roun
 	Fun2= fun()-> {reply,error_channel,stopped,State} end,
 	checkDealer(DealerNow,Pid,Fun1,Fun2);
 	
-stopped(Event,{Pid,_},State=#state{dealer=DealerNow})->
+stopped(Event,_From,State)->
 	lager:error("unexpected event when stopped, event ~p,state ~p",[Event,State]),
-	Fun1 = fun()-> {reply,error_status,stopped,State} end,
-	Fun2 = fun()-> {reply,error_channel,stopped,State} end,
-	checkDealer(DealerNow,Pid,Fun1,Fun2).
-
+	{reply,unexpected,stopped,State}.
+	
 betting(stop_bet,{Pid,_},State=#state{ticker=Ticker,dealer=DealerNow,round=Round})->
-	%% if the count down still there, cancel it
+	lager:info("betting#stop_bet,state ~p",[State]),
 	Fun1 = fun() ->
 			case Ticker of
 				undefined-> ok;
@@ -79,17 +79,13 @@ betting(stop_bet,{Pid,_},State=#state{ticker=Ticker,dealer=DealerNow,round=Round
 	Fun2= fun()-> {reply,error_channel,betting,State} end,
 	checkDealer(DealerNow,Pid,Fun1,Fun2);
 
-betting(Event,{Pid,_},State=#state{dealer=DealerNow})->
+betting(Event,_From,State)->
 	lager:error("unexpected event when betting, event ~p,state ~p",[Event,State]),
-	Fun1=fun()->{reply,error_status,betting,State} end,
-	Fun2= fun()-> {reply,error_channel,betting,State} end,
-	checkDealer(DealerNow,Pid,Fun1,Fun2).
-
+	{reply,unexpected,betting,State}.
 
 dealing(Event={deal,Pos,Card},{Pid,_},State=#state{cards=Cards,dealer=DealerNow})->
-	lager:info("dealing, Event ~p, State ~p",[Event,State]),
+	lager:info("dealing#deal, Event ~p, State ~p",[Event,State]),
 	Fun1 = fun()->
-	%%check the pos and card to see if it's valid
 		case baccarat_dealer_mod:put(Pos,Card,Cards) of
 			{ok,NewCards} ->
 				NewState=State#state{cards=NewCards},
@@ -101,8 +97,21 @@ dealing(Event={deal,Pos,Card},{Pid,_},State=#state{cards=Cards,dealer=DealerNow}
 	Fun2 = fun()-> {reply,error_channel,dealing,State} end,
 	checkDealer(DealerNow,Pid,Fun1,Fun2);
 
+dealing(Event={scan,Card},{Pid,_},State=#state{cards=Cards,dealer=DealerNow})->
+	lager:info("dealing#scan, Event ~p, State ~p",[Event,State]),
+	Fun1 = fun()->
+		case baccarat_dealer_mod:add(Card,Cards) of
+			{error,_} ->
+				{reply,error,dealing,State};
+			{Status,Pos,NewCards}->
+				{reply,{Status,Pos},dealing,NewCards}
+		end
+	end,
+	Fun2 = fun()-> {reply,error_channel,dealing,State} end,
+	checkDealer(DealerNow,Pid,Fun1,Fun2);
+
 dealing(Event={clear,Pos},{Pid,_},State=#state{cards=Cards,dealer=DealerNow})->
-	lager:info("dealing, Event ~p, State ~p",[Event,State]),
+	lager:info("dealing#clear, Event ~p, State ~p",[Event,State]),
 	Fun1 = fun()->
 		case baccarat_dealer_mod:remove(Pos,Cards) of
 			{ok,NewCards} ->
@@ -116,10 +125,10 @@ dealing(Event={clear,Pos},{Pid,_},State=#state{cards=Cards,dealer=DealerNow})->
 	checkDealer(DealerNow,Pid,Fun1,Fun2);
 
 dealing(commit,{Pid,_},State=#state{cards=Cards,dealer=DealerNow,round=Round})->
-	lager:info("dealing, Event ~p, State ~p",[commit,State]),
+	lager:info("dealing#commit, State ~p",[State]),
 	%%check the cards are valid in accordence with the game rule
 	Fun1 = fun()->
-		case baccarat_dealer_mod:commit(Cards) of
+		case baccarat_dealer_mod:validate(Cards) of
 			true->
 				NewRound=baccarat_round:set_done(Round,Cards),
 				NewState=State#state{round=NewRound},
@@ -131,11 +140,9 @@ dealing(commit,{Pid,_},State=#state{cards=Cards,dealer=DealerNow,round=Round})->
 	Fun2 = fun()-> {reply,error_channel,dealing,State} end,
 	checkDealer(DealerNow,Pid,Fun1,Fun2);
 
-dealing(Event,{Pid,_},State=#state{dealer=DealerNow})->
+dealing(Event,_From,State)->
 	lager:error("unexpected event when dealing, event ~p,state ~p",[Event,State]),
-	Fun1 = fun() -> {reply,error_status,dealing,State} end,
-	Fun2 = fun() -> {reply,error_channel,dealing,State} end,
-	checkDealer(DealerNow,Pid,Fun1,Fun2).
+	{reply,unexpected,dealing,State}.
 
 
 handle_info(tick,betting,State=#state{ticker=Ticker})->

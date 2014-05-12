@@ -1,3 +1,6 @@
+-ifndef(BACCARAT_HRL).
+-define(BACCARAT_HRL,true).
+
 -record(card,{name,value}).
 
 -define(CARD(N,V),#card{name=N,value=V}).
@@ -30,3 +33,5 @@
 -define(TOTAL89,[8,9]).
 -define(TOTAL67,[6,7]).
 -define(ALL_POS,[?PLAYER_POS_1,?BANKER_POS_1,?PLAYER_POS_2,?BANKER_POS_2,?PLAYER_POS_3,?BANKER_POS_3]).
+
+-endif.

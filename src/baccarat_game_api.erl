@@ -1,17 +1,29 @@
 -module(baccarat_game_api).
 -export([start_link/2]).
--export([start_bet/0,stop_bet/0,commit/0,dealer_connect/1,
-	dealer_disconnect/1,deal/2,clear/1,update_countdown/1]).
+-export([dealer_connect/1,dealer_disconnect/1]).
+-export([new_shoe/0,start_bet/0,stop_bet/0,commit/0]).
+-export([deal/2,clear/1,scan/1]).
+-export([update_countdown/1]).
+-export([ace/0,two/0,three/0,four/0,five/0,six/0,seven/0,eight/0,nine/0,ten/0,jack/0,queen/0,king/0]).
+
+-include("baccarat.hrl").
+
 -define(SERVER,baccarat_game).
 
 start_link(Countdown,Table)->
 	gen_fsm:start_link({local,?SERVER},?SERVER,{Countdown,Table,undefined},[]).
+
+new_shoe()->
+	gen_fsm:sync_send_event(?SERVER,new_shoe).
 
 start_bet()->
 	gen_fsm:sync_send_event(?SERVER,start_bet).
 
 stop_bet()->
 	gen_fsm:sync_send_event(?SERVER,stop_bet).
+
+scan(Card)->
+	gen_fsm:sync_send_event(?SERVER,{scan,Card}).
 
 deal(Pos,Card)->
 	gen_fsm:sync_send_event(?SERVER,{deal,Pos,Card}).
@@ -30,3 +42,17 @@ dealer_disconnect(Pid)->
 
 update_countdown(Countdown)->
 	gen_fsm:sync_send_all_state_event(?SERVER,{update_countdown,Countdown}).
+
+ace()->?ACE.
+two()->?TWO.
+three()->?THREE.
+four()->?FOUR.
+five()->?FIVE.
+six()->?SIX.
+seven()->?SEVEN.
+eight()->?EIGHT.
+nine()->?NINE.
+ten()->?TEN.
+jack()->?JACK.
+queen()->?QUEEN.
+king()->?KING.
