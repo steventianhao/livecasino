@@ -13,14 +13,6 @@
 
 -record(state,{dealer,table,ticker,cards,countdown,round}).
 
-patch_lager(State)->
-	case State#state.cards of
-		undefined-> 
-			State;
-		CardsMap->
-			State#state{cards=maps:to_list(CardsMap)}
-	end.
-
 init({Countdown,Table,Round})->
 	StateName=case Round of
 		undefined -> 
@@ -44,7 +36,7 @@ checkDealer(DealerNow,Pid,Fun1,Fun2)->
 	end.
 
 stopped(new_shoe,{Pid,_},State=#state{dealer=DealerNow,round=Round})->
-	lager:info("stopped#new_shoe,state ~p",[patch_lager(State)]),
+	lager:info("stopped#new_shoe,state ~p",[State]),
 	Fun1 = fun()->
 			NewRound=baccarat_round:new_shoe(Round),
 			NewState=State#state{round=NewRound},
@@ -54,7 +46,7 @@ stopped(new_shoe,{Pid,_},State=#state{dealer=DealerNow,round=Round})->
 	checkDealer(DealerNow,Pid,Fun1,Fun2);
 
 stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer=DealerNow,round=Round})->
-	lager:info("stopped#start_bet,state ~p",[patch_lager(State)]),
+	lager:info("stopped#start_bet,state ~p",[State]),
 	Fun1 = fun()->
 			case Round of
 				undefined ->
@@ -70,11 +62,11 @@ stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer=DealerNow,roun
 	checkDealer(DealerNow,Pid,Fun1,Fun2);
 	
 stopped(Event,_From,State)->
-	lager:error("unexpected event when stopped, event ~p,state ~p",[Event,patch_lager(State)]),
+	lager:error("unexpected event when stopped, event ~p,state ~p",[Event,State]),
 	{reply,unexpected,stopped,State}.
 	
 betting(stop_bet,{Pid,_},State=#state{ticker=Ticker,dealer=DealerNow,round=Round})->
-	lager:info("betting#stop_bet,state ~p",[patch_lager(State)]),
+	lager:info("betting#stop_bet,state ~p",[State]),
 	Fun1 = fun() ->
 			case Ticker of
 				undefined-> ok;
@@ -88,11 +80,11 @@ betting(stop_bet,{Pid,_},State=#state{ticker=Ticker,dealer=DealerNow,round=Round
 	checkDealer(DealerNow,Pid,Fun1,Fun2);
 
 betting(Event,_From,State)->
-	lager:error("unexpected event when betting, event ~p,state ~p",[Event,patch_lager(State)]),
+	lager:error("unexpected event when betting, event ~p,state ~p",[Event,State]),
 	{reply,unexpected,betting,State}.
 
 dealing(Event={deal,Pos,Card},{Pid,_},State=#state{cards=Cards,dealer=DealerNow})->
-	lager:info("dealing#deal, Event ~p, State ~p",[Event,patch_lager(State)]),
+	lager:info("dealing#deal, Event ~p, State ~p",[Event,State]),
 	Fun1 = fun()->
 		case baccarat_dealer_mod:put(Pos,Card,Cards) of
 			{ok,NewCards} ->
@@ -106,7 +98,7 @@ dealing(Event={deal,Pos,Card},{Pid,_},State=#state{cards=Cards,dealer=DealerNow}
 	checkDealer(DealerNow,Pid,Fun1,Fun2);
 
 dealing(Event={scan,Card},{Pid,_},State=#state{cards=Cards,dealer=DealerNow})->
-	lager:info("dealing#scan, Event ~p, State ~p",[Event,patch_lager(State)]),
+	lager:info("dealing#scan, Event ~p, State ~p",[Event,State]),
 	Fun1 = fun()->
 		case baccarat_dealer_mod:add(Card,Cards) of
 			{error,_} ->
@@ -119,7 +111,7 @@ dealing(Event={scan,Card},{Pid,_},State=#state{cards=Cards,dealer=DealerNow})->
 	checkDealer(DealerNow,Pid,Fun1,Fun2);
 
 dealing(Event={clear,Pos},{Pid,_},State=#state{cards=Cards,dealer=DealerNow})->
-	lager:info("dealing#clear, Event ~p, State ~p",[Event,patch_lager(State)]),
+	lager:info("dealing#clear, Event ~p, State ~p",[Event,State]),
 	Fun1 = fun()->
 		case baccarat_dealer_mod:remove(Pos,Cards) of
 			{ok,NewCards} ->
@@ -133,7 +125,7 @@ dealing(Event={clear,Pos},{Pid,_},State=#state{cards=Cards,dealer=DealerNow})->
 	checkDealer(DealerNow,Pid,Fun1,Fun2);
 
 dealing(commit,{Pid,_},State=#state{cards=Cards,dealer=DealerNow,round=Round})->
-	lager:info("dealing#commit, State ~p",[patch_lager(State)]),
+	lager:info("dealing#commit, State ~p",[State]),
 	%%check the cards are valid in accordence with the game rule
 	Fun1 = fun()->
 		case baccarat_dealer_mod:validate(Cards) of
@@ -149,13 +141,13 @@ dealing(commit,{Pid,_},State=#state{cards=Cards,dealer=DealerNow,round=Round})->
 	checkDealer(DealerNow,Pid,Fun1,Fun2);
 
 dealing(Event,_From,State)->
-	lager:error("unexpected event when dealing, event ~p,state ~p",[Event,patch_lager(State)]),
+	lager:error("unexpected event when dealing, event ~p,state ~p",[Event,State]),
 	{reply,unexpected,dealing,State}.
 
 
 handle_info(tick,betting,State=#state{ticker=Ticker})->
 	%%send the tick to all players intrested in
-	lager:info("handle tick when betting, state ~p",[patch_lager(State)]),
+	lager:info("handle tick when betting, state ~p",[State]),
 	case Ticker of
 		{TRef,0} -> 
 			timer:cancel(TRef),
@@ -166,7 +158,7 @@ handle_info(tick,betting,State=#state{ticker=Ticker})->
 			{next_state,betting,NewState}
 	end;
 handle_info(Info={'DOWN',_Ref,process,Pid,_},StateName,State=#state{dealer=DealerNow})->
-	lager:error("handle dealer process DOWN, info ~p,stateName ~p,state ~p",[Info,StateName,patch_lager(State)]),
+	lager:error("handle dealer process DOWN, info ~p,stateName ~p,state ~p",[Info,StateName,State]),
 	case DealerNow of
 		{Pid,_Dealer}->
 			NewState=State#state{dealer=undefined},
@@ -175,11 +167,11 @@ handle_info(Info={'DOWN',_Ref,process,Pid,_},StateName,State=#state{dealer=Deale
 			{next_state,StateName,State}
 	end;	
 handle_info(Info,StateName,State)->
-	lager:error("unexpected handle info, info ~p,stateName ~p,state ~p",[Info,StateName,patch_lager(State)]),
+	lager:error("unexpected handle info, info ~p,stateName ~p,state ~p",[Info,StateName,State]),
 	{next_state,StateName,State}.
 
 handle_event(Event={dealer_disconnect,Pid},StateName,State=#state{dealer=DealerNow})->
-	lager:info("unexpected handle_event, event ~p,stateName ~p,state ~p",[Event,StateName,patch_lager(State)]),
+	lager:info("unexpected handle_event, event ~p,stateName ~p,state ~p",[Event,StateName,State]),
 	NewState=case DealerNow of
 		{Pid,_Dealer} ->
 			State#state{dealer=undefined};
@@ -188,11 +180,11 @@ handle_event(Event={dealer_disconnect,Pid},StateName,State=#state{dealer=DealerN
 	end,
 	{next_state,StateName,NewState};
 handle_event(Event,StateName,State)->
-	lager:error("unexpected handle_event, event ~p,stateName ~p,state ~p",[Event,StateName,patch_lager(State)]),
+	lager:error("unexpected handle_event, event ~p,stateName ~p,state ~p",[Event,StateName,State]),
 	{next_state,StateName,State}.
 
 handle_sync_event(Event={update_countdown,Countdown},From,StateName,State)->
-	lager:info("update_countdown, event ~p,from ~p,stateName ~p,state ~p",[Event,From,StateName,patch_lager(State)]),
+	lager:info("update_countdown, event ~p,from ~p,stateName ~p,state ~p",[Event,From,StateName,State]),
 	if 
 		Countdown > 0 -> 
 			NewState=State#state{countdown=Countdown},
@@ -202,7 +194,7 @@ handle_sync_event(Event={update_countdown,Countdown},From,StateName,State)->
 	end;
 
 handle_sync_event(Event={dealer_connect,Dealer},From={Pid,_},StateName,State=#state{dealer=DealerNow})->
-	lager:info("dealer_connected, event ~p,from ~p,stateName ~p,state ~p",[Event,From,StateName,patch_lager(State)]),
+	lager:info("dealer_connected, event ~p,from ~p,stateName ~p,state ~p",[Event,From,StateName,State]),
 	{Result,NewState}=case DealerNow of
 		undefined->
 		   	State2=State#state{dealer={Pid,Dealer}},
@@ -213,13 +205,13 @@ handle_sync_event(Event={dealer_connect,Dealer},From={Pid,_},StateName,State=#st
 	end,
 	{reply,Result,StateName,NewState};
 handle_sync_event(Event,From,StateName,State)->
-	lager:error("unexpected handle_sync_event, event ~p,from ~p,stateName ~p,state ~p",[Event,From,StateName,patch_lager(State)]),
+	lager:error("unexpected handle_sync_event, event ~p,from ~p,stateName ~p,state ~p",[Event,From,StateName,State]),
 	{next_state,StateName,State}.
 
 terminate(Reason,StateName,State)->
-	lager:info("terminate, reason ~p,stateName ~p,state ~p",[Reason,StateName,patch_lager(State)]),
+	lager:info("terminate, reason ~p,stateName ~p,state ~p",[Reason,StateName,State]),
 	ok.
 
 code_change(OldVsn,StateName,State,Extra)->
-	lager:info("code_change oldVsn ~p,stateName ~p,state ~p,extra ~p",[OldVsn,StateName,patch_lager(State),Extra]),
+	lager:info("code_change oldVsn ~p,stateName ~p,state ~p,extra ~p",[OldVsn,StateName,State,Extra]),
 	{ok,StateName,State}.
