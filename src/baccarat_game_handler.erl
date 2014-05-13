@@ -18,7 +18,7 @@ dealer_event(Kind,Dealer,Pid)->
 	
 
 handle_event({dealer_connect,Dealer},State=#state{listener=Pid})->
-	dealer_event(dealer_disconnect,Dealer,Pid),
+	dealer_event(dealer_connect,Dealer,Pid),
 	{ok,State};
 
 handle_event({dealer_disconnect,Dealer},State=#state{listener=Pid})->
