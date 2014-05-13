@@ -18,6 +18,8 @@ new_shoe(Round)->
 	case Round of
 		undefined -> 
 			#round{shoeIndex=1,roundIndex=0};
+		OldRound when OldRound#round.roundIndex == 0->
+			OldRound
 		_ -> 
 			NewShoeIndex=increase(Round#round.shoeIndex,Round#round.createTime),
 			#round{shoeIndex=NewShoeIndex,roundIndex=0}
