@@ -14,16 +14,15 @@ restore_round(ShoeIndex,RoundIndex,Status,Cards,CreateTime,FinishTime)->
 increase(ShoeIndex,_CreateTime)->
 	ShoeIndex+1.
 
-new_shoe(Round)->
-	case Round of
-		undefined -> 
-			#round{shoeIndex=1,roundIndex=0};
-		OldRound when OldRound#round.roundIndex == 0->
-			OldRound
-		_ -> 
-			NewShoeIndex=increase(Round#round.shoeIndex,Round#round.createTime),
-			#round{shoeIndex=NewShoeIndex,roundIndex=0}
-	end.
+new_shoe(undefined)->
+	#round{shoeIndex=1,roundIndex=0};
+new_shoe(#round{shoeIndex=undefined})->
+	#round{shoeIndex=1,roundIndex=0};
+new_shoe(Round=#round{roundIndex=0})->
+	Round;
+new_shoe(#round{shoeIndex=ShoeIndex,createTime=CreateTime})->
+	NewShoeIndex=increase(ShoeIndex,CreateTime),
+	#round{shoeIndex=NewShoeIndex,roundIndex=0}.
 
 set_betting(OldRound,Dealer)->
 	RoundIndex=OldRound#round.roundIndex+1,
