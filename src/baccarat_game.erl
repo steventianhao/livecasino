@@ -9,6 +9,7 @@
 -include("round.hrl").
 
 -define(GAME,baccarat).
+-define(GAME_EVENTBUS(Table),{global,{game_eventbus,?GAME,Table}}).
 %% API
 
 -record(state,{dealer,table,ticker,cards,countdown,round}).

@@ -16,7 +16,6 @@ dealer_event(Kind,Dealer,Pid)->
 	M=maps:merge(#{kind=>Kind},dealer_to_json(Dealer)),
 	Pid ! {json,jsx:encode(M)}.
 	
-
 handle_event({dealer_connect,Dealer},State=#state{listener=Pid})->
 	dealer_event(dealer_connect,Dealer,Pid),
 	{ok,State};
@@ -36,4 +35,3 @@ handle_info(_Info,State)->
 
 terminate(_Arg,_State)->
 	ok.
-

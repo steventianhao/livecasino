@@ -1,9 +1,10 @@
 -ifndef(BACCARAT_HRL).
 -define(BACCARAT_HRL,true).
 
--record(card,{name,value}).
+-record(card,{name,value,suit}).
 
 -define(CARD(N,V),#card{name=N,value=V}).
+
 
 -define(ACE,?CARD($A,1)).
 -define(TWO,?CARD($2,2)).
