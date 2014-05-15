@@ -1,11 +1,11 @@
 -module(baccarat_dealer_mod).
 
--export([add/2,put/3,remove/2,validate/1,create/1]).
+-export([add/2,put/3,remove/2,validate/1,from_string/1,to_string/1]).
 -include("baccarat.hrl").
 
 -define(ANYONEOF(Total,Lists),lists:member(Total,Lists)).
 
-create(Cards)->
+from_string(Cards)->
 	[Pcs,Bcs]=string:tokens(Cards,"#"),
 	CardsMap=?CARDS_MAP,
 	CLp=lists:reverse(string_to_cards(Pcs,CardsMap)),
@@ -27,6 +27,21 @@ string_to_cards([],_CardsMap)->
 string_to_cards([S,N|T],CardsMap)->
 	C= maps:get(N,CardsMap),
 	[C#card{suit=S}|string_to_cards(T,CardsMap)].
+
+cards_to_string(Pcs,Bcs)->
+	Fun=fun(C)->[C#card.suit,C#card.name] end,
+	PL=lists:flatmap(Fun,Pcs),
+	BL=lists:flatmap(Fun,Bcs),
+	lists:append([PL,"#",BL]).
+
+to_string(#{?PLAYER_POS_1:=P1,?PLAYER_POS_2:=P2,?PLAYER_POS_3:=P3,?BANKER_POS_1:=B1,?BANKER_POS_2:=B2,?BANKER_POS_3:=B3})->
+	cards_to_string([P3,P2,P1],[B3,B2,B1]);
+to_string(#{?PLAYER_POS_1:=P1,?PLAYER_POS_2:=P2,?BANKER_POS_1:=B1,?BANKER_POS_2:=B2,?BANKER_POS_3:=B3})->
+	cards_to_string([P2,P1],[B3,B2,B1]);
+to_string(#{?PLAYER_POS_1:=P1,?PLAYER_POS_2:=P2,?PLAYER_POS_3:=P3,?BANKER_POS_1:=B1,?BANKER_POS_2:=B2})->
+	cards_to_string([P3,P2,P1],[B2,B1]);
+to_string(#{?PLAYER_POS_1:=P1,?PLAYER_POS_2:=P2,?BANKER_POS_1:=B1,?BANKER_POS_2:=B2})->
+	cards_to_string([P2,P1],[B2,B1]).
 
 
 total(Cards) ->
