@@ -20,21 +20,8 @@
 -define(JACK,$J).
 -define(QUEEN,$Q).
 -define(KING,$K).
--define(ALL_RANK,[?ACE,?TWO,?THREE,?FOUR,?FIX,?SIX,?SEVEN,?EIGHT,?NINE,?TEN,?JACK,?QUEEN,?KING]).
+-define(ALL_RANK,[?ACE,?TWO,?THREE,?FOUR,?FIVE,?SIX,?SEVEN,?EIGHT,?NINE,?TEN,?JACK,?QUEEN,?KING]).
 
-check_cards([])->
-	true;
-check_cards([S,R|T])->
-	case check_one_card(S,R) of
-	 	true ->
-			check_cards(T);
-		_ -> 
-			false
-	end;
-check_cards(L)->
-	false.
-
-check_one_card(S,R)->
-	lists:members(S,ALL_SUIT) andalso lists:members(R,ALL_RANK).
+-record(card,{suit,rank}).
 
 -endif.
