@@ -24,9 +24,9 @@ create_map(Cards,IndexList)->
 
 string_to_cards([],_CardsMap)->
 	[];
-string_to_cards([_,N|T],CardsMap)->
+string_to_cards([S,N|T],CardsMap)->
 	C= maps:get(N,CardsMap),
-	[C|string_to_cards(T,CardsMap)].
+	[C#card{suit=S}|string_to_cards(T,CardsMap)].
 
 
 total(Cards) ->

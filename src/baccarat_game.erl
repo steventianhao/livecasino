@@ -7,28 +7,14 @@
 %% all states transitions
 -export([stopped/3,dealing/3,betting/3]).
 -include("round.hrl").
+-include("baccarat_game_eventbus.hrl").
 
--define(GAME_SERVER_EVENT_BUS,baccarat_game_eventbus).
--define(NOTIFY(Event),gen_event:notify(?GAME_SERVER_EVENT_BUS,Event)).
 %% API
-
+-define(GAME,baccarat).
 -record(state,{dealer,table,ticker,cards,countdown,round}).
 
-init({Countdown,Table,Round})->
-	StateName=case Round of
-		undefined -> 
-			stopped;
-		_->
-			case Round#round.status of
-				?BETTING -> 
-					betting;
-				?DEALING -> 
-					dealing;
-				?DONE -> 
-					stopped
-			end
-	end,
-	{ok,StateName,#state{countdown=Countdown,table=Table,round=Round}}.
+init({Countdown,Table})->
+	{ok,stopped,#state{countdown=Countdown,table=Table}}.
 
 checkDealer(DealerNow,Pid,Fun1,Fun2)->
 	case DealerNow of
@@ -67,6 +53,11 @@ stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer=DealerNow,roun
 stopped(Event,_From,State)->
 	lager:error("unexpected event when stopped, event ~p,state ~p",[Event,State]),
 	{reply,unexpected,stopped,State}.
+
+
+betting(Event={bet,_Cats,_Amounts},_From,State)->
+	lager:info("bet Event ~p,State ~p",[Event,State]),
+	{reply,ok,betting,State};
 	
 betting(stop_bet,{Pid,_},State=#state{ticker=Ticker,dealer=DealerNow,round=Round})->
 	lager:info("betting#stop_bet,state ~p",[State]),

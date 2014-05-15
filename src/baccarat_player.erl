@@ -1,20 +1,22 @@
 -module(baccarat_player).
 -behavior(gen_server).
+-include("baccarat_game_eventbus.hrl").
 
 -export([init/1,handle_call/3,handle_cast/2,handle_info/2,terminate/2,code_change/3]).
--export([bet/3]).
+-export([bet/3,start_link/3]).
+
+start_link(Table,User,Payout)->
+	gen_server:start_link(?MODULE,{Table,User,Payout},[]).
 
 bet(Pid,Cats,Amounts)->
-	gen_server:handle_call(Pid,{bet,Cats,Amounts}).
+	gen_server:call(Pid,{bet,Cats,Amounts}).
 
 -record(state,{game,table,user,payout}).
--define(GAME_SERVER_EVENT_BUS,baccarat_game_eventbus).
+
 
 init({Table,User,Payout})->
-	%% add the listener handler
-	gen_event:add_handler(?GAME_SERVER_EVENT_BUS,baccarat_player_handler,self()),
+	?ADD_HANDLER(self()),
 	{ok,#state{table=Table,user=User,payout=Payout}}.
-
 
 handle_call(_Event={bet,Cats,Amounts},_From,State)->
 	Result=baccarat_game_api:bet(Cats,Amounts),
@@ -33,7 +35,7 @@ handle_info(Info,State)->
 
 terminate(Reason,State)->
 	lager:info("terminate, Reason ~p, State ~p",[Reason,State]),
-	gen_event:delete_handler(?GAME_SERVER_EVENT_BUS,baccarat_player_handler,self()),
+	?DELETE_HANDLER(Reason),
 	ok.
 
 code_change(_OldVsn,State,_Extra)->

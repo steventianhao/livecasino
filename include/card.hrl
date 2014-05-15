@@ -22,6 +22,4 @@
 -define(KING,$K).
 -define(ALL_RANK,[?ACE,?TWO,?THREE,?FOUR,?FIVE,?SIX,?SEVEN,?EIGHT,?NINE,?TEN,?JACK,?QUEEN,?KING]).
 
--record(card,{suit,rank}).
-
 -endif.
