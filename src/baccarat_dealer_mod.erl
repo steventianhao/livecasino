@@ -63,15 +63,13 @@ remove(Pos,Cards) when is_map(Cards) andalso is_integer(Pos)->
 			error
 	end.
 
-validate(Cards=#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?BANKER_POS_1 :=B1,?BANKER_POS_2 :=B2}) when is_map(Cards)->
-	Size = maps:size(Cards),
+validate(Cards=#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?BANKER_POS_1 :=B1,?BANKER_POS_2 :=B2})->
 	Bt=total([B1,B2]),
 	Pt=total([P1,P2]),
-	case {Size,Cards} of
+	case {map_size(Cards),Cards} of
 		{4,_}->
 			?ANYONEOF(Pt,?TOTAL89) orelse ?ANYONEOF(Bt,?TOTAL89) orelse (?ANYONEOF(Pt,?TOTAL67) andalso ?ANYONEOF(Bt,?TOTAL67));
-		{5,#{?PLAYER_POS_3 :=P3}}->
-			P3v=P3#card.value,
+		{5,#{?PLAYER_POS_3 :=#card{value=P3v}}}->
 			Bt3=(Bt==3 andalso P3v ==8)  ,
 			Bt4=(Bt==4 andalso ?ANYONEOF(P3v,[0,1,8,9])),
 			Bt5=(Bt==5 andalso (not ?ANYONEOF(P3v,[4,5,6,7]))),
@@ -79,8 +77,7 @@ validate(Cards=#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?BANKER_POS_1 :=B1,?BANKE
 			Pt < 6 andalso  (Bt3 orelse Bt4 orelse Bt5 orelse Bt6 orelse Bt==7);
 		{5,#{?BANKER_POS_3 :=_}}->
 			?ANYONEOF(Pt,?TOTAL67) andalso Bt < 6;
-		{6,#{?PLAYER_POS_3 :=P3,?BANKER_POS_3 :=_}}->
-			P3v=P3#card.value,
+		{6,#{?PLAYER_POS_3 :=#card{value=P3v},?BANKER_POS_3 :=_}}->
 			Bt3=(Bt==3 andalso P3v /=8) ,
 			Bt4=(Bt==4 andalso (not ?ANYONEOF(P3v,[0,1,8,9]))),
 			Bt5=(Bt==5 andalso ?ANYONEOF(P3v,[4,5,6,7])),
@@ -88,7 +85,7 @@ validate(Cards=#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?BANKER_POS_1 :=B1,?BANKE
 			Pt < 6 andalso (Bt <3 orelse Bt3 orelse Bt4 orelse Bt5 orelse Bt6);
 		_ -> false
 	end;
-validate(Cards) when is_map(Cards)->
+validate(_Cards)->
 	false.
 
 add(Card,Cards) when is_map(Cards) andalso is_record(Card,card)->

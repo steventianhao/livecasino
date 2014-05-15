@@ -1,6 +1,6 @@
 -module(dragontiger_dealer_mod).
 -include("dragontiger.hrl").
--export([put/3,remove/2,add/2,from_string/1,to_string/1]).
+-export([put/3,remove/2,add/2,from_string/1,to_string/1,validate/1]).
 
 
 put(Pos,Card,Cards) when is_map(Cards) andalso is_record(Card,card) andalso is_integer(Pos)->
@@ -25,6 +25,12 @@ add(Card,Cards=#{?DRAGON_POS := _}) when map_size(Cards)==1->
 	{done,?TIGER_POS,Cards#{?TIGER_POS=>Card}};
 add(_Card,Cards)->
 	{error,Cards}.
+
+validate(Cards=#{?DRAGON_POS := _, ?TIGER_POS := _}) when map_size(Cards)==2 -> 
+	true;
+validate(_)->
+	false.
+
 
 string_to_card([S,N],CardsMap)->
 	C=maps:get(N,CardsMap), 
