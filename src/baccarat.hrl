@@ -23,7 +23,6 @@
 -define(ALL_CARD,[?ACE,?TWO,?THREE,?FOUR,?FIVE,?SIX,?SEVEN,?EIGHT,?NINE,?TEN,?JACK,?QUEEN,?KING]).
 -define(CARDS_MAP,maps:from_list([{C#card.name,C} || C <-?ALL_CARD])).
 
--define(INVALID_POS,-1).
 -define(BANKER_POS_1,2).
 -define(BANKER_POS_2,4).
 -define(BANKER_POS_3,6).
