@@ -8,8 +8,8 @@
 -export([stopped/3,dealing/3,betting/3]).
 -include("round.hrl").
 
--define(GAME,baccarat).
--define(GAME_EVENTBUS(Table),{global,{game_eventbus,?GAME,Table}}).
+-define(GAME_SERVER_EVENT_BUS,baccarat_game_eventbus).
+-define(NOTIFY(Event),gen_event:notify(?GAME_SERVER_EVENT_BUS,Event)).
 %% API
 
 -record(state,{dealer,table,ticker,cards,countdown,round}).
@@ -41,6 +41,7 @@ stopped(new_shoe,{Pid,_},State=#state{dealer=DealerNow,round=Round})->
 	Fun1 = fun()->
 			NewRound=baccarat_round:new_shoe(Round),
 			NewState=State#state{round=NewRound},
+			?NOTIFY({new_shoe,NewRound}),
 			{reply,ok,stopped,NewState}
 		end,
 	Fun2= fun()-> {reply,error_channel,stopped,State} end,
@@ -56,6 +57,7 @@ stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer=DealerNow,roun
 					NewRound=baccarat_round:set_betting(Round,DealerNow),
 					{ok,TRef}=timer:send_interval(1000,tick),
 					NewState=State#state{ticker={TRef,Countdown},cards=#{},round=NewRound},
+					?NOTIFY({start_bet,NewRound,Countdown}),
 					{reply,ok,betting,NewState}
 			end
 		end,
@@ -75,6 +77,7 @@ betting(stop_bet,{Pid,_},State=#state{ticker=Ticker,dealer=DealerNow,round=Round
 			end,
 			NewRound=baccarat_round:set_dealing(Round),
 			NewState=State#state{ticker=undefined,round=NewRound},
+			?NOTIFY({stop_bet,NewRound}),
 			{reply,ok,dealing,NewState}
 		end,
 	Fun2= fun()-> {reply,error_channel,betting,State} end,
@@ -90,6 +93,7 @@ dealing(Event={deal,Pos,Card},{Pid,_},State=#state{cards=Cards,dealer=DealerNow}
 		case baccarat_dealer_mod:put(Pos,Card,Cards) of
 			{ok,NewCards} ->
 				NewState=State#state{cards=NewCards},
+				?NOTIFY({deal,Pos,Card}),
 				{reply,ok,dealing,NewState};
 			error ->
 				{reply,error,dealing,State}
@@ -105,6 +109,7 @@ dealing(Event={scan,Card},{Pid,_},State=#state{cards=Cards,dealer=DealerNow})->
 			{error,_} ->
 				{reply,error,dealing,State};
 			{Status,Pos,NewCards}->
+				?NOTIFY({deal,Pos,Card}),
 				{reply,{Status,Pos},dealing,State#state{cards=NewCards}}
 		end
 	end,
@@ -117,6 +122,7 @@ dealing(Event={clear,Pos},{Pid,_},State=#state{cards=Cards,dealer=DealerNow})->
 		case baccarat_dealer_mod:remove(Pos,Cards) of
 			{ok,NewCards} ->
 				NewState=State#state{cards=NewCards},
+				?NOTIFY({clear,Pos}),
 				{reply,ok,dealing,NewState};
 			error ->
 				{reply,error,dealing,State}
@@ -133,6 +139,7 @@ dealing(commit,{Pid,_},State=#state{cards=Cards,dealer=DealerNow,round=Round})->
 			true->
 				NewRound=baccarat_round:set_done(Round,Cards),
 				NewState=State#state{round=NewRound},
+				?NOTIFY({commit,Round,Cards}),				
 				{reply,ok,stopped,NewState};
 			false->
 				{reply,error,dealing,State}
@@ -149,20 +156,24 @@ dealing(Event,_From,State)->
 handle_info(tick,betting,State=#state{ticker=Ticker})->
 	%%send the tick to all players intrested in
 	lager:info("handle tick when betting, state ~p",[State]),
+	
 	case Ticker of
-		{TRef,0} -> 
+		{TRef,0} ->
+			?NOTIFY({tick,0}),
 			timer:cancel(TRef),
 			NewState=State#state{ticker=undefined},
 			{next_state,dealing,NewState};
 		{TRef,Value}->
+			?NOTIFY({tick,Value}),
 			NewState=State#state{ticker={TRef,Value-1}},
 			{next_state,betting,NewState}
 	end;
 handle_info(Info={'DOWN',_Ref,process,Pid,_},StateName,State=#state{dealer=DealerNow})->
 	lager:error("handle dealer process DOWN, info ~p,stateName ~p,state ~p",[Info,StateName,State]),
 	case DealerNow of
-		{Pid,_Dealer}->
+		{Pid,Dealer}->
 			NewState=State#state{dealer=undefined},
+			?NOTIFY({dealer_disconnect,Dealer}),
 			{next_state,StateName,NewState};
 		_ ->
 			{next_state,StateName,State}
@@ -174,7 +185,8 @@ handle_info(Info,StateName,State)->
 handle_event(Event={dealer_disconnect,Pid},StateName,State=#state{dealer=DealerNow})->
 	lager:info("unexpected handle_event, event ~p,stateName ~p,state ~p",[Event,StateName,State]),
 	NewState=case DealerNow of
-		{Pid,_Dealer} ->
+		{Pid,Dealer} ->
+			?NOTIFY({dealer_disconnect,Dealer}),
 			State#state{dealer=undefined};
 		_ -> 
 			State
@@ -200,6 +212,7 @@ handle_sync_event(Event={dealer_connect,Dealer},From={Pid,_},StateName,State=#st
 		undefined->
 		   	State2=State#state{dealer={Pid,Dealer}},
 		   	erlang:monitor(process,Pid),
+		   	?NOTIFY({dealer_connect,Dealer}),
 			{ok,State2};
 		_ ->
 			{{error,dealer_existed},State}

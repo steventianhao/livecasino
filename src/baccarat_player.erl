@@ -1,45 +1,40 @@
 -module(baccarat_player).
+-behavior(gen_server).
 
-%% payout, for example, you can enter a baccarat with non-commission or commission, two options.
--record(range,{min,max}).
--record(table_limit,{id,range}).
--record(bet_limit,{type,range}).
+-export([init/1,handle_call/3,handle_cast/2,handle_info/2,terminate/2,code_change/3]).
+-export([bet/3]).
 
-%% limit.bets is a map of type=>range
--record(player_limit,{table,bets=#{}}).
+bet(Pid,Cats,Amounts)->
+	gen_server:handle_call(Pid,{bet,Cats,Amounts}).
 
-%% limit is the player_limit
--record(state,{game,table,user,limits,payout}).
+-record(state,{game,table,user,payout}).
+-define(GAME_SERVER_EVENT_BUS,baccarat_game_eventbus).
 
-
--define(GAME_SERVER,{local,baccarat_game}).
-
-init({Game,Table,User,Limits,Payout})->
+init({Table,User,Payout})->
 	%% add the listener handler
-	{ok,#state{game=Game,table=Table,user=User,limits=Limits,payout=Payout}}.
+	gen_event:add_handler(?GAME_SERVER_EVENT_BUS,baccarat_player_handler,self()),
+	{ok,#state{table=Table,user=User,payout=Payout}}.
 
-check_bets(Cats,Amounts,BetLimits)->
-	Fun = fun({C,A})->
-			Range=maps:get(C,BetLimits),
-			A >= Range#range.min andalso A =< Range#range.max
-	end,
-	lists:all(Fun,lists:zip(Cats,Amounts)).
 
-handle_call(Event={bet,Cats,Amounts},_From,State=#state{limits=Limits})->
-	case check_bets(Cats,Amounts,Limits#player_limit.bets) of
-		true ->
-			case gen_fsm:sync_send_all_state_event(?GAME_SERVER,Event) of
-				{ok,_Round} -> 
-					%% do the database transaction, deduct the money,save the bets
-					{reply,ok,State};
-				Result={error,not_betting}->
-					{reply,Result,State}
-			end;
-		_ ->
-			{reply,{error,invalid_bets},State}
-	end.
+handle_call(_Event={bet,Cats,Amounts},_From,State)->
+	Result=baccarat_game_api:bet(Cats,Amounts),
+	{reply,Result,State}.
+
+handle_cast(Request,State)->
+	lager:error("unexpected Request ~p, State ~p",[Request,State]),
+	{noreply,State}.
+
+handle_info({json,Json},State)->
+	lager:info("json ~p, state ~p",[Json,State]),
+	{noreply,State};
+handle_info(Info,State)->
+	lager:error("unexpected Info ~p, State ~p",[Info,State]),
+	{noreply,State}.
 
 terminate(Reason,State)->
-	%% remove the listener handler
+	lager:info("terminate, Reason ~p, State ~p",[Reason,State]),
+	gen_event:delete_handler(?GAME_SERVER_EVENT_BUS,baccarat_player_handler,self()),
 	ok.
 
+code_change(_OldVsn,State,_Extra)->
+	{ok,State}.
