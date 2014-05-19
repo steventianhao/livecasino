@@ -1,0 +1,40 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+	<preConditions>
+		<dbms type="mysql" />
+	</preConditions>
+
+	<changeSet id="1" author="steven">
+		<createTable tableName="rounds">
+			<column name="id" type="bigint" autoIncrement="true">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="shoe_index" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="round_index" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="dealer_table_id" type="bigint">
+				<constraints nullable="false" />
+			</column>
+			<column name="dealer_id" type="bigint">
+				<constraints nullable="false" />
+			</column>
+			<column name="status" type="int" defaultValue="1">
+				<constraints nullable="false" />
+			</column>	
+			<column name="create_time" type="bigint">
+				<constraints nullable="false" />
+			</column>
+			<column name="cards" type="varchar(100)" />
+			<column name="finish_time" type="bigint" />
+		</createTable>
+		<modifySql dbms="mysql">
+			<append value=" engine innodb" />
+		</modifySql>
+	</changeSet>	
+</databaseChangeLog>

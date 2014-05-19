@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="casino-dbauto" default="update.prod.db" basedir=".">
+	<property file="${basedir}/jdbc.properties" />
+
+	<property name="lib.dir" value="${basedir}/lib" />
+
+	<path id="classpath">
+		<fileset dir="${lib.dir}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<taskdef resource="liquibasetasks.properties">
+		<classpath refid="classpath" />
+	</taskdef>
+
+	<macrodef name="updateDb">
+		<attribute name="changeLogFile" />
+		<attribute name="contexts" />
+		<sequential>
+			<updateDatabase changeLogFile="@{changeLogFile}" driver="${jdbc.driver}" url="${jdbc.url}" username="${jdbc.username}" password="${jdbc.password}" classpathref="classpath" contexts="@{contexts}" />
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="generateSql">
+		<attribute name="changeLogFile" />
+		<attribute name="contexts" />
+		<attribute name="outputfile" />
+		<sequential>
+			<updateDatabase outputfile="@{outputfile}" changeLogFile="@{changeLogFile}" driver="${jdbc.driver}" url="${jdbc.url}" username="${jdbc.username}" password="${jdbc.password}" classpathref="classpath" contexts="@{contexts}" />
+		</sequential>
+	</macrodef>
+
+	<macrodef name="updateprod">
+		<attribute name="folder" />
+		<sequential>
+			<updateDb changeLogFile="@{folder}/changelog.xml" contexts="prod" />
+			<updateDb changeLogFile="@{folder}/proddata/changelog.xml" contexts="prod" />
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="generateprod">
+		<attribute name="folder" />
+		<sequential>
+			<generateSql changeLogFile="@{folder}/changelog.xml" contexts="prod" outputfile="@{folder}.sql"/>
+			<generateSql changeLogFile="@{folder}/proddata/changelog.xml" contexts="prod" outputfile="@{folder}_data.sql"/>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="updatetest">
+		<attribute name="folder" />
+		<sequential>
+			<updateDb changeLogFile="@{folder}/changelog.xml" contexts="test" />
+			<updateDb changeLogFile="@{folder}/proddata/changelog.xml" contexts="test" />
+			<updateDb changeLogFile="@{folder}/testdata/changelog.xml" contexts="test" />
+		</sequential>
+	</macrodef>
+
+	<target name="clear.db" description="clear database">
+		<dropAllDatabaseObjects driver="${jdbc.driver}" url="${jdbc.url}" username="${jdbc.username}" password="${jdbc.password}" classpathref="classpath" />
+	</target>
+
+	<target name="create.user" description="create user">
+		<sql driver="${jdbc.driver}" url="${jdbc.super.url}" userid="${jdbc.super.username}" password="${jdbc.super.password}" classpathref="classpath" autocommit="true">
+				CREATE USER '${jdbc.username}'@'%' identified by '${jdbc.password}';
+			</sql>
+	</target>
+
+	<target name="create.db" description="create database">
+		<sql driver="${jdbc.driver}" url="${jdbc.super.url}" userid="${jdbc.super.username}" password="${jdbc.super.password}" classpathref="classpath" autocommit="true">
+			CREATE DATABASE IF NOT EXISTS ${jdbc.database} DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+			GRANT ALL PRIVILEGES ON *.* to ${jdbc.username}@'%';
+		</sql>
+	</target>
+
+	<target name="update.prod.db" description="upgrade prod database">
+		<updateprod folder="${basedir}/changelogs/iteration0007" />
+	</target>
+	
+	<target name="generate_prod_sql" description="generate production sql">
+		<generateprod folder="${basedir}/changelogs/iteration0007" />		
+	</target>
+
+	<target name="update.test.db" description="upgrade test database" depends="clear.db">
+		<updatetest folder="${basedir}/changelogs/iteration0000" />
+	</target>
+</project>
