@@ -26,7 +26,7 @@ stopped(new_shoe,{Pid,_},State=#state{dealer=DealerNow,round=Round,eventbus=Even
 	Fun1 = fun()->
 			NewRound=dragontiger_round:new_shoe(Round),
 			NewState=State#state{round=NewRound},
-			game_eventbus:notify(EventBus,{new_shoe,NewRound}),
+			gen_event:notify(EventBus,{new_shoe,NewRound}),
 			{reply,ok,stopped,NewState}
 		end,
 	Fun2= fun()-> {reply,error_channel,stopped,State} end,
@@ -42,7 +42,7 @@ stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer=DealerNow,roun
 					NewRound=dragontiger_round:set_betting(Round,DealerNow),
 					{ok,TRef}=timer:send_interval(1000,tick),
 					NewState=State#state{ticker={TRef,Countdown},cards=#{},round=NewRound},
-					game_eventbus:notify(EventBus,{start_bet,NewRound,Countdown}),
+					gen_event:notify(EventBus,{start_bet,NewRound,Countdown}),
 					{reply,ok,betting,NewState}
 			end
 		end,
@@ -67,7 +67,7 @@ betting(stop_bet,{Pid,_},State=#state{ticker=Ticker,dealer=DealerNow,round=Round
 			end,
 			NewRound=dragontiger_round:set_dealing(Round),
 			NewState=State#state{ticker=undefined,round=NewRound},
-			game_eventbus:notify(EventBus,{stop_bet,NewRound}),
+			gen_event:notify(EventBus,{stop_bet,NewRound}),
 			{reply,ok,dealing,NewState}
 		end,
 	Fun2= fun()-> {reply,error_channel,betting,State} end,
@@ -83,7 +83,7 @@ dealing(Event={deal,Pos,Card},{Pid,_},State=#state{cards=Cards,dealer=DealerNow,
 		case dragontiger_dealer_mod:put(Pos,Card,Cards) of
 			{ok,NewCards} ->
 				NewState=State#state{cards=NewCards},
-				game_eventbus:notify(EventBus,{deal,Pos,Card}),
+				gen_event:notify(EventBus,{deal,Pos,Card}),
 				{reply,ok,dealing,NewState};
 			error ->
 				{reply,error,dealing,State}
@@ -99,7 +99,7 @@ dealing(Event={scan,Card},{Pid,_},State=#state{cards=Cards,dealer=DealerNow,even
 			{error,_} ->
 				{reply,error,dealing,State};
 			{Status,Pos,NewCards}->
-				game_eventbus:notify(EventBus,{deal,Pos,Card}),
+				gen_event:notify(EventBus,{deal,Pos,Card}),
 				{reply,{Status,Pos},dealing,State#state{cards=NewCards}}
 		end
 	end,
@@ -112,7 +112,7 @@ dealing(Event={clear,Pos},{Pid,_},State=#state{cards=Cards,dealer=DealerNow,even
 		case dragontiger_dealer_mod:remove(Pos,Cards) of
 			{ok,NewCards} ->
 				NewState=State#state{cards=NewCards},
-				game_eventbus:notify(EventBus,{clear,Pos}),
+				gen_event:notify(EventBus,{clear,Pos}),
 				{reply,ok,dealing,NewState};
 			error ->
 				{reply,error,dealing,State}
@@ -129,7 +129,7 @@ dealing(commit,{Pid,_},State=#state{cards=Cards,dealer=DealerNow,round=Round,eve
 			true->
 				NewRound=dragontiger_round:set_done(Round,Cards),
 				NewState=State#state{round=NewRound},
-				game_eventbus:notify(EventBus,{commit,Round,Cards}),				
+				gen_event:notify(EventBus,{commit,Round,Cards}),				
 				{reply,ok,stopped,NewState};
 			false->
 				{reply,error,dealing,State}
@@ -149,12 +149,12 @@ handle_info(tick,betting,State=#state{ticker=Ticker,eventbus=EventBus})->
 	
 	case Ticker of
 		{TRef,0} ->
-			game_eventbus:notify(EventBus,{tick,0}),
+			gen_event:notify(EventBus,{tick,0}),
 			timer:cancel(TRef),
 			NewState=State#state{ticker=undefined},
 			{next_state,dealing,NewState};
 		{TRef,Value}->
-			game_eventbus:notify(EventBus,{tick,Value}),
+			gen_event:notify(EventBus,{tick,Value}),
 			NewState=State#state{ticker={TRef,Value-1}},
 			{next_state,betting,NewState}
 	end;
@@ -163,7 +163,7 @@ handle_info(Info={'DOWN',_Ref,process,Pid,_},StateName,State=#state{dealer=Deale
 	case DealerNow of
 		{Pid,Dealer}->
 			NewState=State#state{dealer=undefined},
-			game_eventbus:notify(EventBus,{dealer_disconnect,Dealer}),
+			gen_event:notify(EventBus,{dealer_disconnect,Dealer}),
 			{next_state,StateName,NewState};
 		_ ->
 			{next_state,StateName,State}
@@ -173,10 +173,10 @@ handle_info(Info,StateName,State)->
 	{next_state,StateName,State}.
 
 handle_event(Event={dealer_disconnect,Pid},StateName,State=#state{dealer=DealerNow,eventbus=EventBus})->
-	lager:info("unexpected handle_event, event ~p,stateName ~p,state ~p",[Event,StateName,State]),
+	lager:info("dealer_disconnect handle_event, event ~p,stateName ~p,state ~p",[Event,StateName,State]),
 	NewState=case DealerNow of
 		{Pid,Dealer} ->
-			game_eventbus:notify(EventBus,{dealer_disconnect,Dealer}),
+			gen_event:notify(EventBus,{dealer_disconnect,Dealer}),
 			State#state{dealer=undefined};
 		_ -> 
 			State
@@ -202,7 +202,7 @@ handle_sync_event(Event={dealer_connect,Dealer},From={Pid,_},StateName,State=#st
 		undefined->
 		   	State2=State#state{dealer={Pid,Dealer}},
 		   	erlang:monitor(process,Pid),
-		   	game_eventbus:notify(EventBus,{dealer_connect,Dealer}),
+		   	gen_event:notify(EventBus,{dealer_connect,Dealer}),
 			{ok,State2};
 		_ ->
 			{{error,dealer_existed},State}

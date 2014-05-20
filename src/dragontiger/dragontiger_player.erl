@@ -14,7 +14,7 @@ bet(Pid,Cats,Amounts)->
 	gen_server:call(Pid,{bet,Cats,Amounts}).
 
 init({Server,EventBus,Table,User=#user{id=UserId}})->
-	game_eventbus:add_handler(EventBus,UserId,self()),
+	dragontiger_player_handler:add_handler(EventBus,UserId),
 	{ok,#state{table=Table,user=User,server=Server,eventbus=EventBus}}.
 
 handle_call(_Event={bet,Cats,Amounts},_From,State=#state{server=Server})->
@@ -29,12 +29,12 @@ handle_info({json,Json},State)->
 	lager:info("json ~p, state ~p",[Json,State]),
 	{noreply,State};
 handle_info(Info,State)->
-	lager:error("unexpected Info ~p, State ~p",[Info,State]),
+	lager:error("module ~p, Info ~p, State ~p",[?MODULE,Info,State]),
 	{noreply,State}.
 
 terminate(Reason,State=#state{user=#user{id=UserId},eventbus=EventBus})->
 	lager:info("terminate, Reason ~p, State ~p",[Reason,State]),
-	game_eventbus:del_handler(EventBus,UserId,Reason),
+	dragontiger_player_handler:del_handler(EventBus,UserId,Reason),
 	ok.
 
 code_change(_OldVsn,State,_Extra)->
