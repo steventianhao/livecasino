@@ -11,7 +11,7 @@
 %% API
 -define(GAME,baccarat).
 -define(GAME_ROUND,baccarat_round).
--define(GAME_DEALER_MOD,dragontiger_dealer_mod).
+-define(GAME_DEALER_MOD,baccarat_dealer_mod).
 
 -record(state,{dealer,table,ticker,cards,countdown,round,eventbus}).
 
