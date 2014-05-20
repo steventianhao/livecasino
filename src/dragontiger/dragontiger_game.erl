@@ -62,7 +62,7 @@ betting(Event={bet,_Cats,_Amounts},_From,State)->
 	lager:info("bet Event ~p,State ~p",[Event,State]),
 	{reply,ok,betting,State};
 	
-betting(stop_bet,{Pid,_},State=#state{ticker=Ticker,dealer=DealerNow,round=Round,table=Table,ventbus=EventBus})->
+betting(stop_bet,{Pid,_},State=#state{ticker=Ticker,dealer=DealerNow,round=Round,table=Table,eventbus=EventBus})->
 	lager:info("betting#stop_bet,state ~p",[State]),
 	Fun1 = fun() ->
 			case Ticker of
