@@ -1,54 +1,61 @@
 -module(baccarat_game_api).
--export([start_link/2,start_eventbus/0]).
--export([dealer_connect/1,dealer_disconnect/1]).
--export([new_shoe/0,start_bet/0,stop_bet/0,commit/0,bet/2]).
--export([deal/2,clear/1,scan/1]).
--export([update_countdown/1]).
+
+-export([start_game_server/3,start_game_eventbus/1]).
+-export([dealer_connect/2,dealer_disconnect/1]).
+-export([new_shoe/1,start_bet/1,stop_bet/1,commit/1,bet/3]).
+-export([deal/3,clear/2,scan/2]).
+-export([update_countdown/2]).
 -export([ace/0,two/0,three/0,four/0,five/0,six/0,seven/0,eight/0,nine/0,ten/0,jack/0,queen/0,king/0]).
 
-
--include("baccarat_game_eventbus.hrl").
-
+%% game process module
 -define(SERVER,baccarat_game).
 
-start_eventbus()-> ?START_EVENTBUS.
+start_game_eventbus(DealerTableId) when is_integer(DealerTableId)-> 
+	EventBus=global_game_eventbus(DealerTableId),
+	gen_event:start_link(EventBus).
 
-start_link(Countdown,Table)->
-	gen_fsm:start_link({local,?SERVER},?SERVER,{Countdown,Table},[]).
+start_game_server(EventBus,DealerTableId,Countdown) when is_pid(EventBus) andalso is_integer(DealerTableId) andalso is_integer(Countdown)->
+	GameServer=global_game_server(DealerTableId),
+	gen_fsm:start_link(GameServer,?SERVER,{EventBus,DealerTableId,Countdown},[]).
 
-new_shoe()->
-	gen_fsm:sync_send_event(?SERVER,new_shoe).
+global_game_eventbus(DealerTableId)->
+	{global,{game_eventbus,DealerTableId}}.
 
-start_bet()->
-	gen_fsm:sync_send_event(?SERVER,start_bet).
+global_game_server(DealerTableId)->
+	{global,{game_server,DealerTableId}}.
 
-bet(Cats,Amounts)->
-	gen_fsm:sync_send_event(?SERVER,{bet,Cats,Amounts}).
+new_shoe(GameServer)->
+	gen_fsm:sync_send_event(GameServer,new_shoe).
 
-stop_bet()->
-	gen_fsm:sync_send_event(?SERVER,stop_bet).
+start_bet(GameServer)->
+	gen_fsm:sync_send_event(GameServer,start_bet).
 
-scan(Card)->
-	gen_fsm:sync_send_event(?SERVER,{scan,Card}).
+bet(GameServer,Cats,Amounts)->
+	gen_fsm:sync_send_event(GameServer,{bet,Cats,Amounts}).
 
-deal(Pos,Card)->
-	gen_fsm:sync_send_event(?SERVER,{deal,Pos,Card}).
+stop_bet(GameServer)->
+	gen_fsm:sync_send_event(GameServer,stop_bet).
 
-clear(Pos)->
-	gen_fsm:sync_send_event(?SERVER,{clear,Pos}).
+scan(GameServer,Card)->
+	gen_fsm:sync_send_event(GameServer,{scan,Card}).
 
-commit()->
-	gen_fsm:sync_send_event(?SERVER,commit).
+deal(GameServer,Pos,Card)->
+	gen_fsm:sync_send_event(GameServer,{deal,Pos,Card}).
 
-dealer_connect(Dealer)->
-	gen_fsm:sync_send_all_state_event(?SERVER,{dealer_connect,Dealer}).
+clear(GameServer,Pos)->
+	gen_fsm:sync_send_event(GameServer,{clear,Pos}).
 
-dealer_disconnect(Pid)->
-	gen_fsm:send_all_state_event(?SERVER,{dealer_disconnect,Pid}).
+commit(GameServer)->
+	gen_fsm:sync_send_event(GameServer,commit).
 
-update_countdown(Countdown)->
-	gen_fsm:sync_send_all_state_event(?SERVER,{update_countdown,Countdown}).
+dealer_connect(GameServer,Dealer)->
+	gen_fsm:sync_send_all_state_event(GameServer,{dealer_connect,Dealer}).
 
+dealer_disconnect(GameServer)->
+	gen_fsm:send_all_state_event(GameServer,{dealer_disconnect,self()}).
+
+update_countdown(GameServer,Countdown)->
+	gen_fsm:sync_send_all_state_event(GameServer,{update_countdown,Countdown}).
 
 -include("baccarat.hrl").
 ace()->?ACE.
