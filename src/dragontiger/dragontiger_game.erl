@@ -10,6 +10,10 @@
 
 %% API
 -define(GAME,dragontiger).
+
+-define(GAME_ROUND,dragontiger_round).
+-define(GAME_DEALER_MOD,dragontiger_dealer_mod).
+
 -record(state,{dealer,table,ticker,cards,countdown,round,eventbus}).
 
 init({EventBus,Table,Countdown})->
@@ -24,7 +28,7 @@ checkDealer(DealerNow,Pid,Fun1,Fun2)->
 stopped(new_shoe,{Pid,_},State=#state{dealer=DealerNow,round=Round,eventbus=EventBus})->
 	lager:info("stopped#new_shoe,state ~p",[State]),
 	Fun1 = fun()->
-			NewRound=dragontiger_round:new_shoe(Round),
+			NewRound=?GAME_ROUND:new_shoe(Round),
 			NewState=State#state{round=NewRound},
 			gen_event:notify(EventBus,{new_shoe,NewRound}),
 			{reply,ok,stopped,NewState}
@@ -39,7 +43,7 @@ stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer=DealerNow,roun
 				undefined ->
 					{reply,{error,need_new_shoe},stopped,State};
 				_ ->
-					NewRound=dragontiger_round:set_betting(Round,DealerNow),
+					NewRound=?GAME_ROUND:set_betting(Round,DealerNow),
 					{ok,TRef}=timer:send_interval(1000,tick),
 					NewState=State#state{ticker={TRef,Countdown},cards=#{},round=NewRound},
 					gen_event:notify(EventBus,{start_bet,NewRound,Countdown}),
@@ -65,7 +69,7 @@ betting(stop_bet,{Pid,_},State=#state{ticker=Ticker,dealer=DealerNow,round=Round
 				undefined-> ok;
 				{TRef,_}-> timer:cancel(TRef)
 			end,
-			NewRound=dragontiger_round:set_dealing(Round),
+			NewRound=?GAME_ROUND:set_dealing(Round),
 			NewState=State#state{ticker=undefined,round=NewRound},
 			gen_event:notify(EventBus,{stop_bet,NewRound}),
 			{reply,ok,dealing,NewState}
@@ -80,7 +84,7 @@ betting(Event,_From,State)->
 dealing(Event={deal,Pos,Card},{Pid,_},State=#state{cards=Cards,dealer=DealerNow,eventbus=EventBus})->
 	lager:info("dealing#deal, Event ~p, State ~p",[Event,State]),
 	Fun1 = fun()->
-		case dragontiger_dealer_mod:put(Pos,Card,Cards) of
+		case ?GAME_DEALER_MOD:put(Pos,Card,Cards) of
 			{ok,NewCards} ->
 				NewState=State#state{cards=NewCards},
 				gen_event:notify(EventBus,{deal,Pos,Card}),
@@ -95,7 +99,7 @@ dealing(Event={deal,Pos,Card},{Pid,_},State=#state{cards=Cards,dealer=DealerNow,
 dealing(Event={scan,Card},{Pid,_},State=#state{cards=Cards,dealer=DealerNow,eventbus=EventBus})->
 	lager:info("dealing#scan, Event ~p, State ~p",[Event,State]),
 	Fun1 = fun()->
-		case dragontiger_dealer_mod:add(Card,Cards) of
+		case ?GAME_DEALER_MOD:add(Card,Cards) of
 			{error,_} ->
 				{reply,error,dealing,State};
 			{Status,Pos,NewCards}->
@@ -109,7 +113,7 @@ dealing(Event={scan,Card},{Pid,_},State=#state{cards=Cards,dealer=DealerNow,even
 dealing(Event={clear,Pos},{Pid,_},State=#state{cards=Cards,dealer=DealerNow,eventbus=EventBus})->
 	lager:info("dealing#clear, Event ~p, State ~p",[Event,State]),
 	Fun1 = fun()->
-		case dragontiger_dealer_mod:remove(Pos,Cards) of
+		case ?GAME_DEALER_MOD:remove(Pos,Cards) of
 			{ok,NewCards} ->
 				NewState=State#state{cards=NewCards},
 				gen_event:notify(EventBus,{clear,Pos}),
@@ -127,7 +131,7 @@ dealing(commit,{Pid,_},State=#state{cards=Cards,dealer=DealerNow,round=Round,eve
 	Fun1 = fun()->
 		case baccarat_dealer_mod:validate(Cards) of
 			true->
-				NewRound=dragontiger_round:set_done(Round,Cards),
+				NewRound=?GAME_ROUND:set_done(Round,Cards),
 				NewState=State#state{round=NewRound},
 				gen_event:notify(EventBus,{commit,Round,Cards}),				
 				{reply,ok,stopped,NewState};
