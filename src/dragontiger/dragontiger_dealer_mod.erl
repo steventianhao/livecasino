@@ -30,8 +30,7 @@ validate(Cards=#{?DRAGON_POS := _, ?TIGER_POS := _}) when map_size(Cards)==2 ->
 	true;
 validate(_)->
 	false.
-
-
+	
 string_to_card([S,N],CardsMap)->
 	C=maps:get(N,CardsMap), 
 	C#card{suit=S}.

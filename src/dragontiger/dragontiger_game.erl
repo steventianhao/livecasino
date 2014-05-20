@@ -12,7 +12,7 @@
 -define(GAME,dragontiger).
 -record(state,{dealer,table,ticker,cards,countdown,round,eventbus}).
 
-init({EventBus,Countdown,Table})->
+init({EventBus,Table,Countdown})->
 	{ok,stopped,#state{countdown=Countdown,table=Table,eventbus=EventBus}}.
 
 checkDealer(DealerNow,Pid,Fun1,Fun2)->

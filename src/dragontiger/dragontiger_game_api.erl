@@ -1,5 +1,5 @@
 -module(dragontiger_game_api).
--export([start_link/2,start_eventbus/1]).
+-export([start_link/3,start_eventbus/1]).
 -export([dealer_connect/2,dealer_disconnect/1]).
 -export([new_shoe/1,start_bet/1,stop_bet/1,commit/1,bet/3]).
 -export([deal/3,clear/2,scan/2]).
@@ -13,9 +13,9 @@ start_eventbus(DeaelrTableId)->
 	EventBus=game_eventbus:global_game_eventbus(DeaelrTableId),
 	game_eventbus:start_game_eventbus(EventBus).
 
-start_link(Countdown,Table)->
+start_link(EventBus,Table,Countdown)->
 	GameServer=game_eventbus:global_game_server(Table),
-	game_eventbus:start_game_server(GameServer,?SERVER,{Countdown,Table}).
+	game_eventbus:start_game_server(GameServer,?SERVER,{EventBus,Table,Countdown}).
 
 new_shoe(GameServer)->
 	gen_fsm:sync_send_event(GameServer,new_shoe).
