@@ -1,0 +1,60 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+	<preConditions>
+		<dbms type="mysql" />
+	</preConditions>
+
+	<changeSet id="1" author="steven">
+		<createTable tableName="dealer_tables">
+			<column name="id" type="int">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="sort" type="int">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="game_id" type="int">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<modifySql dbms="mysql">
+			<append value=" engine innodb" />
+		</modifySql>
+	</changeSet>
+
+	<changeSet id="2" author="steven">
+		<addForeignKeyConstraint baseColumnNames="game_id" baseTableName="dealer_tables"
+			constraintName="fk_dealer_table_game" referencedColumnNames="id" referencedTableName="games" />
+		<addUniqueConstraint columnNames="sort" constraintName="idx_dealer_table_sort"
+			tableName="dealer_tables" />
+	</changeSet>
+
+	<changeSet id="3" author="steven">
+		<createTable tableName="player_tables">
+			<column name="id" type="int">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="dealer_table_id" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="payout_id" type="int">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<modifySql dbms="mysql">
+			<append value=" engine innodb" />
+		</modifySql>
+	</changeSet>
+
+	<changeSet id="4" author="steven">
+		<addForeignKeyConstraint baseColumnNames="dealer_table_id" baseTableName="player_tables"
+			constraintName="fk_player_table_dealer_table" referencedColumnNames="id" referencedTableName="dealer_tables" />
+		<addForeignKeyConstraint baseColumnNames="payout_id" baseTableName="player_tables"
+			constraintName="fk_player_table_payout" referencedColumnNames="id" referencedTableName="payouts" />
+		<addUniqueConstraint columnNames="dealer_table_id, payout_id" constraintName="idx_dealer_table_payout"
+			tableName="player_tables" />
+	</changeSet>
+
+</databaseChangeLog>

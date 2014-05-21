@@ -6,7 +6,11 @@
 	<preConditions>
 		<dbms type="mysql" />
 	</preConditions>
-	
+	<include file="game.change.xml" relativeToChangelogFile="true" />
+	<include file="payout.change.xml" relativeToChangelogFile="true" />
+	<include file="table.change.xml" relativeToChangelogFile="true" />
+	<include file="reward.change.xml" relativeToChangelogFile="true" />
 	<include file="round.change.xml" relativeToChangelogFile="true" />
+	<include file="bet.change.xml" relativeToChangelogFile="true" />
 
 </databaseChangeLog>

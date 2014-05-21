@@ -1,0 +1,232 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+	<preConditions>
+		<dbms type="mysql" />
+	</preConditions>
+	
+
+	<changeSet id="1" author="steven">
+
+		<insert tableName="bet_rewards">
+			<column name="id" value="1000" />
+			<column name="payout_id" value="100" />
+			<column name="reward_name" value="banker" />
+			<column name="bet_type_id" value="1000" />
+			<column name="return_ratio" value="1.95"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="1001" />
+			<column name="payout_id" value="100" />
+			<column name="reward_name" value="player" />
+			<column name="bet_type_id" value="1001" />
+			<column name="return_ratio" value="2"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="1002" />
+			<column name="payout_id" value="100" />
+			<column name="reward_name" value="tie" />
+			<column name="bet_type_id" value="1002" />
+			<column name="return_ratio" value="9"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="1003" />
+			<column name="payout_id" value="100" />
+			<column name="reward_name" value="banker_pair" />
+			<column name="bet_type_id" value="1003" />
+			<column name="return_ratio" value="12"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="1004" />
+			<column name="payout_id" value="100" />
+			<column name="reward_name" value="player_pair" />
+			<column name="bet_type_id" value="1004" />
+			<column name="return_ratio" value="12"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="1005" />
+			<column name="payout_id" value="100" />
+			<column name="reward_name" value="banker_n8" />
+			<column name="bet_type_id" value="1005" />
+			<column name="return_ratio" value="9"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="1006" />
+			<column name="payout_id" value="100" />
+			<column name="reward_name" value="banker_n9" />
+			<column name="bet_type_id" value="1006" />
+			<column name="return_ratio" value="9"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="1007" />
+			<column name="payout_id" value="100" />
+			<column name="reward_name" value="player_n8" />
+			<column name="bet_type_id" value="1007" />
+			<column name="return_ratio" value="9"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="1008" />
+			<column name="payout_id" value="100" />
+			<column name="reward_name" value="player_n9" />
+			<column name="bet_type_id" value="1008" />
+			<column name="return_ratio" value="9"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="1009" />
+			<column name="payout_id" value="100" />
+			<column name="reward_name" value="big" />
+			<column name="bet_type_id" value="1009" />
+			<column name="return_ratio" value="1.53"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="1010" />
+			<column name="payout_id" value="100" />
+			<column name="reward_name" value="small" />
+			<column name="bet_type_id" value="1010" />
+			<column name="return_ratio" value="2.45"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="1011" />
+			<column name="payout_id" value="100" />
+			<column name="reward_name" value="banker_tie" />
+			<column name="bet_type_id" value="1000" />
+			<column name="return_ratio" value="1.0"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="1012" />
+			<column name="payout_id" value="100" />
+			<column name="reward_name" value="player_tie" />
+			<column name="bet_type_id" value="1001" />
+			<column name="return_ratio" value="1.0"/>
+		</insert>
+	</changeSet>
+	
+	<changeSet id="2" author="steven">
+
+		<insert tableName="bet_rewards">
+			<column name="id" value="2000" />
+			<column name="payout_id" value="101" />
+			<column name="reward_name" value="banker" />
+			<column name="bet_type_id" value="1000" />
+			<column name="return_ratio" value="2"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="2001" />
+			<column name="payout_id" value="101" />
+			<column name="reward_name" value="player" />
+			<column name="bet_type_id" value="1001" />
+			<column name="return_ratio" value="2"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="2002" />
+			<column name="payout_id" value="101" />
+			<column name="reward_name" value="tie" />
+			<column name="bet_type_id" value="1002" />
+			<column name="return_ratio" value="9"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="2003" />
+			<column name="payout_id" value="101" />
+			<column name="reward_name" value="banker_pair" />
+			<column name="bet_type_id" value="1003" />
+			<column name="return_ratio" value="12"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="2004" />
+			<column name="payout_id" value="101" />
+			<column name="reward_name" value="player_pair" />
+			<column name="bet_type_id" value="1004" />
+			<column name="return_ratio" value="12"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="2005" />
+			<column name="payout_id" value="101" />
+			<column name="reward_name" value="banker_n8" />
+			<column name="bet_type_id" value="1005" />
+			<column name="return_ratio" value="9"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="2006" />
+			<column name="payout_id" value="101" />
+			<column name="reward_name" value="banker_n9" />
+			<column name="bet_type_id" value="1006" />
+			<column name="return_ratio" value="9"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="2007" />
+			<column name="payout_id" value="101" />
+			<column name="reward_name" value="player_n8" />
+			<column name="bet_type_id" value="1007" />
+			<column name="return_ratio" value="9"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="2008" />
+			<column name="payout_id" value="101" />
+			<column name="reward_name" value="player_n9" />
+			<column name="bet_type_id" value="1008" />
+			<column name="return_ratio" value="9"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="2009" />
+			<column name="payout_id" value="101" />
+			<column name="reward_name" value="big" />
+			<column name="bet_type_id" value="1009" />
+			<column name="return_ratio" value="1.53"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="2010" />
+			<column name="payout_id" value="101" />
+			<column name="reward_name" value="small" />
+			<column name="bet_type_id" value="1010" />
+			<column name="return_ratio" value="2.45"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="2011" />
+			<column name="payout_id" value="101" />
+			<column name="reward_name" value="banker_tie" />
+			<column name="bet_type_id" value="1000" />
+			<column name="return_ratio" value="1.0"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="2012" />
+			<column name="payout_id" value="101" />
+			<column name="reward_name" value="player_tie" />
+			<column name="bet_type_id" value="1001" />
+			<column name="return_ratio" value="1.0"/>
+		</insert>
+		
+		<insert tableName="bet_rewards">
+			<column name="id" value="2013" />
+			<column name="payout_id" value="101" />
+			<column name="reward_name" value="banker6" />
+			<column name="bet_type_id" value="1000" />
+			<column name="return_ratio" value="1.5"/>
+		</insert>
+	</changeSet>
+</databaseChangeLog>

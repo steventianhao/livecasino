@@ -1,0 +1,31 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+	<preConditions>
+		<dbms type="mysql" />
+	</preConditions>
+
+	<changeSet id="1" author="steven">
+
+		<insert tableName="payouts">
+			<column name="id" value="100" />
+			<column name="game_id" value="1" />
+			<column name="payout_scheme" value="commission"/>
+		</insert>
+		
+		<insert tableName="payouts">
+			<column name="id" value="101" />
+			<column name="game_id" value="1" />
+			<column name="payout_scheme" value="nocommission"/>
+		</insert>
+		
+		<insert tableName="payouts">
+			<column name="id" value="200" />
+			<column name="game_id" value="2" />
+			<column name="payout_scheme" value="dragontiger"/>
+		</insert>
+		
+	</changeSet>
+</databaseChangeLog>

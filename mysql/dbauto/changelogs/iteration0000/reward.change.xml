@@ -1,0 +1,40 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+	<preConditions>
+		<dbms type="mysql" />
+	</preConditions>
+
+	<changeSet id="1" author="steven">
+		<createTable tableName="bet_rewards">
+			<column name="id" type="int">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="payout_id" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="bet_type_id" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="reward_name" type="varchar(32)">
+				<constraints nullable="false" />
+			</column>
+			<column name="return_ratio" type="decimal(32,2)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<modifySql dbms="mysql">
+			<append value=" engine innodb" />
+		</modifySql>
+	</changeSet>
+
+	<changeSet id="2" author="steven">
+		<addForeignKeyConstraint baseColumnNames="payout_id" baseTableName="bet_rewards"
+			constraintName="fk_bet_reward_payout" referencedColumnNames="id" referencedTableName="payouts" />
+		<addForeignKeyConstraint baseColumnNames="bet_type_id" baseTableName="bet_rewards"
+			constraintName="fk_bet_reward_bet_type" referencedColumnNames="id" referencedTableName="bet_types" />
+	</changeSet>
+
+</databaseChangeLog>

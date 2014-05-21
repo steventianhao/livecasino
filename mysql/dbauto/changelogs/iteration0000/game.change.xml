@@ -1,0 +1,46 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+	<preConditions>
+		<dbms type="mysql" />
+	</preConditions>
+
+	<changeSet id="1" author="steven">
+		<createTable tableName="games">
+			<column name="id" type="int">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="game_name" type="varchar(32)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<modifySql dbms="mysql">
+			<append value=" engine innodb" />
+		</modifySql>
+	</changeSet>
+
+	<changeSet id="4" author="steven">
+		<createTable tableName="bet_types">
+			<column name="id" type="int">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="game_id" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="bet_type_name" type="varchar(32)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<modifySql dbms="mysql">
+			<append value=" engine innodb" />
+		</modifySql>
+	</changeSet>
+
+	<changeSet id="5" author="steven">
+		<addForeignKeyConstraint baseColumnNames="game_id" baseTableName="bet_types"
+			constraintName="fk_bet_type_game" referencedColumnNames="id" referencedTableName="games" />
+	</changeSet>
+
+</databaseChangeLog>

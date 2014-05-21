@@ -1,0 +1,62 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+	<preConditions>
+		<dbms type="mysql" />
+	</preConditions>
+
+	<changeSet id="1" author="steven">
+
+		<insert tableName="dealer_tables">
+			<column name="id" value="100" />
+			<column name="game_id" value="1" />
+			<column name="sort" value="1" />
+		</insert>
+		<insert tableName="dealer_tables">
+			<column name="id" value="101" />
+			<column name="game_id" value="1" />
+			<column name="sort" value="2" />
+		</insert>
+		<insert tableName="dealer_tables">
+			<column name="id" value="200" />
+			<column name="game_id" value="2" />
+			<column name="sort" value="3" />
+		</insert>
+	</changeSet>
+
+	<changeSet id="2" author="steven">
+
+		<insert tableName="player_tables">
+			<column name="id" value="1000" />
+			<column name="dealer_table_id" value="100" />
+			<column name="payout_id" value="100" />
+		</insert>
+
+		<insert tableName="player_tables">
+			<column name="id" value="1001" />
+			<column name="dealer_table_id" value="100" />
+			<column name="payout_id" value="101" />
+		</insert>
+
+		<insert tableName="player_tables">
+			<column name="id" value="1002" />
+			<column name="dealer_table_id" value="101" />
+			<column name="payout_id" value="100" />
+		</insert>
+
+		<insert tableName="player_tables">
+			<column name="id" value="1003" />
+			<column name="dealer_table_id" value="101" />
+			<column name="payout_id" value="101" />
+		</insert>
+
+		<insert tableName="player_tables">
+			<column name="id" value="2000" />
+			<column name="dealer_table_id" value="200" />
+			<column name="payout_id" value="200" />
+		</insert>
+	</changeSet>
+
+</databaseChangeLog>

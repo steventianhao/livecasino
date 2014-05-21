@@ -1,0 +1,114 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+	<preConditions>
+		<dbms type="mysql" />
+	</preConditions>
+
+	<changeSet id="1" author="steven">
+		<insert tableName="games">
+			<column name="id" value="1" />
+			<column name="game_name" value="baccarat" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="1000" />
+			<column name="game_id" value="1" />
+			<column name="bet_type_name" value="banker" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="1001" />
+			<column name="game_id" value="1" />
+			<column name="bet_type_name" value="player" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="1002" />
+			<column name="game_id" value="1" />
+			<column name="bet_type_name" value="tie" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="1003" />
+			<column name="game_id" value="1" />
+			<column name="bet_type_name" value="banker_pair" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="1004" />
+			<column name="game_id" value="1" />
+			<column name="bet_type_name" value="player_pair" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="1005" />
+			<column name="game_id" value="1" />
+			<column name="bet_type_name" value="banker_n8" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="1006" />
+			<column name="game_id" value="1" />
+			<column name="bet_type_name" value="banker_n9" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="1007" />
+			<column name="game_id" value="1" />
+			<column name="bet_type_name" value="player_n8" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="1008" />
+			<column name="game_id" value="1" />
+			<column name="bet_type_name" value="player_n9" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="1009" />
+			<column name="game_id" value="1" />
+			<column name="bet_type_name" value="big" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="1010" />
+			<column name="game_id" value="1" />
+			<column name="bet_type_name" value="small" />
+		</insert>
+	</changeSet>
+
+	<changeSet id="2" author="steven">
+		<insert tableName="games">
+			<column name="id" value="2" />
+			<column name="game_name" value="dragontiger" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="2000" />
+			<column name="game_id" value="2" />
+			<column name="bet_type_name" value="dragon" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="2001" />
+			<column name="game_id" value="2" />
+			<column name="bet_type_name" value="tiger" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="2002" />
+			<column name="game_id" value="2" />
+			<column name="bet_type_name" value="tie" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="2003" />
+			<column name="game_id" value="2" />
+			<column name="bet_type_name" value="dragon_odd" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="2004" />
+			<column name="game_id" value="2" />
+			<column name="bet_type_name" value="tiger_odd" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="2005" />
+			<column name="game_id" value="2" />
+			<column name="bet_type_name" value="dragon_even" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="2006" />
+			<column name="game_id" value="2" />
+			<column name="bet_type_name" value="tiger_even" />
+		</insert>
+	</changeSet>
+
+</databaseChangeLog>
