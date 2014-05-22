@@ -36,26 +36,23 @@ stopped(new_shoe,{Pid,_},State=#state{dealer=DealerNow,round=Round,table=Table,e
 	Fun2= fun()-> {reply,error_channel,stopped,State} end,
 	checkDealer(DealerNow,Pid,Fun1,Fun2);
 
-stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer=DealerNow,round=Round,table=Table,eventbus=EventBus})->
+
+stopped(start_bet,{Pid,_},State=#state{dealer={Pid,_Dealer},round=undefined})->
 	lager:info("stopped#start_bet,state ~p",[State]),
-	Fun1 = fun()->
-			case Round of
-				undefined ->
-					{reply,{error,need_new_shoe},stopped,State};
-				_ ->
-					NewRound=?GAME_ROUND:set_betting(Round,DealerNow),
-					{ok,TRef}=timer:send_interval(1000,tick),
-					NewState=State#state{ticker={TRef,Countdown},cards=#{},round=NewRound},
-					gen_event:notify(EventBus,{start_bet,Table,NewRound,Countdown}),
-					{reply,ok,betting,NewState}
-			end
-		end,
-	Fun2= fun()-> {reply,error_channel,stopped,State} end,
-	checkDealer(DealerNow,Pid,Fun1,Fun2);
-	
+	{reply,{error,need_new_shoe},stopped,State};
+
+stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer={Pid,Dealer},round=Round,table=Table,eventbus=EventBus})->
+	lager:info("stopped#start_bet,state ~p",[State]),
+	NewRound=?GAME_ROUND:set_betting(Round,Dealer),
+	{ok,TRef}=timer:send_interval(1000,tick),
+	NewState=State#state{ticker={TRef,Countdown},cards=#{},round=NewRound},
+	gen_event:notify(EventBus,{start_bet,Table,NewRound,Countdown}),
+	{reply,ok,betting,NewState};
+
 stopped(Event,_From,State)->
 	lager:error("unexpected event when stopped, event ~p,state ~p",[Event,State]),
 	{reply,unexpected,stopped,State}.
+
 
 
 betting(Event={bet,_Cats,_Amounts},_From,State)->
