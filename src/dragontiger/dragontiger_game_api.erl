@@ -6,6 +6,7 @@
 -export([update_countdown/2]).
 -export([ace/0,two/0,three/0,four/0,five/0,six/0,seven/0,eight/0,nine/0,ten/0,jack/0,queen/0,king/0]).
 
+-include("dragontiger.hrl").
 -define(SERVER,dragontiger_game).
 
 start_game_eventbus(DealerTableId) when is_integer(DealerTableId)-> 
@@ -28,20 +29,27 @@ new_shoe(GameServer)->
 start_bet(GameServer)->
 	gen_fsm:sync_send_event(GameServer,start_bet).
 
-bet(GameServer,Cats,Amounts)->
+bet(GameServer,Cats=[C1|_],Amounts=[A1|_]) 
+	when length(Cats)==length(Amounts) andalso is_integer(C1) andalso is_number(A1) ->
 	gen_fsm:sync_send_event(GameServer,{bet,Cats,Amounts}).
 
 stop_bet(GameServer)->
 	gen_fsm:sync_send_event(GameServer,stop_bet).
 
-scan(GameServer,Card)->
+scan(GameServer,Card) when is_record(Card,card) ->
 	gen_fsm:sync_send_event(GameServer,{scan,Card}).
 
-deal(GameServer,Pos,Card)->
-	gen_fsm:sync_send_event(GameServer,{deal,Pos,Card}).
+deal(GameServer,Pos,Card) when is_integer(Pos) andalso is_record(Card,card) ->
+	case lists:member(Pos,?ALL_POS) of
+		true ->	gen_fsm:sync_send_event(GameServer,{deal,Pos,Card});
+		_ -> error
+	end.
 
 clear(GameServer,Pos)->
-	gen_fsm:sync_send_event(GameServer,{clear,Pos}).
+	case lists:member(Pos,?ALL_POS) of
+		true -> gen_fsm:sync_send_event(GameServer,{clear,Pos});
+		_ -> error
+	end.
 
 commit(GameServer)->
 	gen_fsm:sync_send_event(GameServer,commit).
@@ -56,7 +64,7 @@ update_countdown(GameServer,Countdown)->
 	gen_fsm:sync_send_all_state_event(GameServer,{update_countdown,Countdown}).
 
 
--include("dragontiger.hrl").
+
 ace()->?ACE.
 two()->?TWO.
 three()->?THREE.
