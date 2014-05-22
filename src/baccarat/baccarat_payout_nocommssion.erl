@@ -21,9 +21,9 @@ ratio(player_n8)->
 ratio(player_n9)->
 	{2008,9};
 ratio(big)->
-	{2009,0.53};
+	{2009,1.53};
 ratio(small)->
-	{2010,1.45};
+	{2010,2.45};
 
 ratio(banker_tie)->
 	{2011,1};

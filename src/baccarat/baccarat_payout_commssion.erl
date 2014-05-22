@@ -22,7 +22,7 @@ ratio(player_n9)->
 ratio(big)->
 	{1009,1.53};
 ratio(small)->
-	{1010,1.45};
+	{1010,2.45};
 
 ratio(banker_tie)->
 	{1011,1};
