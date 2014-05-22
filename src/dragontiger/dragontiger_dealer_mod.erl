@@ -3,15 +3,10 @@
 -export([put/3,remove/2,add/2,from_string/1,to_string/1,validate/1]).
 
 
-put(Pos,Card,Cards) when is_map(Cards) andalso is_record(Card,card) andalso is_integer(Pos)->
-	case lists:member(Pos,?ALL_POS) of
-		true->
-			{ok,maps:put(Pos,Card,Cards)};
-		false->
-			error
-	end.
+put(Pos,Card,Cards)->
+	maps:put(Pos,Card,Cards).
 
-remove(Pos,Cards) when is_map(Cards) andalso is_integer(Pos)->
+remove(Pos,Cards)->
 	case maps:is_key(Pos,Cards) of
 		true -> 
 			{ok,maps:remove(Pos,Cards)};
