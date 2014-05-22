@@ -45,22 +45,45 @@
 		<![CDATA[
 			CREATE PROCEDURE bets(p_bundle_id BIGINT,p_round_id BIGINT,p_player_table_id INT,p_cats TEXT, p_amounts TEXT, p_size INT)
 			BEGIN
-				DECLARE x INT;
+				
 				DECLARE now BIGINT;
+				
+				DECLARE x INT;
 				DECLARE cats,amounts TEXT;
 				DECLARE cat INT;
 				DECLARE amount DECIMAL(32,2);
+				
+				DECLARE reward_id INT;
+				DECLARE return_ratio DECIMAL(32,2);
+				
+				DECLARE cursor_done INT DEFAULT 0;
+				DECLARE cur_bet_rewards CURSOR FOR 
+						SELECT br.id,br.return_ratio 
+						FROM bet_rewards as br, player_tables as pt 
+						WHERE pt.payout_id = br.payout_id AND pt.id=p_player_table_id and br.bet_type_id=cat;
+				DECLARE CONTINUE HANDLER FOR NOT FOUND SET cursor_done=1;
 				
 				SET now = UNIX_TIMESTAMP()*1000;
 				SET x = 0;
 
 				SET cats = p_cats;
 				SET amounts= p_amounts;
-
+				
 				WHILE x < p_size DO
+					set x = x + 1;
 					call cat2amount(cats,amounts,cat,amount);
-					insert into bets (bet_bundle_id,round_id,bet_reward_id,bet_amount,return_amount,create_time,hit) values (p_bundle_id,p_round_id,133,amount,0,now,FALSE);
-					set x = x + 1;								
+					OPEN cur_bet_rewards;
+					rewards_loop:LOOP
+						FETCH cur_bet_rewards INTO reward_id,return_ratio;
+						IF cursor_done=1 THEN
+							LEAVE rewards_loop;
+						END IF;
+						INSERT INTO bets 
+							(bet_bundle_id,round_id,bet_reward_id,bet_amount,return_amount,create_time,hit) 
+							VALUES 
+							(p_bundle_id,p_round_id,reward_id,amount,amount*return_ratio,now,FALSE);
+					END LOOP rewards_loop;
+					CLOSE cur_bet_rewards;
 				END WHILE;					
 			END
 		]]>
