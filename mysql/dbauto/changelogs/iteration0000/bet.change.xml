@@ -59,8 +59,9 @@
 			<append value=" engine innodb" />
 		</modifySql>
 	</changeSet>
-
+	<!-- 
 	<changeSet id="3" author="steven">
 		<addPrimaryKey columnNames="bet_bundle_id,bet_reward_id" constraintName="pk_bets" tableName="bets" />
 	</changeSet>
+	-->
 </databaseChangeLog>

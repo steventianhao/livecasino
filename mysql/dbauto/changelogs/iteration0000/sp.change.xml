@@ -1,0 +1,71 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+	<preConditions>
+		<dbms type="mysql" />
+	</preConditions>
+
+	<changeSet id="1" author="steven">
+		<sql>
+			DROP PROCEDURE IF EXISTS cat2amount;
+		</sql>
+		<createProcedure>
+			CREATE PROCEDURE cat2amount(INOUT cats TEXT, INOUT amounts TEXT, OUT cat INT, OUT amount DECIMAL(32,2))
+			BEGIN
+			SET cat=substring_index(cats,'#',1);
+			SET cats=substring(cats,locate('#',cats)+1);
+			SET	amount=substring_index(amounts,'#',1);
+			SET amounts=substring(amounts,locate('#',amounts)+1);
+			END
+		</createProcedure>
+	</changeSet>
+
+
+	<changeSet id="2" author="steven">
+		<sql>
+			DROP PROCEDURE IF EXISTS bet_bundles;
+		</sql>
+		<createProcedure>
+			CREATE PROCEDURE bet_bundles(round_id BIGINT,player_id BIGINT,player_table_id INT,total DECIMAL(32,2),OUT bundle_id BIGINT)
+			BEGIN
+			insert into bet_bundles (round_id,player_id,player_table_id,bet_amount,create_time) values (round_id,player_id,player_table_id,total,UNIX_TIMESTAMP()*1000);
+			select last_insert_id() into bundle_id;
+			END
+		</createProcedure>
+	</changeSet>
+
+
+	<changeSet id="3" author="steven">
+		<sql>
+			DROP PROCEDURE IF EXISTS bets;
+		</sql>
+		<createProcedure>
+		<![CDATA[
+			CREATE PROCEDURE bets(p_bundle_id BIGINT,p_round_id BIGINT,p_player_table_id INT,p_cats TEXT, p_amounts TEXT, p_size INT)
+			BEGIN
+				DECLARE x INT;
+				DECLARE now BIGINT;
+				DECLARE cats,amounts TEXT;
+				DECLARE cat INT;
+				DECLARE amount DECIMAL(32,2);
+				
+				SET now = UNIX_TIMESTAMP()*1000;
+				SET x = 0;
+
+				SET cats = p_cats;
+				SET amounts= p_amounts;
+
+				WHILE x < p_size DO
+					call cat2amount(cats,amounts,cat,amount);
+					insert into bets (bet_bundle_id,round_id,bet_reward_id,bet_amount,return_amount,create_time,hit) values (p_bundle_id,p_round_id,133,amount,0,now,FALSE);
+					set x = x + 1;								
+				END WHILE;					
+			END
+		]]>
+		</createProcedure>
+	</changeSet>
+
+
+</databaseChangeLog>
