@@ -8,25 +8,27 @@
 	</preConditions>
 
 	<changeSet id="1" author="steven">
-		<createTable tableName="bet_bundles">
+		<createTable tableName="players">
 			<column name="id" type="bigint" autoIncrement="true">
 				<constraints primaryKey="true" />
 			</column>
-			<column name="round_id" type="bigint">
+			<column name="operator_id" type="int">
 				<constraints nullable="false" />
 			</column>
-			<column name="player_id" type="bigint">
+			<column name="name" type="int">
 				<constraints nullable="false" />
 			</column>
-			<column name="player_table_id" type="bigint">
+			<column name="balance" type="decimal(32,2)" defaultValue="0">
 				<constraints nullable="false" />
 			</column>
-			<column name="bet_amount" type="decimal(32,2)">
+			<column name="status" type="int" defaultValue="0">
 				<constraints nullable="false" />
 			</column>
 			<column name="create_time" type="bigint">
 				<constraints nullable="false" />
 			</column>
+			<column name="last_login_ip" type="varchar(100)" />
+			<column name="last_login_time" type="bigint" />
 		</createTable>
 		<modifySql dbms="mysql">
 			<append value=" engine innodb" />
@@ -34,56 +36,34 @@
 	</changeSet>
 
 	<changeSet id="2" author="steven">
-		<createTable tableName="bets">
-			<column name="bet_bundle_id" type="bigint">
-				<constraints nullable="false" />
-			</column>
-			<column name="round_id" type="bigint">
-				<constraints nullable="false" />
-			</column>
-			<column name="bet_reward_id" type="int">
-				<constraints nullable="false" />
-			</column>
-			<column name="bet_amount" type="decimal(32,2)">
-				<constraints nullable="false" />
-			</column>
-			<column name="return_amount" type="decimal(32,2)">
-				<constraints nullable="false" />
-			</column>
-			<column name="create_time" type="bigint">
-				<constraints nullable="false" />
-			</column>
-			<column name="hit" type="bool" defaultValue="false" />
-		</createTable>
-		<modifySql dbms="mysql">
-			<append value=" engine innodb" />
-		</modifySql>
+		<addUniqueConstraint columnNames="operator_id, name" constraintName="idx_player_operator" tableName="players" />
 	</changeSet>
+	
 	<changeSet id="3" author="steven">
-		<addPrimaryKey columnNames="bet_bundle_id,bet_reward_id" constraintName="pk_bets" tableName="bets" />
-	</changeSet>
-
-	<changeSet id="4" author="steven">
-		<createTable tableName="bet_bundle_payouts">
+		<createTable tableName="journals">
 			<column name="id" type="bigint" autoIncrement="true">
 				<constraints primaryKey="true" />
 			</column>
-			<column name="bet_bundle_id" type="bigint">
+			<column name="player_id" type="int">
 				<constraints nullable="false" />
 			</column>
-			<column name="return_amount" type="decimal(32,2)">
+			<column name="delta" type="decimal(32,2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="balance_before" type="decimal(32,2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="balance_after" type="decimal(32,2)">
 				<constraints nullable="false" />
 			</column>
 			<column name="create_time" type="bigint">
 				<constraints nullable="false" />
 			</column>
-			<column name="action" type="int">
-				<constraints nullable="false" />
-			</column>
+			<column name="action" type="int"/>
+			<column name="reference" type="varchar(100)" />
 		</createTable>
 		<modifySql dbms="mysql">
 			<append value=" engine innodb" />
 		</modifySql>
 	</changeSet>
-
 </databaseChangeLog>
