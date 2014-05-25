@@ -33,7 +33,7 @@ stopped(start_bet,{Pid,_},State=#state{dealer={Pid,_Dealer},round=undefined})->
 stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer={Pid,Dealer},round=Round,table=Table,eventbus=EventBus})->
 	lager:info("stopped#start_bet,state ~p",[State]),
 	NewRound=?GAME_ROUND:set_betting(Round,Dealer),
-	{ok,TRef}=timer:send_interval(1000,tick),
+	TRef=erlang:send_after(1000,self(),tick),
 	NewState=State#state{ticker={TRef,Countdown},cards=#{},round=NewRound},
 	gen_event:notify(EventBus,{start_bet,Table,NewRound,Countdown}),
 	{reply,ok,betting,NewState};
@@ -50,7 +50,7 @@ betting(Event={bet,_Cats,_Amounts},_From,State)->
 	
 betting(stop_bet,{Pid,_},State=#state{ticker={TRef,_},dealer={Pid,_Dealer},round=Round,table=Table,eventbus=EventBus})->
 	lager:info("betting#stop_bet,state ~p",[State]),
-	timer:cancel(TRef),
+	erlang:cancel_timer(TRef),
 	NewRound=?GAME_ROUND:set_dealing(Round),
 	NewState=State#state{ticker=undefined,round=NewRound},
 	gen_event:notify(EventBus,{stop_bet,Table,NewRound}),
@@ -113,13 +113,13 @@ handle_info(tick,betting,State=#state{ticker=Ticker,table=Table,eventbus=EventBu
 	%%send the tick to all players intrested in
 	lager:info("handle tick when betting, state ~p",[State]),
 	case Ticker of
-		{TRef,0} ->
+		{_,0} ->
 			gen_event:notify(EventBus,{tick,Table,0}),
-			timer:cancel(TRef),
 			NewState=State#state{ticker=undefined},
 			{next_state,dealing,NewState};
-		{TRef,Value}->
+		{_,Value}->
 			gen_event:notify(EventBus,{tick,Table,Value}),
+			TRef=erlang:send_after(1000,self(),tick),
 			NewState=State#state{ticker={TRef,Value-1}},
 			{next_state,betting,NewState}
 	end;
