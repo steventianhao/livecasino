@@ -4,7 +4,7 @@
 -compile([{parse_transform, lager_transform}]).
 
 %%API
--export([start_link/1,stop/1,new_dealer/3,enter_table/2,quit_table/1,start_bet/1,stop_bet/1]).
+-export([start_link/1,stop/1,new_dealer/2,enter_table/2,quit_table/1,start_bet/1,stop_bet/1]).
 
 %% gen_server callbacks
 -export([init/1,handle_call/3,handle_cast/2,handle_info/2,terminate/2,code_change/3]).
@@ -16,8 +16,8 @@
 -define(DEALER(Name),"dealer_"++Name).
 -define(PID(Name),gproc:where({n,l,"dealer_"++Name})).
 
-new_dealer(Id,Name,Photo)->
-	#dealer{id=Id,name=Name,photo=Photo}.
+new_dealer(Id,Name)->
+	#dealer{id=Id,name=Name}.
 
 start_link(Dealer)->
 	gen_server:start_link(?MODULE,Dealer,[]).
