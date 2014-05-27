@@ -46,12 +46,11 @@ betting(Event={bet,_Cats,_Amounts},_From,State)->
 	lager:info("bet Event ~p,State ~p",[Event,State]),
 	{reply,ok,betting,State};
 	
-betting(stop_bet,{Pid,_},State=#state{ticker={TRef,_},dealer={Pid,_},round=Round,eventbus=EventBus})->
+betting(stop_bet,{Pid,_},State=#state{ticker={TRef,_},dealer={Pid,_},eventbus=EventBus})->
 	lager:info("betting#stop_bet,state ~p",[State]),
 	erlang:cancel_timer(TRef),
-	NewRound=?GAME_ROUND:set_dealing(Round),
-	NewState=State#state{ticker=undefined,round=NewRound},
-	gen_event:notify(EventBus,{stop_bet,NewRound}),
+	NewState=State#state{ticker=undefined},
+	gen_event:notify(EventBus,{stop_bet}),
 	{reply,ok,dealing,NewState};
 
 betting(Event,_From,State)->

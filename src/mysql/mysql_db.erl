@@ -6,10 +6,10 @@
 -include("db.hrl").
 -include_lib("emysql/include/emysql.hrl").
 
-insert_round(Conn,#db_new_round_req{shoe_index=ShoeIndex,round_index=RoundIndex,dealer_id=DealerId,dealer_table_id=DealerTableId,create_time=CreateTime,status=Status})->
-	Sql = <<"insert into rounds (shoe_index,round_index,dealer_id,dealer_table_id,create_time,status) values (?,?,?,?,?,?)">>,
+insert_round(Conn,#db_new_round_req{shoe_index=ShoeIndex,round_index=RoundIndex,dealer_id=DealerId,dealer_table_id=DealerTableId,create_time=CreateTime})->
+	Sql = <<"insert into rounds (shoe_index,round_index,dealer_id,dealer_table_id,create_time,status) values (?,?,?,?,?,1)">>,
 	emysql:prepare(stmt_insert_round,Sql),
-	Result=emysql:execute(Conn,stmt_insert_round,[ShoeIndex,RoundIndex,DealerId,DealerTableId,CreateTime,Status]),
+	Result=emysql:execute(Conn,stmt_insert_round,[ShoeIndex,RoundIndex,DealerId,DealerTableId,CreateTime]),
 	emysql:insert_id(Result).
 
 update_round(Conn,Id,StopTime)->
@@ -26,7 +26,7 @@ update_round(Conn,Id,Cards,FinishTime)->
 	emysql:affected_rows(Result).
 
 load_last_round(Conn,DealerTableId)->
-	Sql = <<"select id,shoe_index,round_index,dealer_id,dealer_table_id,create_time,status,finish_time,cards from rounds where dealer_table_id =? order by id desc limit 1">>,
+	Sql = <<"select id,shoe_index,round_index,dealer_id,dealer_table_id,create_time,status,cards from rounds where dealer_table_id =? order by id desc limit 1">>,
 	emysql:prepare(stmt_load_last_round,Sql),
 	Result=emysql:execute(Conn,stmt_load_last_round,[DealerTableId]),
 	emysql:as_record(Result,db_round_res,record_info(fields,db_round_res)).

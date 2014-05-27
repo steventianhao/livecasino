@@ -1,15 +1,8 @@
 -module(dragontiger_round).
 -include("round.hrl").
 
--export([restore_round/6,set_dealing/1,set_betting/1,set_done/2,new_shoe/1]).
+-export([set_betting/1,set_done/2,new_shoe/1]).
 
-restore_round(ShoeIndex,RoundIndex,Status,Cards,CreateTime,FinishTime)->
-	if
-		Status /= ?DONE orelse Status /=?DEALING orelse Status /=?BETTING ->
-			{ok,#round{shoeIndex=ShoeIndex,roundIndex=RoundIndex,createTime=CreateTime,finishTime=FinishTime,status=Status,cards=Cards}};
-		true->
-			error
-	end.
 
 increase(ShoeIndex,_CreateTime)->
 	ShoeIndex+1.
@@ -27,10 +20,7 @@ new_shoe(#round{shoeIndex=ShoeIndex,createTime=CreateTime})->
 set_betting(OldRound)->
 	RoundIndex=OldRound#round.roundIndex+1,
 	ShoeIndex =OldRound#round.shoeIndex,
-	#round{status=?BETTING,createTime=casino_utils:now(),roundIndex=RoundIndex,shoeIndex=ShoeIndex}.
+	#round{createTime=casino_utils:now(),roundIndex=RoundIndex,shoeIndex=ShoeIndex}.
 	
-set_dealing(Round)->
-	Round#round{status=?DEALING}.
-
 set_done(Round,Cards)->
-	Round#round{status=?DONE,finishTime=casino_utils:now(),cards=Cards}.
+	Round#round{cards=Cards}.

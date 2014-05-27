@@ -37,9 +37,9 @@ stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer={Pid,Dealer},r
 	lager:info("stopped#start_bet,state ~p",[State]),
 	NewRound=?GAME_ROUND:set_betting(Round),
 	%%-record(round,{id,dealer,shoeIndex,roundIndex,cards,createTime,finishTime,status}).
-	#round{status=Status,createTime={Mills,_},roundIndex=RoundIndex,shoeIndex=ShoeIndex}=NewRound,
+	#round{createTime={Mills,_},roundIndex=RoundIndex,shoeIndex=ShoeIndex}=NewRound,
 	DealerId=Dealer#dealer.id,
-	DbNewRound=#db_new_round_req{shoe_index=ShoeIndex,round_index=RoundIndex,dealer_id=DealerId,dealer_table_id=Table,create_time=Mills,status=Status},
+	DbNewRound=#db_new_round_req{shoe_index=ShoeIndex,round_index=RoundIndex,dealer_id=DealerId,dealer_table_id=Table,create_time=Mills},
 	NewRoundId=mysql_db:insert_round(?CASINO_DB,DbNewRound),
 	NewRound2=NewRound#round{id=NewRoundId},
 	TRef=erlang:send_after(1000,self(),tick),
@@ -61,11 +61,10 @@ betting(Event={try_bet,_Cats,_Amounts},{_Pid,Tag},State=#state{round=Round})->
 betting(stop_bet,{Pid,_},State=#state{ticker={TRef,_},dealer={Pid,_Dealer},round=Round,table=Table,eventbus=EventBus})->
 	lager:info("betting#stop_bet,state ~p",[State]),
 	erlang:cancel_timer(TRef),
-	NewRound=?GAME_ROUND:set_dealing(Round),
-	{Mills,_}=casino_utils:now(),
+	Mills=casino_utils:mills(),
 	1=mysql_db:update_round(?CASINO_DB,Round#round.id,Mills),
-	NewState=State#state{ticker=undefined,round=NewRound},
-	gen_event:notify(EventBus,{stop_bet,Table,NewRound}),
+	NewState=State#state{ticker=undefined},
+	gen_event:notify(EventBus,{stop_bet,Table}),
 	{reply,ok,dealing,NewState};
 
 betting(Event,_From,State)->
@@ -108,7 +107,7 @@ dealing(commit,{Pid,_},State=#state{cards=Cards,dealer={Pid,_},round=Round,table
 	case baccarat_dealer_mod:validate(Cards) of
 		true->
 			NewRound=?GAME_ROUND:set_done(Round,Cards),
-			{Mills,_}=NewRound#round.finishTime,
+			Mills=casino_utils:mills(),
 			Cstr=?GAME_DEALER_MOD:to_string(Cards),
 			1=mysql_db:update_round(?CASINO_DB,Round#round.id,Cstr,Mills),
 			NewState=State#state{round=NewRound},
