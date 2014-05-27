@@ -62,6 +62,8 @@ betting(stop_bet,{Pid,_},State=#state{ticker={TRef,_},dealer={Pid,_Dealer},round
 	lager:info("betting#stop_bet,state ~p",[State]),
 	erlang:cancel_timer(TRef),
 	NewRound=?GAME_ROUND:set_dealing(Round),
+	{Mills,_}=casino_utils:now(),
+	1=mysql_db:update_round(?CASINO_DB,Round#round.id,Mills),
 	NewState=State#state{ticker=undefined,round=NewRound},
 	gen_event:notify(EventBus,{stop_bet,Table,NewRound}),
 	{reply,ok,dealing,NewState};
@@ -106,6 +108,9 @@ dealing(commit,{Pid,_},State=#state{cards=Cards,dealer={Pid,_},round=Round,table
 	case baccarat_dealer_mod:validate(Cards) of
 		true->
 			NewRound=?GAME_ROUND:set_done(Round,Cards),
+			{Mills,_}=NewRound#round.finishTime,
+			Cstr=?GAME_DEALER_MOD:to_string(Cards),
+			1=mysql_db:update_round(?CASINO_DB,Round#round.id,Cstr,Mills),
 			NewState=State#state{round=NewRound},
 			gen_event:notify(EventBus,{commit,Table,Round,Cards}),				
 			{reply,ok,stopped,NewState};
