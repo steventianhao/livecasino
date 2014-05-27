@@ -1,6 +1,6 @@
 -module(mysql_db).
 
--export([insert_round/2,update_round/2,update_round/4,load_last_round/2]).
+-export([insert_round/2,update_round/3,update_round/4,load_last_round/2]).
 -export([user_bet/2]).
 
 -include("db.hrl").
