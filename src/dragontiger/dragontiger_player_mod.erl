@@ -1,7 +1,8 @@
 -module(dragontiger_player_mod).
 
 
--export([all_bet_cats/0,is_valid_bets/2,bets_to_string/2]).
+-export([all_bet_cats/0,is_valid_bets/2,create_bet_req/5]).
+-include("db.hrl").
 
 -define(BET_CAT_DRAGON,2000).
 -define(BET_CAT_TIGER,2001).
@@ -37,17 +38,14 @@ is_valid_bet_cats(Cats)->
 	end.
 is_valid_bet_amounts(Amounts)->
 	lists:all(fun(E)-> E>0 end,Amounts).
-	
-total_amount(Amounts)->
-	lists:sum(Amounts).
-	
+		
 is_valid_bets(Cats=[C1|_],Amounts=[A1|_]) when is_integer(C1) andalso is_number(A1) andalso length(Cats)==length(Amounts)->
 	is_valid_bet_cats(Cats) andalso is_valid_bet_amounts(Amounts);
 is_valid_bets(_,_)->
 	false.
 
-bets_to_string(Cats,Amounts)->
-	{string:join(Cats,","),string:join(Amounts,",")}.	
-
-
-	
+create_bet_req(RoundId,UserId,TableId,Cats,Amounts)->
+	Cstr = string:join(Cats,","),
+	Astr = string:join(Amounts,","),	
+	Total = lists:sum(Amounts),
+ 	#db_bet_req{round_id=RoundId,player_id=UserId,player_table_id=TableId,bet_cats=Cstr,bet_amounts=Astr,total_amount=Total}.

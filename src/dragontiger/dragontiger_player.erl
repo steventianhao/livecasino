@@ -27,12 +27,16 @@ init({Server,EventBus,PlayerTableId,User=#user{id=UserId}})->
 	{ok,#state{player_table_id=PlayerTableId,user=User,server=Server,eventbus=EventBus}}.
 
 handle_call(_Event={bet,Cats,Amounts},_From,State=#state{server=Server,user=User,player_table_id=PlayerTableId})->
-	Result= ok,
-	%%case dragontiger_game_api:bet(Server,Cats,Amounts) of
-	%%	{ok,Tag,RoundId}->
-	%%		Total=lists:sum(Amounts);
-	%%		Bet=#db_bet_req{round_id=RoundId,player_id=User#user.id,player_table_id=PlayerTableId,bet_cats=Cats,bet_amounts=Amounts,total=Total}
-	%%		case mysql_db:user_bet(Bet) of
+	case dragontiger_game_api:try_bet(Server,Cats,Amounts) of
+		{ok,Tag,RoundId}->
+			Bet=dragontiger_player_mod:create_bet_req(RoundId,User#user.id,PlayerTableId,Cats,Amounts),
+			mysql_db:user_bet(?CASINO_DB,Bet),
+			{reply,ok,State};
+		_ ->
+			{reply,error,State}
+	end.
+
+	%% first, test to save the bets into db
 	%%			{ok,#db_bet_res{bet_bundle_id=BetBundleId}}->
 	%%				dragontiger_game_api:bet_succeed(Server,Tag,BetBundleId),
 	%%				ok;
@@ -43,7 +47,7 @@ handle_call(_Event={bet,Cats,Amounts},_From,State=#state{server=Server,user=User
 	%%	Err={error,_}->
 	%%		Err
 	%%end.
-	{reply,Result,State}.
+	
 
 handle_cast(Request,State)->
 	lager:error("unexpected Request ~p, State ~p",[Request,State]),
