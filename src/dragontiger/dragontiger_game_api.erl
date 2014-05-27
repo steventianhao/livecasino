@@ -1,7 +1,8 @@
 -module(dragontiger_game_api).
 -export([start_game_server/3,start_game_eventbus/1]).
 -export([dealer_connect/2,dealer_disconnect/1]).
--export([new_shoe/1,start_bet/1,stop_bet/1,commit/1,bet/3]).
+-export([new_shoe/1,start_bet/1,stop_bet/1,commit/1]).
+-export([try_bet/3,bet_fail/2,bet_succeed/3]).
 -export([deal/3,clear/2,scan/2]).
 -export([update_countdown/2]).
 -export([ace/0,two/0,three/0,four/0,five/0,six/0,seven/0,eight/0,nine/0,ten/0,jack/0,queen/0,king/0]).
@@ -29,9 +30,13 @@ new_shoe(GameServer)->
 start_bet(GameServer)->
 	gen_fsm:sync_send_event(GameServer,start_bet).
 
-bet(GameServer,Cats=[C1|_],Amounts=[A1|_]) 
-	when length(Cats)==length(Amounts) andalso is_integer(C1) andalso is_number(A1) ->
-	gen_fsm:sync_send_event(GameServer,{bet,Cats,Amounts}).
+try_bet(GameServer,Cats,Amounts) ->
+	gen_fsm:sync_send_event(GameServer,{try_bet,Cats,Amounts}).
+bet_succeed(GameServer,Tag,BetBundleId)->
+	ok.
+bet_fail(GameServer,Tag)->
+	ok.
+
 
 stop_bet(GameServer)->
 	gen_fsm:sync_send_event(GameServer,stop_bet).

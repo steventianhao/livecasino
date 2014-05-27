@@ -29,9 +29,9 @@ stopped(start_bet,{Pid,_},State=#state{dealer={Pid,_},round=undefined})->
 	lager:info("stopped#start_bet,state ~p",[State]),
 	{reply,{error,need_new_shoe},stopped,State};
 
-stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer={Pid,Dealer},round=Round,eventbus=EventBus})->
+stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer={Pid,_Dealer},round=Round,eventbus=EventBus})->
 	lager:info("stopped#start_bet,state ~p",[State]),
-	NewRound=?GAME_ROUND:set_betting(Round,Dealer),
+	NewRound=?GAME_ROUND:set_betting(Round),
 	TRef=erlang:send_after(1000,self(),tick),
 	NewState=State#state{ticker={TRef,Countdown},cards=#{},round=NewRound},
 	gen_event:notify(EventBus,{start_bet,NewRound,Countdown}),

@@ -1,24 +1,48 @@
 -module(dragontiger_player).
 -behavior(gen_server).
 -include("user.hrl").
+-include("db.hrl").
 
 -export([init/1,handle_call/3,handle_cast/2,handle_info/2,terminate/2,code_change/3]).
 -export([bet/3,start_link/4]).
--record(state,{table,user,server,eventbus}).
+-record(state,{player_table_id,user,server,eventbus}).
+
+-define(GAME_PLAYER_MOD,dragontiger_player_mod).
+-define(CASINO_DB,mysql_casino_master_db).
 
 
-start_link(Server,EventBus,Table,User) when is_pid(Server) andalso is_pid(EventBus) andalso is_integer(Table) andalso is_record(User,user)->
-	gen_server:start_link(?MODULE,{Server,EventBus,Table,User},[]).
+start_link(Server,EventBus,PlayerTableId,User) when is_pid(Server) andalso is_pid(EventBus) andalso is_integer(PlayerTableId) andalso is_record(User,user)->
+	gen_server:start_link(?MODULE,{Server,EventBus,PlayerTableId,User},[]).
 
 bet(Pid,Cats,Amounts)->
-	gen_server:call(Pid,{bet,Cats,Amounts}).
+	case ?GAME_PLAYER_MOD:is_valid_bets(Cats,Amounts) of
+		true ->
+			gen_server:call(Pid,{bet,Cats,Amounts});
+		_ ->
+			{error,invalid_bets}
+	end.
 
-init({Server,EventBus,Table,User=#user{id=UserId}})->
+init({Server,EventBus,PlayerTableId,User=#user{id=UserId}})->
 	dragontiger_player_handler:add_handler(EventBus,UserId),
-	{ok,#state{table=Table,user=User,server=Server,eventbus=EventBus}}.
+	{ok,#state{player_table_id=PlayerTableId,user=User,server=Server,eventbus=EventBus}}.
 
-handle_call(_Event={bet,Cats,Amounts},_From,State=#state{server=Server})->
-	Result=dragontiger_game_api:bet(Server,Cats,Amounts),
+handle_call(_Event={bet,Cats,Amounts},_From,State=#state{server=Server,user=User,player_table_id=PlayerTableId})->
+	Result= ok,
+	%%case dragontiger_game_api:bet(Server,Cats,Amounts) of
+	%%	{ok,Tag,RoundId}->
+	%%		Total=lists:sum(Amounts);
+	%%		Bet=#db_bet_req{round_id=RoundId,player_id=User#user.id,player_table_id=PlayerTableId,bet_cats=Cats,bet_amounts=Amounts,total=Total}
+	%%		case mysql_db:user_bet(Bet) of
+	%%			{ok,#db_bet_res{bet_bundle_id=BetBundleId}}->
+	%%				dragontiger_game_api:bet_succeed(Server,Tag,BetBundleId),
+	%%				ok;
+	%%			Error={error,insufficient_balance} ->
+	%%				dragontiger_game_api:bet_failed(Server,Tag),
+	%%				Error
+	%%		end.
+	%%	Err={error,_}->
+	%%		Err
+	%%end.
 	{reply,Result,State}.
 
 handle_cast(Request,State)->

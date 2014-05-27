@@ -7,12 +7,15 @@
 %% all states transitions
 -export([stopped/3,dealing/3,betting/3]).
 -include("round.hrl").
+-include("db.hrl").
+-include("dealer.hrl").
 
 %% API
 -define(GAME,dragontiger).
 
 -define(GAME_ROUND,dragontiger_round).
 -define(GAME_DEALER_MOD,dragontiger_dealer_mod).
+-define(CASINO_DB,mysql_casino_master_db).
 
 -record(state,{dealer,table,ticker,cards,countdown,round,eventbus}).
 
@@ -32,9 +35,15 @@ stopped(start_bet,{Pid,_},State=#state{dealer={Pid,_Dealer},round=undefined})->
 
 stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer={Pid,Dealer},round=Round,table=Table,eventbus=EventBus})->
 	lager:info("stopped#start_bet,state ~p",[State]),
-	NewRound=?GAME_ROUND:set_betting(Round,Dealer),
+	NewRound=?GAME_ROUND:set_betting(Round),
+	%%-record(round,{id,dealer,shoeIndex,roundIndex,cards,createTime,finishTime,status}).
+	#round{status=Status,createTime={Mills,_},roundIndex=RoundIndex,shoeIndex=ShoeIndex}=NewRound,
+	DealerId=Dealer#dealer.id,
+	DbNewRound=#db_new_round_req{shoe_index=ShoeIndex,round_index=RoundIndex,dealer_id=DealerId,dealer_table_id=Table,create_time=Mills,status=Status},
+	NewRoundId=mysql_db:insert_round(?CASINO_DB,DbNewRound),
+	NewRound2=NewRound#round{id=NewRoundId},
 	TRef=erlang:send_after(1000,self(),tick),
-	NewState=State#state{ticker={TRef,Countdown},cards=#{},round=NewRound},
+	NewState=State#state{ticker={TRef,Countdown},cards=#{},round=NewRound2},
 	gen_event:notify(EventBus,{start_bet,Table,NewRound,Countdown}),
 	{reply,ok,betting,NewState};
 
@@ -44,9 +53,10 @@ stopped(Event,_From,State)->
 
 
 
-betting(Event={bet,_Cats,_Amounts},_From,State)->
+betting(Event={try_bet,_Cats,_Amounts},{_Pid,Tag},State=#state{round=Round})->
 	lager:info("bet Event ~p,State ~p",[Event,State]),
-	{reply,ok,betting,State};
+	%% add the bets into the limit table, check the limits, then return ok
+	{reply,{ok,Tag,Round#round.id},betting,State};
 	
 betting(stop_bet,{Pid,_},State=#state{ticker={TRef,_},dealer={Pid,_Dealer},round=Round,table=Table,eventbus=EventBus})->
 	lager:info("betting#stop_bet,state ~p",[State]),
