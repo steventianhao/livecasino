@@ -23,22 +23,6 @@
 		</createProcedure>
 	</changeSet>
 
-
-	<changeSet id="2" author="steven">
-		<sql>
-			DROP PROCEDURE IF EXISTS bet_bundles;
-		</sql>
-		<createProcedure>
-			CREATE PROCEDURE bet_bundles(round_id BIGINT,player_id BIGINT,player_table_id INT,total DECIMAL(32,2),OUT bundle_id BIGINT) 
-			MODIFIES SQL DATA
-			BEGIN
-			INSERT INTO bet_bundles (round_id,player_id,player_table_id,bet_amount,create_time) VALUES (round_id,player_id,player_table_id,total,UNIX_TIMESTAMP()*1000);
-			SELECT LAST_INSERT_ID() INTO bundle_id;
-			END
-		</createProcedure>
-	</changeSet>
-
-
 	<changeSet id="3" author="steven">
 		<sql>
 			DROP PROCEDURE IF EXISTS bets;
@@ -88,50 +72,40 @@
 
 	<changeSet id="4" author="steven">
 		<sql>
-			DROP PROCEDURE IF EXISTS user_bet;
-		</sql>
-		<createProcedure>
-			<![CDATA[
-			CREATE PROCEDURE user_bet(p_player_id BIGINT,p_total DECIMAL(32,2),OUT ok BOOL,OUT balance_before DECIMAL(32,2), OUT balance_after DECIMAL(32,2)) 
-			MODIFIES SQL DATA
-			BEGIN
-				SELECT balance INTO balance_before FROM players WHERE id=p_player_id FOR UPDATE;
-				SET balance_after = balance_before - p_total;
-				IF balance_after >=0 THEN
-					UPDATE players SET balance=balance_after WHERE id=p_player_id;
-					SET ok = TRUE;
-				ELSE
-					SET ok= FALSE;
-				END IF;
-			END
-			]]>
-		</createProcedure>
-	</changeSet>
-
-	<changeSet id="5" author="steven">
-		<sql>
 			DROP PROCEDURE IF EXISTS bet;
 		</sql>
 		<createProcedure>
-			CREATE PROCEDURE bet(p_round_id BIGINT,p_player_id BIGINT,p_player_table_id INT,p_total DECIMAL(32,2),p_cats TEXT, p_amounts TEXT, p_size INT)
+			<![CDATA[
+			CREATE PROCEDURE bet(round_id BIGINT,player_id BIGINT,player_table_id INT,bet_cats TEXT, bet_amounts TEXT,total_amount DECIMAL(32,2)) 
 			MODIFIES SQL DATA
 			BEGIN
-				DECLARE bundle_id BIGINT;
-				DECLARE balance_ok  BOOL DEFAULT FALSE;
+				DECLARE action INT DEFAULT 1;
+				DECLARE bet_bundle_id BIGINT;
 				DECLARE balance_before DECIMAL(32,2);
 				DECLARE balance_after DECIMAL(32,2);
-				
+				DECLARE now BIGINT;
+				DECLARE fail BOOL DEFAULT FALSE;
+				DECLARE CONTINUE HANDLER FOR SQLEXCEPTION SET fail=TRUE;
 				START TRANSACTION;
-				CALL user_bet(p_player_id,p_total,balance_ok,balance_before,balance_after);
-				IF balance_ok THEN
-					CALL bet_bundles(p_round_id,p_player_id,p_player_table_id,p_total,bundle_id);
-					CALL bets(bundle_id,p_round_id,p_player_table_id,p_cats,p_amounts,p_size);
-					INSERT INTO journals (player_id,delta,balance_before,balance_after,create_time,action,reference) VALUES (p_player_id,-p_total,balance_before,balance_after,UNIX_TIMESTAMP()*1000,1,bundle_id);
-					COMMIT;
-				ELSE
+				SELECT balance INTO balance_before FROM players WHERE id=player_id FOR UPDATE;
+				IF ROW_COUNT() = 1 THEN
+					SET balance_after = balance_before - total_amount;
+					IF balance_after >=0 THEN
+						SET now = UNIX_TIMESTAMP()*1000;
+						INSERT INTO bet_bundles (round_id,player_id,player_table_id,bet_cats,bet_amounts,total_amount,create_time) VALUES (round_id,player_id,player_table_id,bet_cats,bet_amounts,total_amount,now);
+						SELECT LAST_INSERT_ID() INTO bet_bundle_id;
+						UPDATE players SET balance=balance_after WHERE id=player_id;
+						INSERT INTO bet_bundle_actions (bet_bundle_id,delta,create_time,action) VALUES (bet_bundle_id,-total_amount,now,action);
+						SELECT bet_bundle_id,balance_before,balance_after;
+					END IF;
+				END IF;
+				IF fail THEN
 					ROLLBACK;
+				ELSE
+					COMMIT;
 				END IF;
 			END
+			]]>
 		</createProcedure>
 	</changeSet>
 	
@@ -166,7 +140,7 @@
 					INSERT INTO bet_bundle_payouts (bet_bundle_id,return_amount,create_time,action) SELECT bet_bundle_id, sum(return_amount),@now,@action FROM bets WHERE round_id=p_round_id AND hit=TRUE GROUP BY bet_bundle_id ORDER BY bet_bundle_id ASC;
 					OPEN cur_bet_payouts;
 					payouts_loop:LOOP
-						FETCH cur_bet_rewards INTO bet_bundle_payout_id,player_id,return_amount;
+						FETCH cur_bet_payouts INTO bet_bundle_payout_id,player_id,return_amount;
 						IF cursor_done=1 THEN
 							LEAVE payouts_loop;
 						END IF;

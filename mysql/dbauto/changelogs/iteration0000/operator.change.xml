@@ -21,7 +21,7 @@
 			<column name="status" type="int" defaultValue="0">
 				<constraints nullable="false" />
 			</column>
-			<column name="create_time" type="bigint">
+			<column name="create_time" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP">
 				<constraints nullable="false" />
 			</column>
 		</createTable>

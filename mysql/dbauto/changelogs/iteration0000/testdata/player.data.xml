@@ -7,8 +7,19 @@
 		<dbms type="mysql" />
 	</preConditions>
 
-	<include file="operator.data.xml" relativeToChangelogFile="true" />
-	<include file="player.data.xml" relativeToChangelogFile="true" />
+	<changeSet id="1" author="steven">
+		<insert tableName="players">
+			<column name="id" value="1" />
+			<column name="operator_id" value="3" />
+			<column name="name" value="steven" />
+			<column name="balance" value="1000" />
+		</insert>
 
-
+		<insert tableName="players">
+			<column name="id" value="2" />
+			<column name="operator_id" value="2" />
+			<column name="name" value="bill" />
+			<column name="balance" value="2000" />
+		</insert>
+	</changeSet>
 </databaseChangeLog>

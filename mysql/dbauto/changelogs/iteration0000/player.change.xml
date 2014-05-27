@@ -15,7 +15,7 @@
 			<column name="operator_id" type="int">
 				<constraints nullable="false" />
 			</column>
-			<column name="name" type="int">
+			<column name="name" type="varchar(100)">
 				<constraints nullable="false" />
 			</column>
 			<column name="balance" type="decimal(32,2)" defaultValue="0">
@@ -24,11 +24,9 @@
 			<column name="status" type="int" defaultValue="0">
 				<constraints nullable="false" />
 			</column>
-			<column name="create_time" type="bigint">
+			<column name="create_time" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP">
 				<constraints nullable="false" />
 			</column>
-			<column name="last_login_ip" type="varchar(100)" />
-			<column name="last_login_time" type="bigint" />
 		</createTable>
 		<modifySql dbms="mysql">
 			<append value=" engine innodb" />
