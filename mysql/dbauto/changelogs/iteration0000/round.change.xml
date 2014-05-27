@@ -30,6 +30,7 @@
 			<column name="create_time" type="bigint">
 				<constraints nullable="false" />
 			</column>
+			<column name="stop_time" type="bigint" />
 			<column name="cards" type="varchar(100)" />
 			<column name="finish_time" type="bigint" />
 		</createTable>

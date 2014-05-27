@@ -12,10 +12,10 @@ insert_round(Conn,#db_new_round_req{shoe_index=ShoeIndex,round_index=RoundIndex,
 	Result=emysql:execute(Conn,stmt_insert_round,[ShoeIndex,RoundIndex,DealerId,DealerTableId,CreateTime,Status]),
 	emysql:insert_id(Result).
 
-update_round(Conn,Id)->
-	Sql = <<"update rounds set status=2 where id = ? and status=1">>,
+stop_round(Conn,Id,StopTime)->
+	Sql = <<"update rounds set status=2,stop_time=? where id = ? and status=1">>,
 	emysql:prepare(stmt_update_round1,Sql),
-	Result=emysql:execute(Conn,stmt_update_round1,[Id]),
+	Result=emysql:execute(Conn,stmt_update_round1,[StopTime,Id]),
 	emysql:affected_rows(Result).
 
 
