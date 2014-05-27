@@ -29,7 +29,7 @@ init({Server,EventBus,PlayerTableId,User=#user{id=UserId}})->
 handle_call(_Event={bet,Cats,Amounts},_From,State=#state{server=Server,user=User,player_table_id=PlayerTableId})->
 	case dragontiger_game_api:try_bet(Server,Cats,Amounts) of
 		{ok,Tag,RoundId}->
-			Bet=dragontiger_player_mod:create_bet_req(RoundId,User#user.id,PlayerTableId,Cats,Amounts),
+			Bet=casino_bets:create_bet_req(RoundId,User#user.id,PlayerTableId,Cats,Amounts),
 			mysql_db:user_bet(?CASINO_DB,Bet),
 			{reply,ok,State};
 		_ ->
