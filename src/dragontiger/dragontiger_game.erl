@@ -127,7 +127,6 @@ handle_info(tick,betting,State=#state{ticker=Ticker,table=Table,eventbus=EventBu
 	case Ticker of
 		{_,0} ->
 			gen_event:notify(EventBus,{tick,Table,0}),
-			NewState=State#state{ticker=undefined},
 			{next_state,betting,NewState};
 		{_,Value}->
 			gen_event:notify(EventBus,{tick,Table,Value}),
