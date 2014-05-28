@@ -8,7 +8,7 @@
 -record(state,{player_table_id,user,server,eventbus}).
 
 -define(GAME_PLAYER_MOD,dragontiger_player_mod).
--define(CASINO_DB,mysql_casino_master_db).
+-define(CASINO_DB,mysql_casino_master).
 
 
 start_link(Server,EventBus,PlayerTableId,User) when is_pid(Server) andalso is_pid(EventBus) andalso is_integer(PlayerTableId) andalso is_record(User,user)->

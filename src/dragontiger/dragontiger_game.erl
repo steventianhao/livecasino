@@ -15,7 +15,7 @@
 
 -define(GAME_ROUND,dragontiger_round).
 -define(GAME_DEALER_MOD,dragontiger_dealer_mod).
--define(CASINO_DB,mysql_casino_master_db).
+-define(CASINO_DB,mysql_casino_master).
 
 -record(state,{dealer,table,ticker,cards,countdown,round,eventbus}).
 

@@ -1,4 +1,4 @@
--module(mysql_casino_master_db).
+-module(mysql_casino_master).
 -export([add_db_pool/0,get_db_pool/0]).
 
 add_db_pool()->
