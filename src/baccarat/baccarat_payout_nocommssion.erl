@@ -3,35 +3,35 @@
 -export([ratio/1,rewards/1]).
 
 ratio(banker)->
-	{2000,2};
+	{1100,2};
 ratio(player)-> 
-	{2001,2};
+	{1101,2};
 ratio(tie) -> 
-	{2002,9};
+	{1102,9};
 ratio(banker_pair) -> 
-	{2003,12};
+	{1103,12};
 ratio(player_pair) ->
-	{2004,12};
+	{1104,12};
 ratio(banker_n8)->
-	{2005,9};
+	{1105,9};
 ratio(banker_n9)->
-	{2006,9};
+	{1106,9};
 ratio(player_n8)->
-	{2007,9};
+	{1107,9};
 ratio(player_n9)->
-	{2008,9};
+	{1108,9};
 ratio(big)->
-	{2009,1.53};
+	{1109,1.53};
 ratio(small)->
-	{2010,2.45};
+	{1110,2.45};
 
 ratio(banker_tie)->
-	{2011,1};
+	{1111,1};
 ratio(player_tie) ->
-	{2012,1};
+	{1112,1};
 
 ratio(banker6)->
-	{2013,1.5}.
+	{1113,1.5}.
 
 
 rewards(banker)->

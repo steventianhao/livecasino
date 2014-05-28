@@ -118,7 +118,7 @@
 	<changeSet id="2" author="steven">
 
 		<insert tableName="bet_rewards">
-			<column name="id" value="2000" />
+			<column name="id" value="1100" />
 			<column name="payout_id" value="101" />
 			<column name="reward_name" value="banker" />
 			<column name="bet_type_id" value="1000" />
@@ -126,7 +126,7 @@
 		</insert>
 		
 		<insert tableName="bet_rewards">
-			<column name="id" value="2001" />
+			<column name="id" value="1101" />
 			<column name="payout_id" value="101" />
 			<column name="reward_name" value="player" />
 			<column name="bet_type_id" value="1001" />
@@ -134,7 +134,7 @@
 		</insert>
 		
 		<insert tableName="bet_rewards">
-			<column name="id" value="2002" />
+			<column name="id" value="1102" />
 			<column name="payout_id" value="101" />
 			<column name="reward_name" value="tie" />
 			<column name="bet_type_id" value="1002" />
@@ -142,7 +142,7 @@
 		</insert>
 		
 		<insert tableName="bet_rewards">
-			<column name="id" value="2003" />
+			<column name="id" value="1103" />
 			<column name="payout_id" value="101" />
 			<column name="reward_name" value="banker_pair" />
 			<column name="bet_type_id" value="1003" />
@@ -150,7 +150,7 @@
 		</insert>
 		
 		<insert tableName="bet_rewards">
-			<column name="id" value="2004" />
+			<column name="id" value="1104" />
 			<column name="payout_id" value="101" />
 			<column name="reward_name" value="player_pair" />
 			<column name="bet_type_id" value="1004" />
@@ -158,7 +158,7 @@
 		</insert>
 		
 		<insert tableName="bet_rewards">
-			<column name="id" value="2005" />
+			<column name="id" value="1105" />
 			<column name="payout_id" value="101" />
 			<column name="reward_name" value="banker_n8" />
 			<column name="bet_type_id" value="1005" />
@@ -166,7 +166,7 @@
 		</insert>
 		
 		<insert tableName="bet_rewards">
-			<column name="id" value="2006" />
+			<column name="id" value="1106" />
 			<column name="payout_id" value="101" />
 			<column name="reward_name" value="banker_n9" />
 			<column name="bet_type_id" value="1006" />
@@ -174,7 +174,7 @@
 		</insert>
 		
 		<insert tableName="bet_rewards">
-			<column name="id" value="2007" />
+			<column name="id" value="1107" />
 			<column name="payout_id" value="101" />
 			<column name="reward_name" value="player_n8" />
 			<column name="bet_type_id" value="1007" />
@@ -182,7 +182,7 @@
 		</insert>
 		
 		<insert tableName="bet_rewards">
-			<column name="id" value="2008" />
+			<column name="id" value="1108" />
 			<column name="payout_id" value="101" />
 			<column name="reward_name" value="player_n9" />
 			<column name="bet_type_id" value="1008" />
@@ -190,7 +190,7 @@
 		</insert>
 		
 		<insert tableName="bet_rewards">
-			<column name="id" value="2009" />
+			<column name="id" value="1109" />
 			<column name="payout_id" value="101" />
 			<column name="reward_name" value="big" />
 			<column name="bet_type_id" value="1009" />
@@ -198,7 +198,7 @@
 		</insert>
 		
 		<insert tableName="bet_rewards">
-			<column name="id" value="2010" />
+			<column name="id" value="1110" />
 			<column name="payout_id" value="101" />
 			<column name="reward_name" value="small" />
 			<column name="bet_type_id" value="1010" />
@@ -206,7 +206,7 @@
 		</insert>
 		
 		<insert tableName="bet_rewards">
-			<column name="id" value="2011" />
+			<column name="id" value="1111" />
 			<column name="payout_id" value="101" />
 			<column name="reward_name" value="banker_tie" />
 			<column name="bet_type_id" value="1000" />
@@ -214,7 +214,7 @@
 		</insert>
 		
 		<insert tableName="bet_rewards">
-			<column name="id" value="2012" />
+			<column name="id" value="1112" />
 			<column name="payout_id" value="101" />
 			<column name="reward_name" value="player_tie" />
 			<column name="bet_type_id" value="1001" />
@@ -222,7 +222,7 @@
 		</insert>
 		
 		<insert tableName="bet_rewards">
-			<column name="id" value="2013" />
+			<column name="id" value="1113" />
 			<column name="payout_id" value="101" />
 			<column name="reward_name" value="banker6" />
 			<column name="bet_type_id" value="1000" />
