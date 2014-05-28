@@ -22,8 +22,5 @@
 
 -define(ALL_BET_CATS,[?BET_CAT_DRAGON,?BET_CAT_TIGER,?BET_CAT_TIE,?BET_CAT_DRAGON_ODD,?BET_CAT_TIGER_ODD,?BET_CAT_DRAGON_EVEN,?BET_CAT_TIGER_EVEN]).
 
-all_bet_cats()->
-	sets:from_list(?ALL_BET_CATS).
-
 is_valid_bets(Cats,Amounts)->
-	casino_bets:is_valid_bets(Cats,Amounts,all_bet_cats()).
+	casino_bets:is_valid_bets(Cats,Amounts,?ALL_BET_CATS).
