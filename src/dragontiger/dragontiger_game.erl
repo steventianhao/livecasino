@@ -61,9 +61,9 @@ betting(Event={try_bet,_Cats,_Amounts},{_Pid,Tag},State=#state{round=Round})->
 betting(stop_bet,{Pid,_},State=#state{ticker={TRef,_},dealer={Pid,_Dealer},round=Round,table=Table,eventbus=EventBus})->
 	lager:info("betting#stop_bet,state ~p",[State]),
 	erlang:cancel_timer(TRef),
+	NewState=State#state{ticker=undefined},
 	Mills=casino_utils:mills(),
 	1=mysql_db:update_round(?CASINO_DB,Round#round.id,Mills),
-	NewState=State#state{ticker=undefined},
 	gen_event:notify(EventBus,{stop_bet,Table}),
 	{reply,ok,dealing,NewState};
 
@@ -128,7 +128,7 @@ handle_info(tick,betting,State=#state{ticker=Ticker,table=Table,eventbus=EventBu
 		{_,0} ->
 			gen_event:notify(EventBus,{tick,Table,0}),
 			NewState=State#state{ticker=undefined},
-			{next_state,dealing,NewState};
+			{next_state,betting,NewState};
 		{_,Value}->
 			gen_event:notify(EventBus,{tick,Table,Value}),
 			TRef=erlang:send_after(1000,self(),tick),
