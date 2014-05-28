@@ -127,7 +127,7 @@ handle_info(tick,betting,State=#state{ticker=Ticker,table=Table,eventbus=EventBu
 	case Ticker of
 		{_,0} ->
 			gen_event:notify(EventBus,{tick,Table,0}),
-			{next_state,betting,NewState};
+			{next_state,betting,State};
 		{_,Value}->
 			gen_event:notify(EventBus,{tick,Table,Value}),
 			TRef=erlang:send_after(1000,self(),tick),
