@@ -21,7 +21,7 @@ is_valid_bets(_,_,_)->
 	false.
 
 create_bet_req(RoundId,UserId,TableId,Cats,Amounts)->
-	Cstr = string:join(Cats,","),
-	Astr = string:join(Amounts,","),	
+	Cstr = string:join([integer_to_list(C) || C <-Cats],","),
+	Astr = string:join([float_to_list(A,[{decimals,2}]) || A <-Amounts],","),	
 	Total = lists:sum(Amounts),
  	#db_bet_req{round_id=RoundId,player_id=UserId,player_table_id=TableId,bet_cats=Cstr,bet_amounts=Astr,total_amount=Total}.
