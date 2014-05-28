@@ -97,10 +97,8 @@ dealing(commit,{Pid,_},State=#state{cards=Cards,dealer={Pid,_},round=Round,event
 	%%check the cards are valid in accordence with the game rule
 	case ?GAME_DEALER_MOD:validate(Cards) of
 		true->
-			NewRound=dragontiger_round:set_done(Round,Cards),
-			NewState=State#state{round=NewRound},
 			gen_event:notify(EventBus,{commit,Round,Cards}),				
-			{reply,ok,stopped,NewState};
+			{reply,ok,stopped,State};
 		false->
 			{reply,error,dealing,State}
 	end;

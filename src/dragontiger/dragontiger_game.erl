@@ -35,7 +35,7 @@ stopped(start_bet,{Pid,_},State=#state{dealer={Pid,_Dealer},round=undefined})->
 
 stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer={Pid,Dealer},round=Round,table=Table,eventbus=EventBus})->
 	lager:info("stopped#start_bet,state ~p",[State]),
-	NewRound=?GAME_ROUND:set_betting(Round),
+	NewRound=?GAME_ROUND:new_round(Round),
 	%%-record(round,{id,dealer,shoeIndex,roundIndex,cards,createTime,finishTime,status}).
 	#round{createTime={Mills,_},roundIndex=RoundIndex,shoeIndex=ShoeIndex}=NewRound,
 	DealerId=Dealer#dealer.id,
@@ -106,13 +106,11 @@ dealing(commit,{Pid,_},State=#state{cards=Cards,dealer={Pid,_},round=Round,table
 	%%check the cards are valid in accordence with the game rule
 	case baccarat_dealer_mod:validate(Cards) of
 		true->
-			NewRound=?GAME_ROUND:set_done(Round,Cards),
 			Mills=casino_utils:mills(),
 			Cstr=?GAME_DEALER_MOD:to_string(Cards),
 			1=mysql_db:update_round(?CASINO_DB,Round#round.id,Cstr,Mills),
-			NewState=State#state{round=NewRound},
 			gen_event:notify(EventBus,{commit,Table,Round,Cards}),				
-			{reply,ok,stopped,NewState};
+			{reply,ok,stopped,State};
 		false->
 			{reply,error,dealing,State}
 	end;

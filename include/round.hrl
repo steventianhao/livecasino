@@ -6,6 +6,6 @@
 -define(DEALING,2).
 -define(DONE,3).
 
--record(round,{id,shoeIndex,roundIndex,cards,createTime}).
+-record(round,{id,shoeIndex,roundIndex,createTime}).
 
 -endif.
