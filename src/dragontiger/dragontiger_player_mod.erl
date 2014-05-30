@@ -1,26 +1,34 @@
 -module(dragontiger_player_mod).
--export([is_valid_bets/2]).
+-export([is_valid_bets/2,payout/2]).
 
-
--define(BET_CAT_DRAGON,2000).
--define(BET_CAT_TIGER,2001).
--define(BET_CAT_TIE,2002).
--define(BET_CAT_DRAGON_ODD,2003).
--define(BET_CAT_TIGER_ODD,2004).
--define(BET_CAT_DRAGON_EVEN,2005).
--define(BET_CAT_TIGER_EVEN,2006).
-
--define(BET_CATS_MAP,#{
-	?BET_CAT_DRAGON => dragon,
-	?BET_CAT_TIGER => tiger,
-	?BET_CAT_TIE => tie,
-	?BET_CAT_DRAGON_ODD => dragon_odd,
-	?BET_CAT_TIGER_ODD => tiger_odd,
-	?BET_CAT_DRAGON_EVEN => dragon_even,
-	?BET_CAT_TIGER_EVEN => tiger_even
-	}).
-
--define(ALL_BET_CATS,[?BET_CAT_DRAGON,?BET_CAT_TIGER,?BET_CAT_TIE,?BET_CAT_DRAGON_ODD,?BET_CAT_TIGER_ODD,?BET_CAT_DRAGON_EVEN,?BET_CAT_TIGER_EVEN]).
+-include("dragontiger.hrl").
 
 is_valid_bets(Cats,Amounts)->
 	casino_bets:is_valid_bets(Cats,Amounts,?ALL_BET_CATS).
+
+is_odd(7)->
+	false;
+is_odd(V)->
+	V rem 2 ==1.
+is_even(V)->
+	V rem 2 ==0.
+
+add_reward(Rewards,Pass,Result) when Pass==true ->
+	[Result | Rewards];
+add_reward(Rewards,_,_)->
+	Rewards.
+
+
+payout(#{?DRAGON_POS := #card{value=Dv}, ?TIGER_POS := #card{value=Tv}},dragontiger)->
+	R1=if
+		Dv == Tv -> 
+			[tie,tiger_tie,dragon_tie];
+		Dv > Tv ->
+			[dragon];
+		Dv < Tv ->
+			[tiger]
+	end,
+	R2=add_reward(R1,is_odd(Dv),dragon_odd),
+	R3=add_reward(R2,is_even(Dv),dragon_even),
+	R4=add_reward(R3,is_odd(Tv),tiger_odd),
+	add_reward(R4,is_even(Tv),tiger_even).
