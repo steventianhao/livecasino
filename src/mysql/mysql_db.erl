@@ -37,6 +37,8 @@ user_bet(Conn,#db_bet_req{round_id=RoundId,player_id=PlayerId,player_table_id=Pl
 		#ok_packet{} ->
 			{error,insufficient_balance};
 		[R=#result_packet{},#ok_packet{}] ->
-			{ok,emysql:as_record(R,db_bet_res,record_info(fields,db_bet_res))}
+			Res=emysql:as_record(R,db_bet_res,record_info(fields,db_bet_res)),
+			#db_bet_res{bet_bundle_id=BetBundleId,balance_after=BalanceAfter}=Res,
+			{ok,{BetBundleId,BalanceAfter}}
 	end.
 
