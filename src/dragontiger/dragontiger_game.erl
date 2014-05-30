@@ -108,7 +108,7 @@ dealing(commit,{Pid,_},State=#state{cards=Cards,dealer={Pid,_},round=Round,table
 			Mills=casino_utils:mills(),
 			Cstr=?GAME_DEALER_MOD:to_string(Cards),
 			1=mysql_db:update_round(?CASINO_DB,Round#round.id,Cstr,Mills),
-			gen_event:notify(EventBus,{commit,{Table,Round,Cards}}),				
+			gen_event:notify(EventBus,{commit,{Table,Cards}}),				
 			{reply,ok,stopped,State};
 		false->
 			{reply,error,dealing,State}
