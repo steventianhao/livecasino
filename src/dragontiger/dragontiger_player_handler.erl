@@ -28,16 +28,16 @@ dealer_to_json(Dealer) when is_record(Dealer,dealer)->
 init(Pid)->
 	{ok,#state{pid=Pid}}.
 
-dealer_event(Kind,Dealer,Pid)->
-	M=maps:merge(#{kind=>Kind},dealer_to_json(Dealer)),
+dealer_event(Kind,Table,Dealer,Pid)->
+	M=maps:merge(#{kind=>Kind,table=>Table},dealer_to_json(Dealer)),
 	Pid ! {json,jsx:encode(M)}.
 	
-handle_event({dealer_connect,Dealer},State=#state{pid=Pid})->
-	dealer_event(dealer_connect,Dealer,Pid),
+handle_event({dealer_connect,{Table,Dealer}},State=#state{pid=Pid})->
+	dealer_event(dealer_connect,Table,Dealer,Pid),
 	{ok,State};
 
-handle_event({dealer_disconnect,Dealer},State=#state{pid=Pid})->
-	dealer_event(dealer_disconnect,Dealer,Pid),
+handle_event({dealer_disconnect,{Table,Dealer}},State=#state{pid=Pid})->
+	dealer_event(dealer_disconnect,Table,Dealer,Pid),
 	{ok,State};
 
 handle_event(Event,State=#state{pid=Pid}) ->

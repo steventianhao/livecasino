@@ -22,11 +22,10 @@
 init({EventBus,Table,Countdown})->
 	{ok,stopped,#state{countdown=Countdown,table=Table,eventbus=EventBus}}.
 
-stopped(new_shoe,{Pid,_},State=#state{dealer={Pid,_},round=Round,table=Table,eventbus=EventBus})->
+stopped(new_shoe,{Pid,_},State=#state{dealer={Pid,_},round=Round})->
 	lager:info("stopped#new_shoe,state ~p",[State]),
 	NewRound=?GAME_ROUND:new_shoe(Round),
 	NewState=State#state{round=NewRound},
-	gen_event:notify(EventBus,{new_shoe,Table,NewRound}),
 	{reply,ok,stopped,NewState};
 
 stopped(start_bet,{Pid,_},State=#state{dealer={Pid,_Dealer},round=undefined})->
@@ -44,7 +43,7 @@ stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer={Pid,Dealer},r
 	NewRound2=NewRound#round{id=NewRoundId},
 	TRef=erlang:send_after(1000,self(),tick),
 	NewState=State#state{ticker={TRef,Countdown},cards=#{},round=NewRound2},
-	gen_event:notify(EventBus,{start_bet,Table,NewRound,Countdown}),
+	gen_event:notify(EventBus,{start_bet,{Table,NewRound,Countdown}}),
 	{reply,ok,betting,NewState};
 
 stopped(Event,_From,State)->
@@ -71,11 +70,11 @@ betting(Event,_From,State)->
 	lager:error("unexpected event when betting, event ~p,state ~p",[Event,State]),
 	{reply,unexpected,betting,State}.
 
-dealing(Event={deal,Pos,Card},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},eventbus=EventBus})->
+dealing(Event={deal,Pos,Card},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,eventbus=EventBus})->
 	lager:info("dealing#deal, Event ~p, State ~p",[Event,State]),
 	NewCards=?GAME_DEALER_MOD:put(Pos,Card,Cards),
 	NewState=State#state{cards=NewCards},
-	gen_event:notify(EventBus,{deal,Pos,Card}),
+	gen_event:notify(EventBus,{deal,{Table,Pos,Card}}),
 	{reply,ok,dealing,NewState};
 		
 
@@ -85,7 +84,7 @@ dealing(Event={scan,Card},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=
 		{error,_} ->
 			{reply,error,dealing,State};
 		{Status,Pos,NewCards}->
-			gen_event:notify(EventBus,{deal,Table,Pos,Card}),
+			gen_event:notify(EventBus,{deal,{Table,Pos,Card}}),
 			{reply,{Status,Pos},dealing,State#state{cards=NewCards}}
 	end;
 
@@ -95,7 +94,7 @@ dealing(Event={clear,Pos},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=
 	case ?GAME_DEALER_MOD:remove(Pos,Cards) of
 		{ok,NewCards} ->
 			NewState=State#state{cards=NewCards},
-			gen_event:notify(EventBus,{clear,Table,Pos}),
+			gen_event:notify(EventBus,{clear,{Table,Pos}}),
 			{reply,ok,dealing,NewState};
 		error ->
 			{reply,error,dealing,State}
@@ -109,7 +108,7 @@ dealing(commit,{Pid,_},State=#state{cards=Cards,dealer={Pid,_},round=Round,table
 			Mills=casino_utils:mills(),
 			Cstr=?GAME_DEALER_MOD:to_string(Cards),
 			1=mysql_db:update_round(?CASINO_DB,Round#round.id,Cstr,Mills),
-			gen_event:notify(EventBus,{commit,Table,Round,Cards}),				
+			gen_event:notify(EventBus,{commit,{Table,Round,Cards}}),				
 			{reply,ok,stopped,State};
 		false->
 			{reply,error,dealing,State}
@@ -126,10 +125,10 @@ handle_info(tick,betting,State=#state{ticker=Ticker,table=Table,eventbus=EventBu
 	lager:info("handle tick when betting, state ~p",[State]),
 	case Ticker of
 		{_,0} ->
-			gen_event:notify(EventBus,{tick,Table,0}),
+			gen_event:notify(EventBus,{tick,{Table,0}}),
 			{next_state,betting,State};
 		{_,Value}->
-			gen_event:notify(EventBus,{tick,Table,Value}),
+			gen_event:notify(EventBus,{tick,{Table,Value}}),
 			TRef=erlang:send_after(1000,self(),tick),
 			NewState=State#state{ticker={TRef,Value-1}},
 			{next_state,betting,NewState}
@@ -137,7 +136,7 @@ handle_info(tick,betting,State=#state{ticker=Ticker,table=Table,eventbus=EventBu
 handle_info(Info={'DOWN',_Ref,process,Pid,_},StateName,State=#state{dealer={Pid,Dealer},table=Table,eventbus=EventBus})->
 	lager:error("handle dealer process DOWN, info ~p,stateName ~p,state ~p",[Info,StateName,State]),
 	NewState=State#state{dealer=undefined},
-	gen_event:notify(EventBus,{dealer_disconnect,Table,Dealer}),
+	gen_event:notify(EventBus,{dealer_disconnect,{Table,Dealer}}),
 	{next_state,StateName,NewState};
 	
 handle_info(Info,StateName,State)->
@@ -146,7 +145,7 @@ handle_info(Info,StateName,State)->
 
 handle_event(Event={dealer_disconnect,Pid},StateName,State=#state{dealer={Pid,Dealer},table=Table,eventbus=EventBus})->
 	lager:info("dealer_disconnect handle_event, event ~p,stateName ~p,state ~p",[Event,StateName,State]),
-	gen_event:notify(EventBus,{dealer_disconnect,Table,Dealer}),
+	gen_event:notify(EventBus,{dealer_disconnect,{Table,Dealer}}),
 	NewState=State#state{dealer=undefined},
 	{next_state,StateName,NewState};
 
@@ -167,7 +166,7 @@ handle_sync_event(Event={dealer_connect,Dealer},From={Pid,_},StateName,State=#st
 	lager:info("dealer_connected, event ~p,from ~p,stateName ~p,state ~p",[Event,From,StateName,State]),
 	NewState=State#state{dealer={Pid,Dealer}},
 	erlang:monitor(process,Pid),
-	gen_event:notify(EventBus,{dealer_connect,Table,Dealer}),
+	gen_event:notify(EventBus,{dealer_connect,{Table,Dealer}}),
 	{reply,ok,StateName,NewState};
 
 handle_sync_event(Event={dealer_connect,_Dealer},From,StateName,State)->
