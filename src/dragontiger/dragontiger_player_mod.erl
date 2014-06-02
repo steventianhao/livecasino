@@ -19,7 +19,7 @@ add_reward(Rewards,_,_)->
 	Rewards.
 
 
-payout(#{?DRAGON_POS := #card{value=Dv}, ?TIGER_POS := #card{value=Tv}},dragontiger)->
+reward(#{?DRAGON_POS := #card{value=Dv}, ?TIGER_POS := #card{value=Tv}},dragontiger)->
 	R1=if
 		Dv == Tv -> 
 			[tie,tiger_tie,dragon_tie];
@@ -32,3 +32,8 @@ payout(#{?DRAGON_POS := #card{value=Dv}, ?TIGER_POS := #card{value=Tv}},dragonti
 	R3=add_reward(R2,is_even(Dv),dragon_even),
 	R4=add_reward(R3,is_odd(Tv),tiger_odd),
 	add_reward(R4,is_even(Tv),tiger_even).
+
+payout(Cards=#{?DRAGON_POS := #card{}, ?TIGER_POS := #card{}},dragontiger)->
+	L=reward(Cards,dragontiger),
+	Fun=fun(E)->dragontiger_payout_dragontiger:ratio(E) end,
+	maps:from_list(lists:map(Fun,L)).
