@@ -22,17 +22,19 @@ is_valid_bets2_test()->
 insert_bets_test()->
 	Table=ets:new(bets,[set]),
 	casino_bets:insert_bets(Table,1234,[1,2,3,4],[1.1,2.2,3.3,4.4]),
-	R=ets:tab2list(Table),
-	?debugFmt("records in ets ~p",[R]),
+	Result=ets:tab2list(Table),
+	?debugFmt("insert_bets_test,records in ets ~p",[Result]),
 	ets:delete(Table),
-	?assert(true).
+	?assert(length(Result)==4),
+	?assert(lists:all(fun({{_BundleId,_C},_A,R})->R==0 end,Result)).
 
 payout_bets_test()->
 	RatioMap=#{2000 => 2,2004 => 2,2005 => 2},
 	Table=ets:new(bets,[set]),
 	casino_bets:insert_bets(Table,1234,[2000,2001,2002,2003],[1.1,2.2,3.3,4.4]),
 	casino_bets:payout_bets(Table,RatioMap),
-	R=ets:tab2list(Table),
-	?debugFmt("records in ets ~p",[R]),
+	Result=ets:tab2list(Table),
+	?debugFmt("payout_bets_test,records in ets ~p",[Result]),
+	M=maps:from_list([{C,R}||{{_BundleId,C},_A,R} <-Result]),
 	ets:delete(Table),
-	?assert(true).	
+	?assertMatch(#{2000:=2,2001:=0,2002:=0,2003:=0},M).	
