@@ -1,5 +1,5 @@
 -module(casino_bets).
--export([is_valid_bets/3,create_bet_req/5,insert_bets/4,payout_bets/2]).
+-export([is_valid_bets/3,create_bet_req/5,insert_bets/4,payout_bets/2,payout_bundles/1,payout_total/1]).
 -include("db.hrl").
 
 is_valid_bet_cats(Cats,AllBetCats)->
@@ -43,3 +43,20 @@ payout_bet(Key={_,Cat},BetEts,RatioMap)->
 	payout_bet(ets:next(BetEts,Key),BetEts,RatioMap).
 payout_bets(BetEts,RatioMap)->
 	payout_bet(ets:first(BetEts),BetEts,RatioMap).
+
+
+payout_bundles(BetEts)->
+	Fun = fun({{_BetBundleId,_C},_A,0},Acc)->
+					Acc;
+			 ({{BetBundleId,_C},A,R},Acc)->
+			 	case maps:find(BetBundleId,Acc) of
+			 		{ok,Total}->
+			 			maps:put(BetBundleId,A*R+Total,Acc);
+			 		error->
+			 			maps:put(BetBundleId,A*R,Acc)
+			 	end
+	end,
+	ets:foldl(Fun,#{},BetEts).
+
+payout_total(PayoutBundles)->
+	maps:fold(fun(_K,V,Acc)->Acc+V end,0,PayoutBundles).

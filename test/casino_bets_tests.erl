@@ -37,4 +37,20 @@ payout_bets_test()->
 	?debugFmt("payout_bets_test,records in ets ~p",[Result]),
 	M=maps:from_list([{C,R}||{{_BundleId,C},_A,R} <-Result]),
 	ets:delete(Table),
-	?assertMatch(#{2000:=2,2001:=0,2002:=0,2003:=0},M).	
+	?assertMatch(#{2000:=2,2001:=0,2002:=0,2003:=0},M).
+
+payout_bundles_test()->
+	RatioMap=#{2000 => 2,2004 => 2,2005 => 2},
+	Table=ets:new(bets,[set]),
+	casino_bets:insert_bets(Table,1234,[2000,2001,2002,2003],[1.1,2.2,3.3,4.4]),
+	casino_bets:insert_bets(Table,2234,[2000,2004,2005,2003],[1.1,2.2,3.3,4.4]),
+	casino_bets:payout_bets(Table,RatioMap),
+	?debugFmt("payout_bundles_test,records in ets ~p",[ets:tab2list(Table)]),
+	M=casino_bets:payout_bundles(Table),
+	?debugFmt("payout_bundles_test,payouts by bundle ~p",[M]),
+	ets:delete(Table),
+	?assertMatch(#{1234:=2.2,2234:=13.2},M).
+
+payout_total_test()->
+	R=casino_bets:payout_total(#{1234 => 2.2,2234 => 13.2}),
+	?assertEqual(float_to_list(R,[{decimals,2},compact]),"15.4").
