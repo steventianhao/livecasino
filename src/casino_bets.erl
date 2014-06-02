@@ -1,5 +1,5 @@
 -module(casino_bets).
--export([is_valid_bets/3,create_bet_req/5]).
+-export([is_valid_bets/3,create_bet_req/5,insert_bets/4,payout_bets/2]).
 -include("db.hrl").
 
 is_valid_bet_cats(Cats,AllBetCats)->
@@ -25,3 +25,21 @@ create_bet_req(RoundId,UserId,TableId,Cats,Amounts)->
 	Astr = string:join([float_to_list(A,[{decimals,2}]) || A <-Amounts],","),	
 	Total = lists:sum(Amounts),
  	#db_bet_req{round_id=RoundId,player_id=UserId,player_table_id=TableId,bet_cats=Cstr,bet_amounts=Astr,total_amount=Total}.
+
+
+insert_bets(BetEts,BetBundleId,Cats,Amounts)->
+	Ts=lists:zipwith(fun(C,A)->{{BetBundleId,C},A,0} end, Cats, Amounts),
+	ets:insert(BetEts,Ts).
+
+payout_bet('$end_of_table',_BetEts,_RatioMap)->
+	ok;
+payout_bet(Key={_,Cat},BetEts,RatioMap)->
+	case maps:find(Cat,RatioMap) of
+		{ok,Ratio}-> 
+			ets:update_element(BetEts,Key,{3,Ratio});
+		error ->
+			ok
+	end,	
+	payout_bet(ets:next(BetEts,Key),BetEts,RatioMap).
+payout_bets(BetEts,RatioMap)->
+	payout_bet(ets:first(BetEts),BetEts,RatioMap).
