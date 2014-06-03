@@ -33,11 +33,7 @@
 			<![CDATA[
 			CREATE PROCEDURE bet(round_id BIGINT,player_id BIGINT,player_table_id INT,bet_cats TEXT, bet_amounts TEXT,total_amount DECIMAL(32,2)) 
 			MODIFIES SQL DATA
-			BEGIN
-				DECLARE ok INT DEFAULT 0;
-				DECLARE player_not_exist INT DEFAULT -1;
-				DECLARE insufficient_balance INT DEFAULT -2;
-				
+			BEGIN				
 				DECLARE bet_bundle_id BIGINT;
 				DECLARE balance_before DECIMAL(32,2);
 				DECLARE balance_after DECIMAL(32,2);
@@ -53,13 +49,13 @@
 						INSERT INTO bet_bundles (round_id,player_id,player_table_id,bet_cats,bet_amounts,total_amount,create_time) VALUES (round_id,player_id,player_table_id,bet_cats,bet_amounts,total_amount,now);
 						SELECT LAST_INSERT_ID() INTO bet_bundle_id;
 						UPDATE players SET balance=balance_after WHERE id=player_id;
-						SELECT ok as status,bet_bundle_id,balance_before,balance_after;
+						SELECT 0 as status,bet_bundle_id,balance_before,balance_after;
 					ELSE
 						SET fail=TRUE;
-						SELECT insufficient_balance as status,NULL as bet_bundle_id,balance_before,balance_after;
+						SELECT -2 as status,NULL as bet_bundle_id,balance_before,balance_after;
 					END IF;
 				ELSE
-					SELECT player_not_exist as status,NULL as bet_bundle_id,NULL as balance_before,NULL as balance_after;
+					SELECT -1 as status,NULL as bet_bundle_id,NULL as balance_before,NULL as balance_after;
 					SET fail=TRUE;
 				END IF;
 				IF fail THEN
@@ -81,8 +77,8 @@
 			CREATE PROCEDURE payout(round_id BIGINT,player_id BIGINT,player_table_id INT,bet_bundle_ids TEXT, payout_amounts TEXT,total_amount DECIMAL(32,2)) 
 			MODIFIES SQL DATA
 			BEGIN
-				DECLARE ok INT DEFAULT 0;
-				DECLARE player_not_exist INT DEFAULT -1;
+				
+				
 				
 				DECLARE payout_bundle_id BIGINT;
 				DECLARE balance_before DECIMAL(32,2);
@@ -98,9 +94,9 @@
 					INSERT INTO payout_bundles (round_id,player_id,player_table_id,bet_bundle_ids,payout_amounts,total_amount,create_time) VALUES (round_id,player_id,player_table_id,bet_bundle_ids,payout_amounts,total_amount,now);
 					SELECT LAST_INSERT_ID() INTO payout_bundle_id;
 					UPDATE players SET balance=balance_after WHERE id=player_id;
-					SELECT ok as status,payout_bundle_id,balance_before,balance_after;
+					SELECT 0 as status,payout_bundle_id,balance_before,balance_after;
 				ELSE
-					SELECT player_not_exist as status,NULL as payout_bundle_id,NULL as balance_before,NULL as balance_after;
+					SELECT -1 as status,NULL as payout_bundle_id,NULL as balance_before,NULL as balance_after;
 					SET fail=TRUE;
 				END IF;
 				IF fail THEN
