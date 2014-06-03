@@ -1,5 +1,6 @@
 -module(casino_bets).
--export([is_valid_bets/3,create_bet_req/5,insert_bets/4,payout_bets/2,payout_bundles/1,payout_total/1]).
+-export([is_valid_bets/3,insert_bets/4,payout_bets/2,payout_bundles/1,payout_total/1]).
+-export([create_bet_req/5,create_payout_req/5]).
 -include("db.hrl").
 
 is_valid_bet_cats(Cats,AllBetCats)->
@@ -26,6 +27,12 @@ create_bet_req(RoundId,UserId,TableId,Cats,Amounts)->
 	Total = lists:sum(Amounts),
  	#db_bet_req{round_id=RoundId,player_id=UserId,player_table_id=TableId,bet_cats=Cstr,bet_amounts=Astr,total_amount=Total}.
 
+create_payout_req(RoundId,UserId,TableId,Payouts,Total)->
+	{Bs,Ps}=lists:unzip(maps:to_list(Payouts)),
+	Bstr = string:join([integer_to_list(C) || C <-Bs],","),
+	Pstr = string:join([float_to_list(A,[{decimals,2}]) || A <-Ps],","),
+	#db_payout_req{round_id=RoundId,player_id=UserId,player_table_id=TableId,bet_bundle_ids=Bstr,payout_amounts=Pstr,total_amount=Total}.	
+	
 
 insert_bets(BetEts,BetBundleId,Cats,Amounts)->
 	Ts=lists:zipwith(fun(C,A)->{{BetBundleId,C},A,0} end, Cats, Amounts),

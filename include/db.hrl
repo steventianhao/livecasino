@@ -7,4 +7,6 @@
 -record(db_bet_req,{round_id,player_id,player_table_id,bet_cats,bet_amounts,total_amount}).
 -record(db_bet_res,{bet_bundle_id,balance_before,balance_after}).
 
+-record(db_payout_req,{round_id,player_id,player_table_id,bet_bundle_ids,payout_amounts,total_amount}).
+
 -endif.
