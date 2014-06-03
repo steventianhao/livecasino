@@ -39,8 +39,6 @@ user_bet(Conn,#db_bet_req{round_id=RoundId,player_id=PlayerId,player_table_id=Pl
 		0 ->
 			#db_bet_res{bet_bundle_id=BetBundleId,balance_after=BalanceAfter}=Res,
 			{ok,{BetBundleId,BalanceAfter}};
-		-1 ->
-			{error,player_not_exist};
 		-2 ->
 			{error,insufficient_balance}
 	end.
@@ -49,10 +47,8 @@ user_payout(Conn,#db_payout_req{round_id=RoundId,player_id=PlayerId,player_table
 	R=emysql:execute(Conn,"call payout(?,?,?,?,?,?)",[RoundId,PlayerId,PlayerTableId,BetBundleIds,PayoutAmounts,TotalAmount]),
 	[Result=#result_packet{},#ok_packet{}]=R,
 	[Res]=emysql:as_record(Result,db_payout_res,record_info(fields,db_payout_res)),
-	case Res#db_payout_res.status of
-		0 ->
+	if 
+		Res#db_payout_res.status==0 ->
 			#db_payout_res{payout_bundle_id=PayoutBundleId,balance_after=BalanceAfter}=Res,
-			{ok,{PayoutBundleId,BalanceAfter}};
-		-1 ->
-			{error,player_not_exist}
+			{ok,{PayoutBundleId,BalanceAfter}}
 	end.
