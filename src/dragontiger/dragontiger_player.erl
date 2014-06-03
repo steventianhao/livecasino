@@ -59,11 +59,12 @@ handle_info({commit,{_Table,Cards}},State=#state{bet_ets=BetEts})->
 	%%atom dragontiger should be the payout scheme, when create this process, should be passed in.
 	RatioMap=?GAME_PLAYER_MOD:payout(Cards,dragontiger),
 	casino_bets:payout_bets(BetEts,RatioMap),
-	%%foldl to caculate the payout for each bundle send to db to update 
-	%%foldl to caculate all, send to player for display.
+	Pb=casino_bets:payout_bundles(BetEts),
+	Pt=casino_bets:payout_total(Pb),
+	Payout=casino_bets:create_payout_req(RoundId,User#user.id,PlayerTableId,Pb,Pt),
+	mysql_db:user_payout(?CASINO_DB,Payout),
+	lager:info("payout by bundles ~p, payout total ~p",[Pb,Pt]),
 	{noreply,State};
-
-
 
 handle_info(Info,State)->
 	lager:error("module ~p, Info ~p, State ~p",[?MODULE,Info,State]),
