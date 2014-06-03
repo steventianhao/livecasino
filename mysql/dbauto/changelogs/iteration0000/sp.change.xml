@@ -12,65 +12,20 @@
 			DROP PROCEDURE IF EXISTS cat2amount;
 		</sql>
 		<createProcedure>
-			CREATE PROCEDURE cat2amount(INOUT cats TEXT, INOUT amounts TEXT, OUT cat INT, OUT amount DECIMAL(32,2)) 
+			CREATE PROCEDURE cat2amount(INOUT cats TEXT, INOUT amounts TEXT, OUT cat INT, OUT amount
+			DECIMAL(32,2))
 			DETERMINISTIC NO SQL
 			BEGIN
 			SET cat=substring_index(cats,',',1);
 			SET cats=substring(cats,locate(',',cats)+1);
-			SET amount=substring_index(amounts,',',1);
-			SET	amounts=substring(amounts,locate(',',amounts)+1);
+			SET
+			amount=substring_index(amounts,',',1);
+			SET amounts=substring(amounts,locate(',',amounts)+1);
 			END
 		</createProcedure>
 	</changeSet>
 
-	<changeSet id="3" author="steven">
-		<sql>
-			DROP PROCEDURE IF EXISTS bets;
-		</sql>
-		<createProcedure>
-		<![CDATA[
-			CREATE PROCEDURE bets(p_bundle_id BIGINT,p_round_id BIGINT,p_player_table_id INT,p_cats TEXT, p_amounts TEXT, p_size INT) 
-			MODIFIES SQL DATA
-			BEGIN				
-				DECLARE x INT DEFAULT 0;
-				DECLARE now BIGINT;
-				
-				DECLARE cats,amounts TEXT;
-				DECLARE cat INT;
-				DECLARE amount DECIMAL(32,2);
-				
-				DECLARE reward_id INT;
-				DECLARE return_ratio DECIMAL(32,2);
-				
-				DECLARE cursor_done INT DEFAULT 0;
-				DECLARE cur_bet_rewards CURSOR FOR 
-						SELECT br.id,br.return_ratio FROM bet_rewards as br, player_tables as pt 
-						WHERE pt.payout_id = br.payout_id AND pt.id=p_player_table_id and br.bet_type_id=cat;
-				DECLARE CONTINUE HANDLER FOR NOT FOUND SET cursor_done=1;
-				
-				SET now = UNIX_TIMESTAMP()*1000;
-				SET cats = p_cats;
-				SET amounts= p_amounts;
-				
-				WHILE x < p_size DO
-					SET x = x + 1;
-					CALL cat2amount(cats,amounts,cat,amount);
-					OPEN cur_bet_rewards;
-					rewards_loop:LOOP
-						FETCH cur_bet_rewards INTO reward_id,return_ratio;
-						IF cursor_done=1 THEN
-							LEAVE rewards_loop;
-						END IF;
-						INSERT INTO bets (bet_bundle_id,round_id,bet_reward_id,bet_amount,return_amount,create_time,hit) VALUES (p_bundle_id,p_round_id,reward_id,amount,amount*return_ratio,now,FALSE);
-					END LOOP rewards_loop;
-					CLOSE cur_bet_rewards;
-				END WHILE;
-			END
-		]]>
-		</createProcedure>
-	</changeSet>
-
-	<changeSet id="4" author="steven">
+	<changeSet id="2" author="steven">
 		<sql>
 			DROP PROCEDURE IF EXISTS bet;
 		</sql>
@@ -79,7 +34,10 @@
 			CREATE PROCEDURE bet(round_id BIGINT,player_id BIGINT,player_table_id INT,bet_cats TEXT, bet_amounts TEXT,total_amount DECIMAL(32,2)) 
 			MODIFIES SQL DATA
 			BEGIN
-				DECLARE action INT DEFAULT 1;
+				DECLARE ok INT DEFAULT 0;
+				DECLARE player_not_exist INT DEFAULT -1;
+				DECLARE insufficient_balance INT DEFAULT -2;
+				
 				DECLARE bet_bundle_id BIGINT;
 				DECLARE balance_before DECIMAL(32,2);
 				DECLARE balance_after DECIMAL(32,2);
@@ -95,9 +53,14 @@
 						INSERT INTO bet_bundles (round_id,player_id,player_table_id,bet_cats,bet_amounts,total_amount,create_time) VALUES (round_id,player_id,player_table_id,bet_cats,bet_amounts,total_amount,now);
 						SELECT LAST_INSERT_ID() INTO bet_bundle_id;
 						UPDATE players SET balance=balance_after WHERE id=player_id;
-						INSERT INTO bet_bundle_actions (bet_bundle_id,delta,create_time,action) VALUES (bet_bundle_id,-total_amount,now,action);
-						SELECT bet_bundle_id,balance_before,balance_after;
+						SELECT ok as status,bet_bundle_id,balance_before,balance_after;
+					ELSE
+						SET fail=TRUE;
+						SELECT insufficient_balance as status,NULL as bet_bundle_id,balance_before,balance_after;
 					END IF;
+				ELSE
+					SELECT player_not_exist as status,NULL as bet_bundle_id,NULL as balance_before,NULL as balance_after;
+					SET fail=TRUE;
 				END IF;
 				IF fail THEN
 					ROLLBACK;
@@ -108,50 +71,45 @@
 			]]>
 		</createProcedure>
 	</changeSet>
-	
-	<changeSet id="6" author="steven">
+
+	<changeSet id="3" author="steven">
 		<sql>
 			DROP PROCEDURE IF EXISTS payout;
 		</sql>
 		<createProcedure>
-			CREATE PROCEDURE payout(p_round_id BIGINT,p_rewards_id_csv TEXT)
+			<![CDATA[
+			CREATE PROCEDURE payout(round_id BIGINT,player_id BIGINT,player_table_id INT,bet_bundle_ids TEXT, payout_amounts TEXT,total_amount DECIMAL(32,2)) 
 			MODIFIES SQL DATA
 			BEGIN
-				DECLARE bet_bundle_payout_id BIGINT;
-				DECLARE player_id BIGINT;
-				DECLARE return_amount DECIMAL(32,2);
+				DECLARE ok INT DEFAULT 0;
+				DECLARE player_not_exist INT DEFAULT -1;
+				
+				DECLARE payout_bundle_id BIGINT;
 				DECLARE balance_before DECIMAL(32,2);
 				DECLARE balance_after DECIMAL(32,2);
-				
-				DECLARE cursor_done INT DEFAULT 0;
-				DECLARE cur_bet_payouts CURSOR FOR 
-						SELECT bbp.id, player_id, return_amount FROM bet_bundle_payouts bbp, bet_bundles bb WHERE bb.id=bbp.bet_bundle_id and bb.round_id=p_round_id ORDER BY bbp.id ASC;
-				DECLARE CONTINUE HANDLER FOR NOT FOUND SET cursor_done=1;
-				
-				SET @action = 2;
-				SET @now = UNIX_TIMESTAMP()*1000;
-				SET @round_id=p_round_id;
-				
-				SET @rewards_sql= CONCAT('UPDATE bets SET hit=true WHERE round_id=? and bet_reward_id in (',p_rewards_id_csv,')');
-				PREPARE update_bets_stmt FROM @rewards_sql;
-				EXECUTE update_bets_stmt USING @round_id;
-				
-				IF ROW_COUNT() > 0 THEN
-					INSERT INTO bet_bundle_payouts (bet_bundle_id,return_amount,create_time,action) SELECT bet_bundle_id, sum(return_amount),@now,@action FROM bets WHERE round_id=p_round_id AND hit=TRUE GROUP BY bet_bundle_id ORDER BY bet_bundle_id ASC;
-					OPEN cur_bet_payouts;
-					payouts_loop:LOOP
-						FETCH cur_bet_payouts INTO bet_bundle_payout_id,player_id,return_amount;
-						IF cursor_done=1 THEN
-							LEAVE payouts_loop;
-						END IF;
-						SELECT balance INTO balance_before FROM players where id=player_id;
-						SET balance_after =blance_before+return_amount;
-						INSERT INTO journals (player_id,delta,balance_before,balance_after,create_time,action,reference) VALUES (player_id,return_amount,balance_before,balance_after,@now,@action,bet_bundle_payout_id);
-						UPDATE players SET balance=balance_after WHERE id=player_id;
-					END LOOP payouts_loop;
-					CLOSE cur_bet_payouts;
+				DECLARE now BIGINT;
+				DECLARE fail BOOL DEFAULT FALSE;
+				DECLARE CONTINUE HANDLER FOR SQLEXCEPTION SET fail=TRUE;
+				START TRANSACTION;
+				SELECT balance INTO balance_before FROM players WHERE id=player_id FOR UPDATE;
+				IF ROW_COUNT() = 1 THEN
+					SET balance_after = balance_before + total_amount;
+					SET now = UNIX_TIMESTAMP()*1000;
+					INSERT INTO payout_bundles (round_id,player_id,player_table_id,bet_bundle_ids,payout_amounts,total_amount,create_time) VALUES (round_id,player_id,player_table_id,bet_bundle_ids,payout_amounts,total_amount,now);
+					SELECT LAST_INSERT_ID() INTO payout_bundle_id;
+					UPDATE players SET balance=balance_after WHERE id=player_id;
+					SELECT ok as status,payout_bundle_id,balance_before,balance_after;
+				ELSE
+					SELECT player_not_exist as status,NULL as payout_bundle_id,NULL as balance_before,NULL as balance_after;
+					SET fail=TRUE;
+				END IF;
+				IF fail THEN
+					ROLLBACK;
+				ELSE
+					COMMIT;
 				END IF;
 			END
+			]]>
 		</createProcedure>
 	</changeSet>
 

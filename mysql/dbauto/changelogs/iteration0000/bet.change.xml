@@ -38,56 +38,36 @@
 			<append value=" engine innodb" />
 		</modifySql>
 	</changeSet>
-
-
+	
 	<changeSet id="2" author="steven">
-		<createTable tableName="bet_bundle_actions">
+		<createTable tableName="payout_bundles">
 			<column name="id" type="bigint" autoIncrement="true">
 				<constraints primaryKey="true" />
-			</column>
-			<column name="bet_bundle_id" type="bigint">
-				<constraints nullable="false" />
-			</column>
-			<column name="delta" type="decimal(32,2)">
-				<constraints nullable="false" />
-			</column>
-			<column name="action" type="int">
-				<constraints nullable="false" />
-			</column>
-			<column name="create_time" type="bigint">
-				<constraints nullable="false" />
-			</column>
-		</createTable>
-		<modifySql dbms="mysql">
-			<append value=" engine innodb" />
-		</modifySql>
-	</changeSet>
-	
-	<changeSet id="3" author="steven">
-		<createTable tableName="bets">
-			<column name="bet_bundle_id" type="bigint">
-				<constraints nullable="false" />
 			</column>
 			<column name="round_id" type="bigint">
 				<constraints nullable="false" />
 			</column>
-			<column name="bet_reward_id" type="int">
+			<column name="player_id" type="bigint">
 				<constraints nullable="false" />
 			</column>
-			<column name="bet_amount" type="decimal(32,2)">
+			<column name="player_table_id" type="bigint">
 				<constraints nullable="false" />
 			</column>
-			<column name="return_amount" type="decimal(32,2)">
+			<column name="bet_bundle_ids" type="text">
+				<constraints nullable="false"/>
+			</column>
+			<column name="payout_amounts" type="text">
+				<constraints nullable="false"/>
+			</column>
+			<column name="total_amount" type="decimal(32,2)">
 				<constraints nullable="false" />
 			</column>
 			<column name="create_time" type="bigint">
 				<constraints nullable="false" />
 			</column>
-			<column name="hit" type="bool" defaultValue="false" />
 		</createTable>
 		<modifySql dbms="mysql">
 			<append value=" engine innodb" />
 		</modifySql>
 	</changeSet>
-
 </databaseChangeLog>
