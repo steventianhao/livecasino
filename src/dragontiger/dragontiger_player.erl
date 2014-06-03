@@ -1,10 +1,11 @@
 -module(dragontiger_player).
 -behavior(gen_server).
 -include("user.hrl").
+-include("round.hrl").
 
 -export([init/1,handle_call/3,handle_cast/2,handle_info/2,terminate/2,code_change/3]).
 -export([bet/3,start_link/4]).
--record(state,{player_table_id,user,bet_ets,server,eventbus}).
+-record(state,{player_table_id,user,bet_ets,server,eventbus,round_id}).
 
 -define(GAME_PLAYER_MOD,dragontiger_player_mod).
 -define(CASINO_DB,mysql_casino_master).
@@ -51,11 +52,13 @@ handle_info({json,Json},State)->
 	lager:info("json ~p, state ~p",[Json,State]),
 	{noreply,State};
 
-handle_info({start_bet,_},State=#state{bet_ets=BetEts})->
+handle_info({start_bet,{_Table,Round,_Countdown}},State=#state{bet_ets=BetEts})->
+	#round{id=RoundId}=Round,
 	ets:delete_all_objects(BetEts),
-	{noreply,State};
+	lager:info("start_bet, round is ~p",[Round]),
+	{noreply,State#state{round_id=RoundId}};
 
-handle_info({commit,{_Table,Cards}},State=#state{bet_ets=BetEts})->
+handle_info({commit,{_Table,Cards}},State=#state{bet_ets=BetEts,round_id=RoundId,user=User,player_table_id=PlayerTableId})->
 	%%atom dragontiger should be the payout scheme, when create this process, should be passed in.
 	RatioMap=?GAME_PLAYER_MOD:payout(Cards,dragontiger),
 	casino_bets:payout_bets(BetEts,RatioMap),
