@@ -52,10 +52,10 @@ stopped(Event,_From,State)->
 
 
 
-betting(Event={try_bet,_Cats,_Amounts},{_Pid,Tag},State=#state{round=Round})->
+betting(Event={try_bet,_Cats,_Amounts},_From,State)->
 	lager:info("bet Event ~p,State ~p",[Event,State]),
 	%% add the bets into the limit table, check the limits, then return ok
-	{reply,{ok,Tag,Round#round.id},betting,State};
+	{reply,ok,betting,State};
 	
 betting(stop_bet,{Pid,_},State=#state{ticker={TRef,_},dealer={Pid,_Dealer},round=Round,table=Table,eventbus=EventBus})->
 	lager:info("betting#stop_bet,state ~p",[State]),
