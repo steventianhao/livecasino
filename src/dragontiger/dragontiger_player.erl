@@ -4,14 +4,11 @@
 -include("round.hrl").
 
 -export([init/1,handle_call/3,handle_cast/2,handle_info/2,terminate/2,code_change/3]).
--export([bet/3,start_link/4]).
+-export([bet/3]).
 -record(state,{player_table_id,user,bet_ets,server,eventbus,round_id}).
 
--define(GAME_PLAYER_MOD,dragontiger_player_mod).
 -define(CASINO_DB,mysql_casino_master).
-
-start_link(Server,EventBus,PlayerTableId,User) when is_pid(Server) andalso is_pid(EventBus) andalso is_integer(PlayerTableId) andalso is_record(User,user)->
-	gen_server:start_link(?MODULE,{Server,EventBus,PlayerTableId,User},[]).
+-define(GAME_PLAYER_MOD,dragontiger_player_mod).
 
 bet(Pid,Cats,Amounts)->
 	case ?GAME_PLAYER_MOD:is_valid_bets(Cats,Amounts) of
@@ -21,10 +18,9 @@ bet(Pid,Cats,Amounts)->
 			{error,invalid_bets}
 	end.
 
-init({Server,EventBus,PlayerTableId,User=#user{id=UserId}})->
-	dragontiger_player_handler:add_handler(EventBus,UserId),
+init({Server,PlayerTableId,User})->
 	BetEts=ets:new(player_bets,[set]),
-	{ok,#state{player_table_id=PlayerTableId,user=User,server=Server,eventbus=EventBus,bet_ets=BetEts}}.
+	{ok,#state{player_table_id=PlayerTableId,user=User,server=Server,bet_ets=BetEts}}.
 
 do_bet(Server,BetEts,RoundId,UserId,PlayerTableId,Cats,Amounts)->
 	case dragontiger_game_api:try_bet(Server,Cats,Amounts) of
@@ -82,9 +78,9 @@ handle_info(Info,State)->
 	lager:error("module ~p, Info ~p, State ~p",[?MODULE,Info,State]),
 	{noreply,State}.
 
-terminate(Reason,State=#state{user=#user{id=UserId},eventbus=EventBus})->
+terminate(Reason,State=#state{user=User,server=Server})->
 	lager:info("terminate, Reason ~p, State ~p",[Reason,State]),
-	dragontiger_player_handler:del_handler(EventBus,UserId,Reason),
+	dragontiger_game_api:player_quit(Server,User,Reason),
 	ok.
 
 code_change(_OldVsn,State,_Extra)->

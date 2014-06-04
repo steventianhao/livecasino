@@ -1,6 +1,7 @@
 -module(dragontiger_game_api).
--export([start_game_server/3,start_game_eventbus/1]).
+-export([start_game_server/2]).
 -export([dealer_connect/2,dealer_disconnect/1]).
+-export([player_join/3,player_quit/3]).
 -export([new_shoe/1,start_bet/1,stop_bet/1,commit/1]).
 -export([try_bet/3,bet_fail/2,bet_succeed/3]).
 -export([deal/3,clear/2,scan/2]).
@@ -9,17 +10,12 @@
 
 -include("dragontiger.hrl").
 -define(SERVER,dragontiger_game).
+-define(PLAYER_HANDLER_MOD,dragontiger_player_handler).
 
-start_game_eventbus(DealerTableId) when is_integer(DealerTableId)-> 
-	EventBus=global_game_eventbus(DealerTableId),
-	gen_event:start_link(EventBus).
 
-start_game_server(EventBus,DealerTableId,Countdown) when is_pid(EventBus) andalso is_integer(DealerTableId) andalso is_integer(Countdown)->
+start_game_server(DealerTableId,Countdown) when  is_integer(DealerTableId) andalso is_integer(Countdown)->
 	GameServer=global_game_server(DealerTableId),
-	gen_fsm:start_link(GameServer,?SERVER,{EventBus,DealerTableId,Countdown},[]).
-
-global_game_eventbus(DealerTableId)->
-	{global,{game_eventbus,DealerTableId}}.
+	gen_fsm:start_link(GameServer,?SERVER,{DealerTableId,Countdown},[]).
 
 global_game_server(DealerTableId)->
 	{global,{game_server,DealerTableId}}.
@@ -68,6 +64,10 @@ dealer_disconnect(GameServer)->
 update_countdown(GameServer,Countdown)->
 	gen_fsm:sync_send_all_state_event(GameServer,{update_countdown,Countdown}).
 
+player_join(GameServer,User,PlayerTableId)->
+	gen_fsm:sync_send_all_state_event(GameServer,{player_join,User,PlayerTableId}).
+player_quit(GameServer,User,Reason)->
+	gen_fsm:send_all_state_event(GameServer,{player_quit,User,Reason}).
 
 
 ace()->?ACE#card{suit=?S_CLUB}.

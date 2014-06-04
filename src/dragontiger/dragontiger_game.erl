@@ -9,17 +9,22 @@
 -include("round.hrl").
 -include("db.hrl").
 -include("dealer.hrl").
+-include("user.hrl").
 
 %% API
 -define(GAME,dragontiger).
 
 -define(GAME_ROUND,dragontiger_round).
 -define(GAME_DEALER_MOD,dragontiger_dealer_mod).
+-define(PLAYER_HANDLER_MOD,dragontiger_player_handler).
+-define(PLAYER_MOD,dragontiger_player).
 -define(CASINO_DB,mysql_casino_master).
 
 -record(state,{dealer,table,ticker,cards,countdown,round,eventbus}).
 
-init({EventBus,Table,Countdown})->
+
+init({Table,Countdown})->
+	{ok,EventBus}=gen_event:start_link(),
 	{ok,stopped,#state{countdown=Countdown,table=Table,eventbus=EventBus}}.
 
 stopped(new_shoe,{Pid,_},State=#state{dealer={Pid,_},round=Round})->
@@ -139,6 +144,10 @@ handle_info(Info,StateName,State)->
 	lager:error("unexpected handle info, info ~p,stateName ~p,state ~p",[Info,StateName,State]),
 	{next_state,StateName,State}.
 
+handle_event(Event={player_quit,#user{id=UserId},Reason},StateName,State=#state{eventbus=EventBus})->
+	lager:info("player_quit handle_event, event ~p,stateName ~p,state ~p",[Event,StateName,State]),
+	gen_event:delete_handler(EventBus,{?PLAYER_HANDLER_MOD,UserId},Reason);
+
 handle_event(Event={dealer_disconnect,Pid},StateName,State=#state{dealer={Pid,Dealer},table=Table,eventbus=EventBus})->
 	lager:info("dealer_disconnect handle_event, event ~p,stateName ~p,state ~p",[Event,StateName,State]),
 	gen_event:notify(EventBus,{dealer_disconnect,{Table,Dealer}}),
@@ -149,6 +158,18 @@ handle_event(Event,StateName,State)->
 	lager:error("unexpected handle_event, event ~p,stateName ~p,state ~p",[Event,StateName,State]),
 	{next_state,StateName,State}.
 
+handle_sync_event(Event={player_join,User=#user{id=UserId},PlayerTableId},From,StateName,State=#state{eventbus=EventBus})->
+	lager:info("player_join, event ~p,from ~p,stateName ~p,state ~p",[Event,From,StateName,State]),
+	Handlers=gen_event:which_handlers(EventBus),
+	case lists:member({?PLAYER_HANDLER_MOD,UserId},Handlers) of
+		true->
+			{reply,{error,already_joined},StateName,State};
+		_->
+			Result={ok,Pid}=gen_server:start_link(?PLAYER_MOD,{self(),PlayerTableId,User},[]),
+			gen_event:add_handler(EventBus,{?MODULE,UserId},Pid),
+			{reply,Result,StateName,State}
+	end;
+
 handle_sync_event(Event={update_countdown,Countdown},From,StateName,State)->
 	lager:info("update_countdown, event ~p,from ~p,stateName ~p,state ~p",[Event,From,StateName,State]),
 	if 
@@ -156,7 +177,7 @@ handle_sync_event(Event={update_countdown,Countdown},From,StateName,State)->
 			NewState=State#state{countdown=Countdown},
 			{reply,ok,StateName,NewState};
 		true ->
-			{reply,error,StateName,State}
+			{reply,{error,badarg},StateName,State}
 	end;
 handle_sync_event(Event={dealer_connect,Dealer},From={Pid,_},StateName,State=#state{dealer=undefined,table=Table,eventbus=EventBus})->
 	lager:info("dealer_connected, event ~p,from ~p,stateName ~p,state ~p",[Event,From,StateName,State]),
@@ -173,8 +194,9 @@ handle_sync_event(Event,From,StateName,State)->
 	lager:error("unexpected handle_sync_event, event ~p,from ~p,stateName ~p,state ~p",[Event,From,StateName,State]),
 	{next_state,StateName,State}.
 
-terminate(Reason,StateName,State)->
+terminate(Reason,StateName,State=#state{eventbus=EventBus})->
 	lager:info("terminate, reason ~p,stateName ~p,state ~p",[Reason,StateName,State]),
+	gen_event:stop(EventBus),
 	ok.
 
 code_change(OldVsn,StateName,State,Extra)->
