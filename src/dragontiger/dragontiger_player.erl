@@ -26,23 +26,32 @@ init({Server,EventBus,PlayerTableId,User=#user{id=UserId}})->
 	BetEts=ets:new(player_bets,[set]),
 	{ok,#state{player_table_id=PlayerTableId,user=User,server=Server,eventbus=EventBus,bet_ets=BetEts}}.
 
-handle_call(Event={bet,Cats,Amounts},_From,State=#state{server=Server,user=User,player_table_id=PlayerTableId,bet_ets=BetEts})->
-	lager:info("bet module ~p, event ~p, state ~p",[?MODULE,Event,State]),
+do_bet(Server,BetEts,RoundId,UserId,PlayerTableId,Cats,Amounts)->
 	case dragontiger_game_api:try_bet(Server,Cats,Amounts) of
-		{ok,Tag,RoundId}->
-			lager:info("after try_bet, tag ~p, roundId ~p",[Tag,RoundId]),
-			Bet=casino_bets:create_bet_req(RoundId,User#user.id,PlayerTableId,Cats,Amounts),
+		ok->
+			Bet=casino_bets:create_bet_req(RoundId,UserId,PlayerTableId,Cats,Amounts),
 			case mysql_db:user_bet(?CASINO_DB,Bet) of
 				{ok,Bundle={BetBundleId,_BalanceAfter}}->
-					casino_bets:insert_bets(BetEts,BetBundleId,Cats,Amounts),
-					{reply,{ok,Bundle},State};
+					true=casino_bets:insert_bets(BetEts,BetBundleId,Cats,Amounts),
+					{ok,Bundle};
 				Error->
-					{reply,Error,State}
+					Error
 			end;
 		Res ->
-			lager:info("after try_bet, res ~p",[Res]),
-			{reply,error,State}
+			Res
 	end.
+					
+
+handle_call(Event={bet,Cats,Amounts},_From,State=#state{server=Server,user=User,player_table_id=PlayerTableId,bet_ets=BetEts,round_id=RoundId})->
+	lager:info("bet module ~p, event ~p, state ~p",[?MODULE,Event,State]),
+	Result=case RoundId of
+		undefined->
+			{error,round_not_found};
+		_ ->
+			do_bet(Server,BetEts,RoundId,User#user.id,PlayerTableId,Cats,Amounts)
+	end,
+	{reply,Result,State}.	
+	
 
 handle_cast(Request,State)->
 	lager:error("unexpected Request ~p, State ~p",[Request,State]),
