@@ -29,7 +29,7 @@ validate(_)->
 string_to_card([S,N],CardsMap)->
 	C=maps:get(N,CardsMap), 
 	C#card{suit=S}.
-card_to_string(#card{name=N,suit=S})->
+card_to_string(#card{rank=N,suit=S})->
 	[S,N].
 
 from_string(Cards)->

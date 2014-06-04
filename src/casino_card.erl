@@ -1,7 +1,7 @@
--module(card).
+-module(casino_card).
 -include("card.hrl").
 
--export([check_cards/1]).
+-export([check_cards/1,check_one_card/2]).
 
 check_cards([])->
 	true;
@@ -19,3 +19,4 @@ check_one_card(S,R) when is_integer(S) andalso is_integer(R)->
 	lists:member(S,?ALL_SUIT) andalso lists:member(R,?ALL_RANK);
 check_one_card(_,_)->
 	false.
+

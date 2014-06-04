@@ -1,4 +1,4 @@
--module(card_tests).
+-module(casino_card_tests).
 -include_lib("eunit/include/eunit.hrl").
 -define(DEBUG,true).
 
@@ -12,20 +12,20 @@ results()->
 
 check_cards(Cards)->
 	[Pcs,Bcs]=string:tokens(Cards,"#"),
-	card:check_cards(Pcs) andalso card:check_cards(Bcs).
+	casino_card:check_cards(Pcs) andalso casino_card:check_cards(Bcs).
 
 check_cards_test()->
 	Result=lists:all(fun(L)-> check_cards(L) end,results()),
 	?assert(Result).
 
 check_cards2_test()->
-	?assert(card:check_cards([])).
+	?assert(casino_card:check_cards([])).
 
 check_cards3_test()->
-	?assertNot(card:check_cards(["DKD"])).
+	?assertNot(casino_card:check_cards(["DKD"])).
 
 check_cards4_test()->
-	?assertNot(card:check_cards(abc)).
+	?assertNot(casino_card:check_cards(abc)).
 
 check_cards5_test()->
-	?assertNot(card:check_cards([a,b])).
+	?assertNot(casino_card:check_cards([a,b])).

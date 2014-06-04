@@ -29,7 +29,7 @@ string_to_cards([S,N|T],CardsMap)->
 	[C#card{suit=S}|string_to_cards(T,CardsMap)].
 
 cards_to_string(Pcs,Bcs)->
-	Fun=fun(C)->[C#card.suit,C#card.name] end,
+	Fun=fun(C)->[C#card.suit,C#card.rank] end,
 	PL=lists:flatmap(Fun,Pcs),
 	BL=lists:flatmap(Fun,Bcs),
 	lists:append([PL,"#",BL]).
