@@ -70,16 +70,16 @@ update_countdown(GameServer,Countdown)->
 
 
 
-ace()->?ACE.
-two()->?TWO.
-three()->?THREE.
-four()->?FOUR.
-five()->?FIVE.
-six()->?SIX.
-seven()->?SEVEN.
-eight()->?EIGHT.
-nine()->?NINE.
-ten()->?TEN.
-jack()->?JACK.
-queen()->?QUEEN.
-king()->?KING.
+ace()->?ACE#card{suit=?S_CLUB}.
+two()->?TWO#card{suit=?S_CLUB}.
+three()->?THREE#card{suit=?S_CLUB}.
+four()->?FOUR#card{suit=?S_CLUB}.
+five()->?FIVE#card{suit=?S_CLUB}.
+six()->?SIX#card{suit=?S_CLUB}.
+seven()->?SEVEN#card{suit=?S_CLUB}.
+eight()->?EIGHT#card{suit=?S_CLUB}.
+nine()->?NINE#card{suit=?S_CLUB}.
+ten()->?TEN#card{suit=?S_CLUB}.
+jack()->?JACK#card{suit=?S_CLUB}.
+queen()->?QUEEN#card{suit=?S_CLUB}.
+king()->?KING#card{suit=?S_CLUB}.
