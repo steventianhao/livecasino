@@ -32,9 +32,9 @@ start_bet(GameServer)->
 
 try_bet(GameServer,Cats,Amounts) ->
 	gen_fsm:sync_send_event(GameServer,{try_bet,Cats,Amounts}).
-bet_succeed(GameServer,Tag,BetBundleId)->
+bet_succeed(_GameServer,_Tag,_BetBundleId)->
 	ok.
-bet_fail(GameServer,Tag)->
+bet_fail(_GameServer,_Tag)->
 	ok.
 
 
