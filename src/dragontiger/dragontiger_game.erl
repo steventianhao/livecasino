@@ -43,7 +43,7 @@ stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer={Pid,Dealer},r
 	NewRound2=NewRound#round{id=NewRoundId},
 	TRef=erlang:send_after(1000,self(),tick),
 	NewState=State#state{ticker={TRef,Countdown},cards=#{},round=NewRound2},
-	gen_event:notify(EventBus,{start_bet,{Table,NewRound,Countdown}}),
+	gen_event:notify(EventBus,{start_bet,{Table,NewRound2,Countdown}}),
 	{reply,ok,betting,NewState};
 
 stopped(Event,_From,State)->
