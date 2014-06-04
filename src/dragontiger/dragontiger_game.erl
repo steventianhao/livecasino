@@ -50,8 +50,6 @@ stopped(Event,_From,State)->
 	lager:error("unexpected event when stopped, event ~p,state ~p",[Event,State]),
 	{reply,unexpected,stopped,State}.
 
-
-
 betting(Event={try_bet,_Cats,_Amounts},_From,State)->
 	lager:info("bet Event ~p,State ~p",[Event,State]),
 	%% add the bets into the limit table, check the limits, then return ok
@@ -60,10 +58,9 @@ betting(Event={try_bet,_Cats,_Amounts},_From,State)->
 betting(stop_bet,{Pid,_},State=#state{ticker={TRef,_},dealer={Pid,_Dealer},round=Round,table=Table,eventbus=EventBus})->
 	lager:info("betting#stop_bet,state ~p",[State]),
 	erlang:cancel_timer(TRef),
-	NewState=State#state{ticker=undefined},
-	Mills=casino_utils:mills(),
-	1=mysql_db:update_round(?CASINO_DB,Round#round.id,Mills),
+	1=mysql_db:update_round(?CASINO_DB,Round#round.id,casino_utils:mills()),
 	gen_event:notify(EventBus,{stop_bet,Table}),
+	NewState=State#state{ticker=undefined},
 	{reply,ok,dealing,NewState};
 
 betting(Event,_From,State)->
@@ -73,9 +70,8 @@ betting(Event,_From,State)->
 dealing(Event={deal,Pos,Card},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,eventbus=EventBus})->
 	lager:info("dealing#deal, Event ~p, State ~p",[Event,State]),
 	NewCards=?GAME_DEALER_MOD:put(Pos,Card,Cards),
-	NewState=State#state{cards=NewCards},
 	gen_event:notify(EventBus,{deal,{Table,Pos,Card}}),
-	{reply,ok,dealing,NewState};
+	{reply,ok,dealing,State#state{cards=NewCards}};
 		
 
 dealing(Event={scan,Card},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,eventbus=EventBus})->
