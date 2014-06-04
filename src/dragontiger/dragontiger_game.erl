@@ -103,7 +103,7 @@ dealing(Event={clear,Pos},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=
 dealing(commit,{Pid,_},State=#state{cards=Cards,dealer={Pid,_},round=Round,table=Table,eventbus=EventBus})->
 	lager:info("dealing#commit, State ~p",[State]),
 	%%check the cards are valid in accordence with the game rule
-	case baccarat_dealer_mod:validate(Cards) of
+	case ?GAME_DEALER_MOD:validate(Cards) of
 		true->
 			Mills=casino_utils:mills(),
 			Cstr=?GAME_DEALER_MOD:to_string(Cards),
