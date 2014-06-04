@@ -39,13 +39,13 @@ insert_bets(BetEts,BetBundleId,Cats,Amounts)->
 	ets:insert(BetEts,Ts).
 
 payout_bet('$end_of_table',_BetEts,_RatioMap)->
-	ok;
+	true;
 payout_bet(Key={_,Cat},BetEts,RatioMap)->
 	case maps:find(Cat,RatioMap) of
 		{ok,Ratio}-> 
-			ets:update_element(BetEts,Key,{3,Ratio});
+			true=ets:update_element(BetEts,Key,{3,Ratio});
 		error ->
-			ok
+			true
 	end,	
 	payout_bet(ets:next(BetEts,Key),BetEts,RatioMap).
 payout_bets(BetEts,RatioMap)->
