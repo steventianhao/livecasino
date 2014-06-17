@@ -1,9 +1,0 @@
-{application,baccarat,
-[
-	{description,"commssion baccarat game application"},
-	{vsn,"0.9.0"},
-	%% {registered,[game_baccarat,dealer_baccarat,baccarat_players]},
-	{modules,[baccarat_sup]},
-	{applications,[kernel,stdlib,gproc,lager]},
-	{mod,{baccarat_app,[]}}
-]}.
