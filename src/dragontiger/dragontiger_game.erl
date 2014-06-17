@@ -22,6 +22,11 @@
 
 -record(state,{dealer,table,ticker,cards,countdown,round,eventbus}).
 
+persist_round(NewRound,Dealer,Table)->
+	#round{createTime={Mills,_},roundIndex=RoundIndex,shoeIndex=ShoeIndex}=NewRound,
+	DealerId=Dealer#dealer.id,
+	DbNewRound=#db_new_round_req{shoe_index=ShoeIndex,round_index=RoundIndex,dealer_id=DealerId,dealer_table_id=Table,create_time=Mills},
+    mysql_db:insert_round(?CASINO_DB,DbNewRound).
 
 init({Table,Countdown})->
 	{ok,EventBus}=gen_event:start_link(),
@@ -40,15 +45,11 @@ stopped(start_bet,{Pid,_},State=#state{dealer={Pid,_Dealer},round=undefined})->
 stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer={Pid,Dealer},round=Round,table=Table,eventbus=EventBus})->
 	lager:info("stopped#start_bet,state ~p",[State]),
 	NewRound=?GAME_ROUND:new_round(Round),
-	%%-record(round,{id,dealer,shoeIndex,roundIndex,cards,createTime,finishTime,status}).
-	#round{createTime={Mills,_},roundIndex=RoundIndex,shoeIndex=ShoeIndex}=NewRound,
-	DealerId=Dealer#dealer.id,
-	DbNewRound=#db_new_round_req{shoe_index=ShoeIndex,round_index=RoundIndex,dealer_id=DealerId,dealer_table_id=Table,create_time=Mills},
-	NewRoundId=mysql_db:insert_round(?CASINO_DB,DbNewRound),
+	NewRoundId=persist_round(NewRound,Dealer,Table),
 	NewRound2=NewRound#round{id=NewRoundId},
+	gen_event:notify(EventBus,{start_bet,{Table,NewRound2,Countdown}}),
 	TRef=erlang:send_after(1000,self(),tick),
 	NewState=State#state{ticker={TRef,Countdown},cards=#{},round=NewRound2},
-	gen_event:notify(EventBus,{start_bet,{Table,NewRound2,Countdown}}),
 	{reply,ok,betting,NewState};
 
 stopped(Event,_From,State)->
@@ -165,7 +166,7 @@ handle_sync_event(Event={player_join,User=#user{id=UserId},PlayerTableId},From,S
 		true->
 			{reply,{error,already_joined},StateName,State};
 		_->
-			Result={ok,Pid}=gen_server:start_link(?PLAYER_MOD,{self(),PlayerTableId,User},[]),
+			Result={ok,Pid}=gen_server:start_link(?PLAYER_MOD,[self(),PlayerTableId,User],[]),
 			gen_event:add_handler(EventBus,{?PLAYER_HANDLER_MOD,UserId},Pid),
 			{reply,Result,StateName,State}
 	end;

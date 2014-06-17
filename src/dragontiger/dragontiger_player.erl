@@ -18,7 +18,7 @@ bet(Pid,Cats,Amounts)->
 			{error,invalid_bets}
 	end.
 
-init({Server,PlayerTableId,User})->
+init([Server,PlayerTableId,User])->
 	BetEts=ets:new(player_bets,[set]),
 	{ok,#state{player_table_id=PlayerTableId,user=User,server=Server,bet_ets=BetEts}}.
 
