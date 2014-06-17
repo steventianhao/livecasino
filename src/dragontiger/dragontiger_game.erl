@@ -166,8 +166,7 @@ handle_sync_event(Event={player_join,User=#user{id=UserId},PlayerTableId},From,S
 		true->
 			{reply,{error,already_joined},StateName,State};
 		_->
-			Result={ok,Pid}=gen_server:start_link(?PLAYER_MOD,[self(),PlayerTableId,User],[]),
-			gen_event:add_handler(EventBus,{?PLAYER_HANDLER_MOD,UserId},Pid),
+			Result=gen_server:start_link(?PLAYER_MOD,[self(),EventBus,PlayerTableId,User],[]),
 			{reply,Result,StateName,State}
 	end;
 

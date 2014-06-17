@@ -5,10 +5,11 @@
 
 -export([init/1,handle_call/3,handle_cast/2,handle_info/2,terminate/2,code_change/3]).
 -export([bet/3]).
--record(state,{player_table_id,user,bet_ets,server,eventbus,round_id}).
+-record(state,{player_table_id,user,bet_ets,server,round_id}).
 
 -define(CASINO_DB,mysql_casino_master).
 -define(GAME_PLAYER_MOD,dragontiger_player_mod).
+-define(PLAYER_HANDLER_MOD,dragontiger_player_handler).
 
 bet(Pid,Cats,Amounts)->
 	case ?GAME_PLAYER_MOD:is_valid_bets(Cats,Amounts) of
@@ -18,7 +19,8 @@ bet(Pid,Cats,Amounts)->
 			{error,invalid_bets}
 	end.
 
-init([Server,PlayerTableId,User])->
+init([Server,EventBus,PlayerTableId,User])->
+	gen_event:add_handler(EventBus,{?PLAYER_HANDLER_MOD,User#user.id},self()),
 	BetEts=ets:new(player_bets,[set]),
 	{ok,#state{player_table_id=PlayerTableId,user=User,server=Server,bet_ets=BetEts}}.
 
