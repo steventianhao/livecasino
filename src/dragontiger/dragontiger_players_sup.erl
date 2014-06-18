@@ -7,7 +7,7 @@
 -export([init/1]).
 
 start_link()->
-	supervisor:start_link(?MODULE,[]).
+	supervisor:start_link({local,?MODULE},?MODULE,[]).
 
 init([])->
 	PlayerSpec={player,{dragontiger_player,start_link,[]},transient,6,worker,[dragontiger_player]},
