@@ -166,7 +166,8 @@ handle_sync_event(Event={player_join,User=#user{id=UserId},PlayerTableId},From,S
 		true->
 			{reply,{error,already_joined},StateName,State};
 		_->
-			Result=gen_server:start_link(?PLAYER_MOD,[self(),EventBus,PlayerTableId,User],[]),
+			%%Result=gen_server:start_link(?PLAYER_MOD,[self(),EventBus,PlayerTableId,User],[]),
+			Result=supervisor:start_child(dragontiger_players_sup,[self(),EventBus,PlayerTableId,User]),
 			{reply,Result,StateName,State}
 	end;
 

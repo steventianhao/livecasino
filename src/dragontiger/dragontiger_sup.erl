@@ -10,11 +10,11 @@ start_link()->
 	supervisor:start_link(?MODULE,[]).
 
 dragontiger_spec()->
-	StartFunc={dragontiger_game,init,[4,13]},
+	StartFunc={dragontiger_game_api,start_game_server,[4,13]},
 	{dragontiger_game,StartFunc,permanent,6,worker,[dragontiger_game]}.
 
 players_supervisor()->
-	StartFunc={dragontiger_players_sup,init,[]},
+	StartFunc={dragontiger_players_sup,start_link,[]},
 	{dragontiger_players_sup,StartFunc,transient,6,supervisor,dynamic}.
 
 init([])->

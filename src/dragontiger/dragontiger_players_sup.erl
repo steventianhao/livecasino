@@ -10,6 +10,6 @@ start_link()->
 	supervisor:start_link(?MODULE,[]).
 
 init([])->
-	PlayerSpec={player,{dragontiger_player,init,[]},transient,6,worker,[dragontiger_player]},
+	PlayerSpec={player,{dragontiger_player,start_link,[]},transient,6,worker,[dragontiger_player]},
 	RestartStrategy={simple_one_for_one,1,60},
 	{ok,{RestartStrategy,[PlayerSpec]}}.
