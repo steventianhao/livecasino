@@ -83,9 +83,10 @@ handle_info(Info,State)->
 	lager:error("module ~p, Info ~p, State ~p",[?MODULE,Info,State]),
 	{noreply,State}.
 
-terminate(Reason,State=#state{user=User,server=Server})->
+terminate(Reason,State=#state{user=User,server=Server,bet_ets=BetEts})->
 	lager:info("terminate, Reason ~p, State ~p",[Reason,State]),
 	dragontiger_game_api:player_quit(Server,User,Reason),
+	ets:delete(BetEts),
 	ok.
 
 code_change(_OldVsn,State,_Extra)->
