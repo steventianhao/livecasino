@@ -20,7 +20,7 @@
 -define(PLAYER_MOD,dragontiger_player).
 -define(CASINO_DB,mysql_casino_master).
 
--record(state,{dealer,table,ticker,cards,countdown,round,eventbus}).
+-record(state,{dealer,table,ticker,cards,countdown,round,eventbus,players_sup}).
 
 persist_round(NewRound,Dealer,Table)->
 	#round{createTime={Mills,_},roundIndex=RoundIndex,shoeIndex=ShoeIndex}=NewRound,
@@ -30,7 +30,8 @@ persist_round(NewRound,Dealer,Table)->
 
 init({Table,Countdown})->
 	{ok,EventBus}=gen_event:start_link(),
-	{ok,stopped,#state{countdown=Countdown,table=Table,eventbus=EventBus}}.
+	{ok,PlayersSup}=supervisor:start_child(dragontiger_sup,dragontiger_sup:players_sup_spec(Table)),
+	{ok,stopped,#state{countdown=Countdown,table=Table,eventbus=EventBus,players_sup=PlayersSup}}.
 
 stopped(new_shoe,{Pid,_},State=#state{dealer={Pid,_},round=Round})->
 	lager:info("stopped#new_shoe,state ~p",[State]),
@@ -159,7 +160,7 @@ handle_event(Event,StateName,State)->
 	lager:error("unexpected handle_event, event ~p,stateName ~p,state ~p",[Event,StateName,State]),
 	{next_state,StateName,State}.
 
-handle_sync_event(Event={player_join,User=#user{id=UserId},PlayerTableId},From,StateName,State=#state{eventbus=EventBus})->
+handle_sync_event(Event={player_join,User=#user{id=UserId},PlayerTableId},From,StateName,State=#state{eventbus=EventBus,players_sup=PlayersSup})->
 	lager:info("player_join, event ~p,from ~p,stateName ~p,state ~p",[Event,From,StateName,State]),
 	Handlers=gen_event:which_handlers(EventBus),
 	case lists:member({?PLAYER_HANDLER_MOD,UserId},Handlers) of
@@ -167,7 +168,7 @@ handle_sync_event(Event={player_join,User=#user{id=UserId},PlayerTableId},From,S
 			{reply,{error,already_joined},StateName,State};
 		_->
 			%%Result=gen_server:start_link(?PLAYER_MOD,[self(),EventBus,PlayerTableId,User],[]),
-			Result=supervisor:start_child(dragontiger_players_sup,[self(),EventBus,PlayerTableId,User]),
+			Result=supervisor:start_child(PlayersSup,[self(),EventBus,PlayerTableId,User]),
 			{reply,Result,StateName,State}
 	end;
 
