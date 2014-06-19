@@ -3,6 +3,6 @@
 	{description,"dragontiger game application"},
 	{vsn,"0.9.0"},
 	{modules,[dragontiger_sup]},
-	{applications,[kernel,stdlib,emysql,lager]},
+	{applications,[kernel,stdlib,crypto,emysql,lager]},
 	{mod,{dragontiger_app,[]}}
 ]}.
