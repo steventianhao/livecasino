@@ -19,8 +19,9 @@
 -define(PLAYER_HANDLER_MOD,dragontiger_player_handler).
 -define(PLAYER_MOD,dragontiger_player).
 -define(CASINO_DB,mysql_casino_master).
+-define(GAME_SUP,dragontiger_sup).
 
--record(state,{dealer,table,ticker,cards,countdown,round,eventbus,players_sup}).
+-record(state,{dealer,table,ticker,cards,countdown,round,eventbus}).
 
 persist_round(NewRound,Dealer,Table)->
 	#round{createTime={Mills,_},roundIndex=RoundIndex,shoeIndex=ShoeIndex}=NewRound,
@@ -30,8 +31,7 @@ persist_round(NewRound,Dealer,Table)->
 
 init({Table,Countdown})->
 	{ok,EventBus}=gen_event:start_link(),
-	{ok,PlayersSup}=supervisor:start_child(dragontiger_sup,dragontiger_sup:players_sup_spec(Table)),
-	{ok,stopped,#state{countdown=Countdown,table=Table,eventbus=EventBus,players_sup=PlayersSup}}.
+	{ok,stopped,#state{countdown=Countdown,table=Table,eventbus=EventBus}}.
 
 stopped(new_shoe,{Pid,_},State=#state{dealer={Pid,_},round=Round})->
 	lager:info("stopped#new_shoe,state ~p",[State]),
@@ -160,15 +160,14 @@ handle_event(Event,StateName,State)->
 	lager:error("unexpected handle_event, event ~p,stateName ~p,state ~p",[Event,StateName,State]),
 	{next_state,StateName,State}.
 
-handle_sync_event(Event={player_join,User=#user{id=UserId},PlayerTableId},From,StateName,State=#state{eventbus=EventBus,players_sup=PlayersSup})->
+handle_sync_event(Event={player_join,User=#user{id=UserId},PlayerTableId},From,StateName,State=#state{table=Table,eventbus=EventBus})->
 	lager:info("player_join, event ~p,from ~p,stateName ~p,state ~p",[Event,From,StateName,State]),
 	Handlers=gen_event:which_handlers(EventBus),
 	case lists:member({?PLAYER_HANDLER_MOD,UserId},Handlers) of
 		true->
 			{reply,{error,already_joined},StateName,State};
 		_->
-			%%Result=gen_server:start_link(?PLAYER_MOD,[self(),EventBus,PlayerTableId,User],[]),
-			Result=supervisor:start_child(PlayersSup,[self(),EventBus,PlayerTableId,User]),
+			Result=supervisor:start_child(?GAME_SUP:players_sup_id(Table),[self(),EventBus,PlayerTableId,User]),
 			{reply,Result,StateName,State}
 	end;
 
