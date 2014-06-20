@@ -11,7 +11,8 @@ start_link()->
 
 dragontiger_spec(Table,Countdown)->
 	StartFunc={dragontiger_game_api,start_game_server,[Table,Countdown]},
-	{dragontiger_game,StartFunc,permanent,6,worker,[dragontiger_game]}.
+	Id=list_to_atom(lists:concat(["dragontiger_game_",Table])),
+	{Id,StartFunc,permanent,6,worker,[dragontiger_game]}.
 
 players_sup_id(Table)->
 	list_to_atom(lists:concat(["dragontiger_players_sup_",Table])).
