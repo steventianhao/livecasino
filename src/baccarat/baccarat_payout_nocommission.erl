@@ -1,4 +1,4 @@
--module(baccarat_payout_nocommssion).
+-module(baccarat_payout_nocommission).
 -include("baccarat.hrl").
 -export([ratio/1]).
 
