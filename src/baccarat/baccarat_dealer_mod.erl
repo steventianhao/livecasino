@@ -7,7 +7,7 @@
 
 from_string(Cards)->
 	[Pcs,Bcs]=string:tokens(Cards,"#"),
-	CardsMap=?CARDS_MAP,
+	CardsMap= maps:from_list([{C#card.rank,C} || C <-?ALL_CARD]),
 	CLp=lists:reverse(string_to_cards(Pcs,CardsMap)),
 	Mp=create_map(CLp,[?PLAYER_POS_1,?PLAYER_POS_2,?PLAYER_POS_3]),
 	CLb=lists:reverse(string_to_cards(Bcs,CardsMap)),

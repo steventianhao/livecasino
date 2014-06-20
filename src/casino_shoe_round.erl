@@ -1,6 +1,5 @@
--module(baccarat_round).
+-module(casino_shoe_round).
 -include("round.hrl").
-
 -export([new_round/1,new_shoe/1]).
 
 increase(ShoeIndex,_CreateTime)->
