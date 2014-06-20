@@ -7,7 +7,6 @@
 %% all states transitions
 -export([stopped/3,dealing/3,betting/3]).
 -include("round.hrl").
--include("db.hrl").
 -include("dealer.hrl").
 -include("user.hrl").
 
@@ -22,12 +21,6 @@
 -define(GAME_SUP,dragontiger_sup).
 
 -record(state,{dealer,table,ticker,cards,countdown,round,eventbus}).
-
-persist_round(NewRound,Dealer,Table)->
-	#round{createTime={Mills,_},roundIndex=RoundIndex,shoeIndex=ShoeIndex}=NewRound,
-	DealerId=Dealer#dealer.id,
-	DbNewRound=#db_new_round_req{shoe_index=ShoeIndex,round_index=RoundIndex,dealer_id=DealerId,dealer_table_id=Table,create_time=Mills},
-    mysql_db:insert_round(?CASINO_DB,DbNewRound).
 
 init({Table,Countdown})->
 	{ok,EventBus}=gen_event:start_link(),
@@ -46,7 +39,7 @@ stopped(start_bet,{Pid,_},State=#state{dealer={Pid,_Dealer},round=undefined})->
 stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer={Pid,Dealer},round=Round,table=Table,eventbus=EventBus})->
 	lager:info("stopped#start_bet,state ~p",[State]),
 	NewRound=?GAME_ROUND:new_round(Round),
-	NewRoundId=persist_round(NewRound,Dealer,Table),
+	NewRoundId=?GAME_ROUND:persist_round(NewRound,Dealer#dealer.id,Table),
 	NewRound2=NewRound#round{id=NewRoundId},
 	gen_event:notify(EventBus,{start_bet,{Table,NewRound2,Countdown}}),
 	TRef=erlang:send_after(1000,self(),tick),
