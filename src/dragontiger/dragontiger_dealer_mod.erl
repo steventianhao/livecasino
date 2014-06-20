@@ -34,7 +34,7 @@ card_to_string(#card{rank=N,suit=S})->
 
 from_string(Cards)->
 	[Dc,Tc]=string:tokens(Cards,"#"),
-	CardsMap=?CARDS_MAP,
+	CardsMap=maps:from_list([{C#card.rank,C} || C <-?ALL_CARD]),
 	#{?DRAGON_POS=>string_to_card(Dc,CardsMap),?TIGER_POS=>string_to_card(Tc,CardsMap)}.
 
 
