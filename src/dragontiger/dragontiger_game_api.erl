@@ -10,8 +10,6 @@
 
 -include("dragontiger.hrl").
 -define(SERVER,dragontiger_game).
--define(PLAYER_HANDLER_MOD,dragontiger_player_handler).
-
 
 start_game_server(DealerTableId,Countdown) when  is_integer(DealerTableId) andalso is_integer(Countdown)->
 	GameServer=global_game_server(DealerTableId),
