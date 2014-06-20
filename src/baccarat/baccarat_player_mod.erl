@@ -1,6 +1,6 @@
 -module(baccarat_player_mod).
 -include("baccarat.hrl").
--export([reward/1]).
+-export([reward/1,payout/2]).
 
 add_reward(Rewards,Pass,Result) when Pass==true ->
 	[Result | Rewards];
@@ -71,3 +71,11 @@ reward(#{?BANKER_POS_1 := #card{value=B1},?BANKER_POS_2 := #card{value=B2},?BANK
 reward(#{?BANKER_POS_1 := #card{value=B1},?BANKER_POS_2 := #card{value=B2},
 		 ?PLAYER_POS_1 := #card{value=P1},?PLAYER_POS_2 := #card{value=P2},?PLAYER_POS_3 := #card{value=P3}})->
 	reward_morethan4(total([B1,B2]),total([P1,P2,P3]),B1,B2,P1,P2).
+
+
+payout(Cards=#{},commission)->
+	Fun=fun baccarat_payout_commission:ratio/1,
+	maps:from_list(lists:map(Fun,reward(Cards)));
+payout(Cards=#{},nocommission)->
+	Fun=fun baccarat_payout_nocommission:ratio/1,
+	maps:from_list(lists:map(Fun,reward(Cards))).
