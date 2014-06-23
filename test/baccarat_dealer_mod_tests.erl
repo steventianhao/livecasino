@@ -1,6 +1,6 @@
 -module(baccarat_dealer_mod_tests).
 -include_lib("eunit/include/eunit.hrl").
--include("../src/baccarat.hrl").
+-include("../src/baccarat/baccarat.hrl").
 -define(DEBUG,true).
 
 put(List)->

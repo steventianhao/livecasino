@@ -1,6 +1,9 @@
 -module(casino_bets).
+
 -export([is_valid_bets/3,insert_bets/4,payout_bets/2,payout_bundles/1,payout_total/1]).
 -export([create_bet_req/5,create_payout_req/5]).
+-export([add_reward/3,baccarat_total/1,payout/3]).
+
 -include("db.hrl").
 
 is_valid_bet_cats(Cats,AllBetCats)->
@@ -67,3 +70,14 @@ payout_bundles(BetEts)->
 
 payout_total(PayoutBundles)->
 	maps:fold(fun(_K,V,Acc)->Acc+V end,0,PayoutBundles).
+
+payout(Cards=#{},RatioFunc,RewardFunc)->
+	maps:from_list(lists:map(RatioFunc,RewardFunc(Cards))).
+
+add_reward(Rewards,Cond,Result) when Cond==true ->
+	[Result | Rewards];
+add_reward(Rewards,_,_)->
+	Rewards.
+
+baccarat_total(Values) ->
+	lists:sum(Values) rem 10.
