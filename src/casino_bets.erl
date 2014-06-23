@@ -5,6 +5,7 @@
 -export([add_reward/3,baccarat_total/1,payout/3]).
 
 -include("db.hrl").
+-include("card.hrl").
 
 is_valid_bet_cats(Cats,AllBetCats)->
 	Cs=sets:from_list(Cats),
@@ -79,5 +80,5 @@ add_reward(Rewards,Cond,Result) when Cond==true ->
 add_reward(Rewards,_,_)->
 	Rewards.
 
-baccarat_total(Values) ->
-	lists:sum(Values) rem 10.
+baccarat_total(Cards) ->
+	lists:foldl(fun(X,Sum)->X#card.value+Sum end,0,Cards) rem 10.

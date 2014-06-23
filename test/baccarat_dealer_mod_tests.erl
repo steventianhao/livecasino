@@ -86,4 +86,3 @@ remove_test()->
 	M=#{?PLAYER_POS_1=>?JACK,?PLAYER_POS_2=>?KING},
 	?assert({ok,#{?PLAYER_POS_2=>?KING}}=:=baccarat_dealer_mod:remove(?PLAYER_POS_1,M)),
 	?assert(error=:=baccarat_dealer_mod:remove(?BANKER_POS_2,M)).
-

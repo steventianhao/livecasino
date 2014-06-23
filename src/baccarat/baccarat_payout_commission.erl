@@ -30,10 +30,12 @@ ratio(banker_tie)->
 ratio(player_tie) ->
 	{?BET_PLAYER,1}.
 
+is_pair(#card{rank=R1},#card{rank=R2})->
+	R1==R2.
 
 reward_morethan4(Bs=[B1,B2|_],Ps=[P1,P2|_])->
-	Pt=casino_bet:baccarat_total(Ps),
-	Bt=casino_bet:baccarat_total(Bs),
+	Pt=casino_bets:baccarat_total(Ps),
+	Bt=casino_bets:baccarat_total(Bs),
 	R1=if
 		Pt==Bt ->
 			[tie,banker_tie,player_tie];
@@ -42,14 +44,14 @@ reward_morethan4(Bs=[B1,B2|_],Ps=[P1,P2|_])->
 		Pt < Bt ->
 			[banker]
 	end,
-	R2=casino_bets:add_reward(R1,B1==B2,banker_pair),
-	R3=casino_bets:add_reward(R2,P1==P2,player_pair),
+	R2=casino_bets:add_reward(R1,is_pair(B1,B2),banker_pair),
+	R3=casino_bets:add_reward(R2,is_pair(P1,P2),player_pair),
 	[big|R3].
 
-reward(#{?BANKER_POS_1 := #card{value=B1},?BANKER_POS_2 := #card{value=B2},
-		 ?PLAYER_POS_1 := #card{value=P1},?PLAYER_POS_2 := #card{value=P2}})->
-	Pt=casino_bet:baccarat_total([P1,P2]),
-	Bt=casino_bet:baccarat_total([B1,B2]),
+reward(#{?BANKER_POS_1 := B1,?BANKER_POS_2 := B2,
+		 ?PLAYER_POS_1 := P1,?PLAYER_POS_2 := P2}=Cards) when map_size(Cards)==4 ->
+	Pt=casino_bets:baccarat_total([P1,P2]),
+	Bt=casino_bets:baccarat_total([B1,B2]),
 	R1=if
 		Pt == Bt ->
 			[tie,banker_tie,player_tie];
@@ -72,20 +74,20 @@ reward(#{?BANKER_POS_1 := #card{value=B1},?BANKER_POS_2 := #card{value=B2},
 					[banker]
 			end
 	end,
-	R2=casino_bets:add_reward(R1,B1==B2,banker_pair),
-	R3=casino_bets:add_reward(R2,P1==P2,player_pair),
+	R2=casino_bets:add_reward(R1,is_pair(B1,B2),banker_pair),
+	R3=casino_bets:add_reward(R2,is_pair(P1,P2),player_pair),
 	[small|R3];
 
-reward(#{?BANKER_POS_1 := #card{value=B1},?BANKER_POS_2 := #card{value=B2},?BANKER_POS_3 := #card{value=B3},
-		 ?PLAYER_POS_1 := #card{value=P1},?PLAYER_POS_2 := #card{value=P2}})->
+reward(#{?BANKER_POS_1 := B1,?BANKER_POS_2 := B2,?BANKER_POS_3 := B3,
+		 ?PLAYER_POS_1 := P1,?PLAYER_POS_2 := P2}=Cards) when map_size(Cards)==5 ->
 	reward_morethan4([B1,B2,B3],[P1,P2]);
 
-reward(#{?BANKER_POS_1 := #card{value=B1},?BANKER_POS_2 := #card{value=B2},?BANKER_POS_3 := #card{value=B3},
-		 ?PLAYER_POS_1 := #card{value=P1},?PLAYER_POS_2 := #card{value=P2},?PLAYER_POS_3 := #card{value=P3}})->
+reward(#{?BANKER_POS_1 := B1,?BANKER_POS_2 := B2,?BANKER_POS_3 := B3,
+		 ?PLAYER_POS_1 := P1,?PLAYER_POS_2 := P2,?PLAYER_POS_3 := P3}=Cards) when map_size(Cards)==6->
 	reward_morethan4([B1,B2,B3],[P1,P2,P3]);
 
-reward(#{?BANKER_POS_1 := #card{value=B1},?BANKER_POS_2 := #card{value=B2},
-		 ?PLAYER_POS_1 := #card{value=P1},?PLAYER_POS_2 := #card{value=P2},?PLAYER_POS_3 := #card{value=P3}})->
+reward(#{?BANKER_POS_1 := B1,?BANKER_POS_2 := B2,
+		 ?PLAYER_POS_1 := P1,?PLAYER_POS_2 := P2,?PLAYER_POS_3 := P3}=Cards) when map_size(Cards)==5->
 	reward_morethan4([B1,B2],[P1,P2,P3]).
 
 
