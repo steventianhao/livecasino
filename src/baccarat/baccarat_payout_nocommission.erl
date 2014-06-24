@@ -71,7 +71,7 @@ result4(Pt,Bt) when Pt<Bt ->
 
 
 reward(#{?BANKER_POS_1 := B1,?BANKER_POS_2 := B2,
-		 ?PLAYER_POS_1 := P1,?PLAYER_POS_2 := P2}=Cards) when map_size(Cards)==4 ->
+		?PLAYER_POS_1 := P1,?PLAYER_POS_2 := P2}=Cards) when map_size(Cards)==4 ->
 	Pt=casino_bets:baccarat_total([P1,P2]),
 	Bt=casino_bets:baccarat_total([B1,B2]),
 	R1=result4(Pt,Bt),
@@ -80,15 +80,15 @@ reward(#{?BANKER_POS_1 := B1,?BANKER_POS_2 := B2,
 	[small|R3];
 
 reward(#{?BANKER_POS_1 := B1,?BANKER_POS_2 := B2,?BANKER_POS_3 := B3,
-		 ?PLAYER_POS_1 := P1,?PLAYER_POS_2 := P2}=Cards) when map_size(Cards)==5->
+		?PLAYER_POS_1 := P1,?PLAYER_POS_2 := P2}=Cards) when map_size(Cards)==5->
 	reward_morethan4([B1,B2,B3],[P1,P2]);
 
 reward(#{?BANKER_POS_1 := B1,?BANKER_POS_2 := B2,?BANKER_POS_3 := B3,
-		 ?PLAYER_POS_1 := P1,?PLAYER_POS_2 := P2,?PLAYER_POS_3 := P3}=Cards) when map_size(Cards)==6->
+		?PLAYER_POS_1 := P1,?PLAYER_POS_2 := P2,?PLAYER_POS_3 := P3}=Cards) when map_size(Cards)==6->
 	reward_morethan4([B1,B2,B3],[P1,P2,P3]);
 
 reward(#{?BANKER_POS_1 := B1,?BANKER_POS_2 := B2,
-		 ?PLAYER_POS_1 := P1,?PLAYER_POS_2 := P2,?PLAYER_POS_3 := P3}=Cards) when map_size(Cards)==5->
+		?PLAYER_POS_1 := P1,?PLAYER_POS_2 := P2,?PLAYER_POS_3 := P3}=Cards) when map_size(Cards)==5->
 	reward_morethan4([B1,B2],[P1,P2,P3]).
 
 payout(Cards=#{})->
