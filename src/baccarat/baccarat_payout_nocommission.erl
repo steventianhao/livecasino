@@ -37,54 +37,44 @@ ratio(banker6)->
 is_pair(#card{rank=R1},#card{rank=R2})->
 	R1==R2.
 
+result4plus(Pt,Bt) when Pt==Bt ->
+	[tie,banker_tie,player_tie];
+result4plus(Pt,Bt) when Pt>Bt ->
+	[player];
+result4plus(Pt,Bt=6) when Pt<Bt ->
+	[banker6];
+result4plus(Pt,Bt) when Pt<Bt ->
+	[banker].
+
 reward_morethan4(Bs=[B1,B2|_],Ps=[P1,P2|_])->
 	Pt=casino_bets:baccarat_total(Ps),
 	Bt=casino_bets:baccarat_total(Bs),
-	R1=if
-		Pt==Bt ->
-			[tie,banker_tie,player_tie];
-		Pt > Bt ->
-			[player];
-		Pt < Bt ->
-			if 
-				Bt ==6 ->
-					[banker6];
-				true ->
-					[banker]
-			end
-	end,
+	R1=result4plus(Pt,Bt),
 	R2=casino_bets:add_reward(R1,is_pair(B1,B2),banker_pair),
 	R3=casino_bets:add_reward(R2,is_pair(P1,P2),player_pair),
 	[big|R3].
+
+result4(Pt,Bt) when Pt==Bt ->
+	[tie,banker_tie,player_tie];
+result4(Pt=8,Bt) when Pt>Bt ->
+	[player,player_n8];
+result4(Pt=9,Bt) when Pt>Bt ->
+	[player,player_n9];
+result4(Pt,Bt) when Pt>Bt ->
+	[player];
+result4(Pt,Bt=8) when Pt<Bt ->
+	[banker,banker_n8];
+result4(Pt,Bt=9) when Pt<Bt ->
+	[banker,banker_n9];
+result4(Pt,Bt) when Pt<Bt ->
+	[banker].
+
 
 reward(#{?BANKER_POS_1 := B1,?BANKER_POS_2 := B2,
 		 ?PLAYER_POS_1 := P1,?PLAYER_POS_2 := P2}=Cards) when map_size(Cards)==4 ->
 	Pt=casino_bets:baccarat_total([P1,P2]),
 	Bt=casino_bets:baccarat_total([B1,B2]),
-	R1=if
-		Pt == Bt ->
-			[tie,banker_tie,player_tie];
-		Pt > Bt ->
-			if 
-				Pt ==8 ->
-					[player,player_n8];
-				Pt ==9 ->
-					[player,player_n9];
-				true ->
-					[player]
-			end;
-		Pt < Bt ->
-			if
-				Bt==6 ->
-					[banker6];
-				Bt==8 ->
-					[banker,banker_n8];
-				Bt==9 ->
-					[banker,banker_n9];
-				true ->
-					[banker]
-			end
-	end,
+	R1=result4(Pt,Bt),
 	R2=casino_bets:add_reward(R1,is_pair(B1,B2),banker_pair),
 	R3=casino_bets:add_reward(R2,is_pair(P1,P2),player_pair),
 	[small|R3];
