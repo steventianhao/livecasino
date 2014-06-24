@@ -7,16 +7,6 @@
 %% gen_event callbacks
 -export([init/1,handle_event/2,handle_call/2,code_change/3,terminate/2,handle_info/2]).
 
-%%API
--export([add_handler/2,del_handler/3]).
-
-
-%%APIs
-add_handler(EventBus,UserId) when is_pid(EventBus)->
-	gen_event:add_handler(EventBus,{?MODULE,UserId},self()).
-del_handler(EventBus,UserId,Reason)->
-	gen_event:delete_handler(EventBus,{?MODULE,UserId},Reason).
-
 %%private functions
 dealer_to_json(Dealer) when is_list(Dealer)->
 	#{dealer=>list_to_binary(Dealer)};
