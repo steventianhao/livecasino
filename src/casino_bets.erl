@@ -1,8 +1,10 @@
 -module(casino_bets).
 
--export([is_valid_bets/3,insert_bets/4,payout_bets/2,payout_bundles/1,payout_total/1]).
+-export([is_valid_bets/3,insert_bets/4]).
 -export([create_bet_req/5,create_payout_req/5]).
 -export([add_reward/3,baccarat_total/1,payout/3]).
+-export([player_payout/2,persist_payout/5]).
+-define(CASINO_DB,mysql_casino_master).
 
 -include("db.hrl").
 -include("card.hrl").
@@ -52,9 +54,9 @@ payout_bet(Key={_,Cat},BetEts,RatioMap)->
 			true
 	end,	
 	payout_bet(ets:next(BetEts,Key),BetEts,RatioMap).
+
 payout_bets(BetEts,RatioMap)->
 	payout_bet(ets:first(BetEts),BetEts,RatioMap).
-
 
 payout_bundles(BetEts)->
 	Fun = fun({{_BetBundleId,_C},_A,0},Acc)->
@@ -69,8 +71,15 @@ payout_bundles(BetEts)->
 	end,
 	ets:foldl(Fun,#{},BetEts).
 
-payout_total(PayoutBundles)->
-	maps:fold(fun(_K,V,Acc)->Acc+V end,0,PayoutBundles).
+player_payout(BetEts,RatioMap)->
+	payout_bets(BetEts,RatioMap),
+	Pb=payout_bundles(BetEts),
+	Pt=maps:fold(fun(_K,V,Acc)->Acc+V end,0,Pb),
+	{Pb,Pt}.
+
+persist_payout(RoundId,UserId,PlayerTableId,Pb,Pt)->
+	Payout=create_payout_req(RoundId,UserId,PlayerTableId,Pb,Pt),
+	mysql_db:user_payout(?CASINO_DB,Payout).
 
 payout(Cards=#{},RatioFunc,RewardFunc)->
 	maps:from_list(lists:map(RatioFunc,RewardFunc(Cards))).

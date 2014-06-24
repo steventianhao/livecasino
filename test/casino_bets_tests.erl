@@ -33,22 +33,18 @@ payout_bets_test()->
 	RatioMap=#{2000 => 2,2004 => 2,2005 => 2},
 	Table=ets:new(bets,[set]),
 	casino_bets:insert_bets(Table,1234,[2000,2001,2002,2003],[1.1,2.2,3.3,4.4]),
-	casino_bets:payout_bets(Table,RatioMap),
+	casino_bets:player_payout(Table,RatioMap),
 	Result=ets:tab2list(Table),
 	M=maps:from_list([{C,R}||{{_BundleId,C},_A,R} <-Result]),
 	ets:delete(Table),
 	?assertMatch(#{2000:=2,2001:=0,2002:=0,2003:=0},M).
 
-payout_bundles_test()->
+player_payout_test()->
 	RatioMap=#{2000 => 2,2004 => 2,2005 => 2},
 	Table=ets:new(bets,[set]),
 	casino_bets:insert_bets(Table,1234,[2000,2001,2002,2003],[1.1,2.2,3.3,4.4]),
 	casino_bets:insert_bets(Table,2234,[2000,2004,2005,2003],[1.1,2.2,3.3,4.4]),
-	casino_bets:payout_bets(Table,RatioMap),
-	M=casino_bets:payout_bundles(Table),
+	{Pb,Pt}=casino_bets:player_payout(Table,RatioMap),
 	ets:delete(Table),
-	?assertMatch(#{1234:=2.2,2234:=13.2},M).
-
-payout_total_test()->
-	R=casino_bets:payout_total(#{1234 => 2.2,2234 => 13.2}),
-	?assertEqual(float_to_list(R,[{decimals,2},compact]),"15.4").
+	?assertMatch(#{1234:=2.2,2234:=13.2},Pb),
+	?assertEqual(float_to_list(Pt,[{decimals,2},compact]),"15.4").
