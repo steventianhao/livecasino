@@ -9,6 +9,9 @@
 -export([ace/0,two/0,three/0,four/0,five/0,six/0,seven/0,eight/0,nine/0,ten/0,jack/0,queen/0,king/0]).
 
 -include("dragontiger.hrl").
+-include("user.hrl").
+-include("table.hrl").
+
 -define(SERVER,dragontiger_game).
 
 start_game_server(DealerTableId,Countdown) when  is_integer(DealerTableId) andalso is_integer(Countdown)->
@@ -62,8 +65,8 @@ dealer_disconnect(GameServer)->
 update_countdown(GameServer,Countdown)->
 	gen_fsm:sync_send_all_state_event(GameServer,{update_countdown,Countdown}).
 
-player_join(GameServer,User,PlayerTableId)->
-	gen_fsm:sync_send_all_state_event(GameServer,{player_join,User,PlayerTableId}).
+player_join(GameServer,User,PlayerTable) when is_record(User,user) andalso is_record(PlayerTable,player_table)->
+	gen_fsm:sync_send_all_state_event(GameServer,{player_join,User,PlayerTable}).
 player_quit(GameServer,User,Reason)->
 	gen_fsm:send_all_state_event(GameServer,{player_quit,User,Reason}).
 
