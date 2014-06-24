@@ -4,17 +4,13 @@
 -record(state,{pid}).
 -include("dealer.hrl").
 
-%% gen_event callbacks
 -export([init/1,handle_event/2,handle_call/2,code_change/3,terminate/2,handle_info/2]).
 
-%%private functions
 dealer_to_json(Dealer) when is_list(Dealer)->
 	#{dealer=>list_to_binary(Dealer)};
 dealer_to_json(Dealer) when is_record(Dealer,dealer)->
 	#{dealer=>list_to_binary(Dealer#dealer.name)}.
 
-
-%%gen_event callbacks
 init(Pid)->
 	{ok,#state{pid=Pid}}.
 
