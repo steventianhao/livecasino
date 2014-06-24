@@ -21,7 +21,7 @@ bet(Pid,Cats,Amounts)->
 			{error,invalid_bets}
 	end.
 
-start_link(Server,EventBus,PlayerTable,User)->
+start_link(Server,EventBus,PlayerTable,User) when is_record(PlayerTable,player_table) andalso is_record(User,user)->
 	gen_server:start_link(?MODULE,{Server,EventBus,PlayerTable,User},[]).
 
 init({Server,EventBus,PlayerTable,User})->
@@ -32,8 +32,7 @@ init({Server,EventBus,PlayerTable,User})->
 do_bet(Server,BetEts,RoundId,UserId,PlayerTableId,Cats,Amounts)->
 	case ?GAME_API:try_bet(Server,Cats,Amounts) of
 		ok->
-			Bet=casino_bets:create_bet_req(RoundId,UserId,PlayerTableId,Cats,Amounts),
-			case mysql_db:user_bet(?CASINO_DB,Bet) of
+			case casino_bets:persist_bet(RoundId,UserId,PlayerTableId,Cats,Amounts) of
 				{ok,Bundle={BetBundleId,_BalanceAfter}}->
 					true=casino_bets:insert_bets(BetEts,BetBundleId,Cats,Amounts),
 					{ok,Bundle};

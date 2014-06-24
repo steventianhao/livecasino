@@ -3,7 +3,7 @@
 -export([is_valid_bets/3,insert_bets/4]).
 -export([create_bet_req/5,create_payout_req/5]).
 -export([add_reward/3,baccarat_total/1,payout/3]).
--export([player_payout/2,persist_payout/5]).
+-export([player_payout/2,persist_payout/5,persist_bet/5]).
 -define(CASINO_DB,mysql_casino_master).
 
 -include("db.hrl").
@@ -80,6 +80,10 @@ player_payout(BetEts,RatioMap)->
 persist_payout(RoundId,UserId,PlayerTableId,Pb,Pt)->
 	Payout=create_payout_req(RoundId,UserId,PlayerTableId,Pb,Pt),
 	mysql_db:user_payout(?CASINO_DB,Payout).
+
+persist_bet(RoundId,UserId,PlayerTableId,Cats,Amounts)->
+	Bet=create_bet_req(RoundId,UserId,PlayerTableId,Cats,Amounts),
+	mysql_db:user_bet(?CASINO_DB,Bet).
 
 payout(Cards=#{},RatioFunc,RewardFunc)->
 	maps:from_list(lists:map(RatioFunc,RewardFunc(Cards))).
