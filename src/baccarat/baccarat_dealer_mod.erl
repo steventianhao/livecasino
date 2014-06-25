@@ -16,7 +16,8 @@ from_string(Cards)->
 	
 create_map(Cards,IndexList)->
 	case {Cards,IndexList} of
-		{[],_} -> #{};
+		{[],_} -> 
+			#{};
 		{[H1|T1],[H2|T2]} -> 
 			Rest=create_map(T1,T2),
 			maps:put(H2,H1,Rest)
@@ -26,12 +27,11 @@ string_to_cards([],_CardsMap)->
 	[];
 string_to_cards([S,N|T],CardsMap)->
 	C= maps:get(N,CardsMap),
-	[C#card{suit=S}|string_to_cards(T,CardsMap)].
+	[casino_card:set_suit(S,C)|string_to_cards(T,CardsMap)].
 
 cards_to_string(Pcs,Bcs)->
-	Fun=fun(C)->[C#card.suit,C#card.rank] end,
-	PL=lists:flatmap(Fun,Pcs),
-	BL=lists:flatmap(Fun,Bcs),
+	PL=casino_card:cards_to_string(Pcs),
+	BL=casino_card:cards_to_string(Bcs),
 	lists:append([PL,"#",BL]).
 
 to_string(#{?PLAYER_POS_1:=P1,?PLAYER_POS_2:=P2,?PLAYER_POS_3:=P3,?BANKER_POS_1:=B1,?BANKER_POS_2:=B2,?BANKER_POS_3:=B3})->

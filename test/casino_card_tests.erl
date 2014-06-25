@@ -1,5 +1,6 @@
 -module(casino_card_tests).
 -include_lib("eunit/include/eunit.hrl").
+-include("card.hrl").
 -define(DEBUG,true).
 
 results()->
@@ -29,3 +30,12 @@ check_cards4_test()->
 
 check_cards5_test()->
 	?assertNot(casino_card:check_cards([a,b])).
+
+set_suit_test()->
+	C=casino_card:set_suit(?S_HEART,#card{}),
+	?assertEqual(#card{suit=$H},C).
+
+cards_to_string_test()->
+	Cards=[#card{suit=?S_HEART,rank=?R_ACE},#card{suit=?S_CLUB,rank=?R_QUEEN}],
+	?assertEqual("HACQ",casino_card:cards_to_string(Cards)).
+

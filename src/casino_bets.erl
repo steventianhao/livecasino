@@ -2,7 +2,7 @@
 
 -export([is_valid_bets/3,insert_bets/4]).
 -export([create_bet_req/5,create_payout_req/5]).
--export([add_reward/3,baccarat_total/1,payout/3]).
+-export([add_reward/3,payout/3]).
 -export([player_payout/2,persist_payout/5,persist_bet/5]).
 -define(CASINO_DB,mysql_casino_master).
 
@@ -92,6 +92,3 @@ add_reward(Rewards,Cond,Result) when Cond==true ->
 	[Result | Rewards];
 add_reward(Rewards,_,_)->
 	Rewards.
-
-baccarat_total(Cards) ->
-	lists:foldl(fun(X,Sum)->X#card.value+Sum end,0,Cards) rem 10.

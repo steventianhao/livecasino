@@ -1,7 +1,7 @@
 -module(casino_card).
 -include("card.hrl").
 
--export([check_cards/1,check_one_card/2]).
+-export([check_cards/1,check_one_card/2,set_suit/2,cards_to_string/1,total/1]).
 
 check_cards([])->
 	true;
@@ -20,3 +20,11 @@ check_one_card(S,R) when is_integer(S) andalso is_integer(R)->
 check_one_card(_,_)->
 	false.
 
+set_suit(Suit,Card)->
+	Card#card{suit=Suit}.
+
+cards_to_string(Cards)->
+	lists:flatmap(fun(C)->[C#card.suit,C#card.rank] end,Cards).
+
+total(Cards) ->
+	lists:foldl(fun(X,Sum)->X#card.value+Sum end,0,Cards) rem 10.
