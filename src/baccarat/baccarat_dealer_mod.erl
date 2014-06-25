@@ -44,9 +44,6 @@ to_string(#{?PLAYER_POS_1:=P1,?PLAYER_POS_2:=P2,?BANKER_POS_1:=B1,?BANKER_POS_2:
 	cards_to_string([P2,P1],[B2,B1]).
 
 
-total(Cards) ->
-	lists:foldl(fun(X,Sum)->X#card.value+Sum end,0,Cards) rem 10.
-
 put(Pos,Card,Cards) when is_map(Cards) andalso is_record(Card,card) andalso is_integer(Pos)->
 	case lists:member(Pos,?ALL_POS) of
 		true->
@@ -64,8 +61,8 @@ remove(Pos,Cards) when is_map(Cards) andalso is_integer(Pos)->
 	end.
 
 validate(Cards=#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?BANKER_POS_1 :=B1,?BANKER_POS_2 :=B2})->
-	Bt=total([B1,B2]),
-	Pt=total([P1,P2]),
+	Bt=casino_card:total([B1,B2]),
+	Pt=casino_card:total([P1,P2]),
 	case {map_size(Cards),Cards} of
 		{4,_}->
 			?ANYONEOF(Pt,?TOTAL89) orelse ?ANYONEOF(Bt,?TOTAL89) orelse (?ANYONEOF(Pt,?TOTAL67) andalso ?ANYONEOF(Bt,?TOTAL67));
@@ -152,11 +149,11 @@ add(Card,Cards) when is_map(Cards) andalso is_record(Card,card)->
 		{2,#{?PLAYER_POS_1 := _, ?BANKER_POS_1 := _}}->
 			{more,?PLAYER_POS_2};
 		{3,#{?PLAYER_POS_1 := P1, ?BANKER_POS_1 := B1, ?PLAYER_POS_2 := P2}}->
-			Calc3(total([P1,P2]),total([B1,Card]));
+			Calc3(casino_card:total([P1,P2]),casino_card:total([B1,Card]));
 		{4,#{?PLAYER_POS_1 :=P1, ?BANKER_POS_1 :=B1,?PLAYER_POS_2 :=P2,?BANKER_POS_2 := B2}}->
-			Calc4(total([P1,P2]),total([B1,B2]));
+			Calc4(casino_card:total([P1,P2]),casino_card:total([B1,B2]));
 		{5,#{?PLAYER_POS_1:=_,?PLAYER_POS_2:=_,?PLAYER_POS_3:=P3,?BANKER_POS_1:=B1,?BANKER_POS_2:=B2}}->
-			Calc5(total([B1,B2]),P3#card.value);
+			Calc5(casino_card:total([B1,B2]),P3#card.value);
 		_ -> 
 			error
 	end,
