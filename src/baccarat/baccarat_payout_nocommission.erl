@@ -33,10 +33,6 @@ ratio(player_tie) ->
 ratio(banker6)->
 	{?BET_BANKER,1.5}.
 
-
-is_pair(#card{rank=R1},#card{rank=R2})->
-	R1==R2.
-
 result4plus(Pt,Bt) when Pt==Bt ->
 	[tie,banker_tie,player_tie];
 result4plus(Pt,Bt) when Pt>Bt ->
@@ -50,8 +46,8 @@ reward_morethan4(Bs=[B1,B2|_],Ps=[P1,P2|_])->
 	Pt=casino_card:total(Ps),
 	Bt=casino_card:total(Bs),
 	R1=result4plus(Pt,Bt),
-	R2=casino_bets:add_reward(R1,is_pair(B1,B2),banker_pair),
-	R3=casino_bets:add_reward(R2,is_pair(P1,P2),player_pair),
+	R2=casino_bets:add_reward(R1,casino_card:is_pair(B1,B2),banker_pair),
+	R3=casino_bets:add_reward(R2,casino_card:is_pair(P1,P2),player_pair),
 	[big|R3].
 
 result4(Pt,Bt) when Pt==Bt ->
@@ -75,8 +71,8 @@ reward(#{?BANKER_POS_1 := B1,?BANKER_POS_2 := B2,
 	Pt=casino_card:total([P1,P2]),
 	Bt=casino_card:total([B1,B2]),
 	R1=result4(Pt,Bt),
-	R2=casino_bets:add_reward(R1,is_pair(B1,B2),banker_pair),
-	R3=casino_bets:add_reward(R2,is_pair(P1,P2),player_pair),
+	R2=casino_bets:add_reward(R1,casino_card:is_pair(B1,B2),banker_pair),
+	R3=casino_bets:add_reward(R2,casino_card:is_pair(P1,P2),player_pair),
 	[small|R3];
 
 reward(#{?BANKER_POS_1 := B1,?BANKER_POS_2 := B2,?BANKER_POS_3 := B3,

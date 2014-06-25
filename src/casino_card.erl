@@ -2,6 +2,7 @@
 -include("card.hrl").
 
 -export([check_cards/1,check_one_card/2,set_suit/2,cards_to_string/1,total/1]).
+-export([is_pair/2]).
 
 check_cards([])->
 	true;
@@ -28,3 +29,6 @@ cards_to_string(Cards)->
 
 total(Cards) ->
 	lists:foldl(fun(X,Sum)->X#card.value+Sum end,0,Cards) rem 10.
+
+is_pair(#card{rank=R1},#card{rank=R2})->
+	R1==R2.
