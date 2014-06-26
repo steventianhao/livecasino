@@ -110,5 +110,1086 @@
 			<column name="bet_type_name" value="tiger_even" />
 		</insert>
 	</changeSet>
+	
+	<changeSet id="3" author="steven">
+		<insert tableName="games">
+			<column name="id" value="3" />
+			<column name="game_name" value="sicbo" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3000" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="big" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3001" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="small" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3002" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="odd" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3003" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="even" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3004" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="total4" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3005" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="total5" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3006" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="total6" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3007" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="total7" />
+		</insert>
+		
+		<insert tableName="bet_types">
+			<column name="id" value="3008" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="total8" />
+		</insert>
+		
+		<insert tableName="bet_types">
+			<column name="id" value="3009" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="total9" />
+		</insert>
+		
+		<insert tableName="bet_types">
+			<column name="id" value="3010" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="total10" />
+		</insert>
+		
+		<insert tableName="bet_types">
+			<column name="id" value="3011" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="total11" />
+		</insert>
+		
+		<insert tableName="bet_types">
+			<column name="id" value="3012" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="total12" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3013" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="total13" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3014" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="total14" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3015" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="total15" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3016" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="total16" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3017" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="total17" />
+		</insert>
+		
+		<insert tableName="bet_types">
+			<column name="id" value="3021" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="number1" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3022" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="number2" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3023" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="number3" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3024" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="number4" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3025" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="number5" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3026" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="number6" />
+		</insert>
+		
+		<insert tableName="bet_types">
+			<column name="id" value="3031" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="triple1" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3032" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="triple2" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3033" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="triple3" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3034" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="triple4" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3035" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="triple5" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3036" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="triple6" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3037" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="any_triple" />
+		</insert>
+		
+		
+		<insert tableName="bet_types">
+			<column name="id" value="3041" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="double1" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3042" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="double2" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3043" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="double3" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3044" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="double4" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3045" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="double5" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3046" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="double6" />
+		</insert>
+		
+		
+		<insert tableName="bet_types">
+			<column name="id" value="3051" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="pair1" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3052" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="pair2" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3053" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="pair3" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3054" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="pair4" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3055" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="pair5" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3056" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="pair6" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3057" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="pair7" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3058" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="pair8" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3059" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="pair9" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3060" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="pair10" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3061" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="pair11" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3062" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="pair12" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3063" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="pair13" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3064" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="pair14" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="3065" />
+			<column name="game_id" value="3" />
+			<column name="bet_type_name" value="pair15" />
+		</insert>
+	</changeSet>
+	
+	<changeSet id="4" author="steven">
+		<insert tableName="games">
+			<column name="id" value="4" />
+			<column name="game_name" value="roulette" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4000" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="red" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4001" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="black" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4002" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="odd" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4003" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="even" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4004" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="big" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4005" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="small" />
+		</insert>
+		
+		<insert tableName="bet_types">
+			<column name="id" value="4010" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="dozen1" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4011" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="dozen2" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4012" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="dozen3" />
+		</insert>
+		
+		<insert tableName="bet_types">
+			<column name="id" value="4020" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="column1" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4021" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="column2" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4022" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="column3" />
+		</insert>
+		
+		<insert tableName="bet_types">
+			<column name="id" value="4030" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight0" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4031" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight1" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4032" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight2" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4033" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight3" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4034" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight4" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4035" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight5" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4036" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight6" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4037" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight7" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4038" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight8" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4039" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight9" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4040" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight10" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4041" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight11" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4042" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight12" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4043" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight13" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4044" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight14" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4045" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight15" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4046" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight16" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4047" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight17" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4048" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight18" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4049" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight19" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4050" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight20" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4051" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight21" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4052" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight22" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4053" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight23" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4054" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight24" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4055" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight25" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4056" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight26" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4057" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight27" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4058" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight28" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4059" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight29" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4060" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight30" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4061" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight31" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4062" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight32" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4063" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight33" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4064" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight34" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4065" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight35" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4066" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="straight36" />
+		</insert>
+		
+		<insert tableName="bet_types">
+			<column name="id" value="4071" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="street1" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4072" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="street2" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4073" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="street3" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4074" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="street4" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4075" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="street5" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4076" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="street6" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4077" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="street7" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4078" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="street8" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4079" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="street9" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4080" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="street10" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4081" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="street11" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4082" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="street12" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4083" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="street13" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4084" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="street14" />
+		</insert>
+		
+		
+		
+		<insert tableName="bet_types">
+			<column name="id" value="4101" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split1" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4102" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split2" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4103" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split3" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4104" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split4" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4105" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split5" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4106" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split6" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4107" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split7" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4108" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split8" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4109" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split9" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4110" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split10" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4111" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split11" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4112" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split12" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4113" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split13" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4114" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split14" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4115" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split15" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4116" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split16" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4117" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split17" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4118" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split18" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4119" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split19" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4120" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split20" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4121" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split21" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4122" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split22" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4123" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split23" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4124" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split24" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4125" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split25" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4126" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split26" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4127" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split27" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4128" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split28" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4129" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split29" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4130" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split30" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4131" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split31" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4132" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split32" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4133" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split33" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4134" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split34" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4135" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split35" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4136" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split36" />
+		</insert>
+		
+		<insert tableName="bet_types">
+			<column name="id" value="4137" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split37" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4138" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split38" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4139" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split39" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4140" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split40" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4141" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split41" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4142" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split42" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4143" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split43" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4144" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split44" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4145" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split45" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4146" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split46" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4147" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split47" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4148" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split48" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4149" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split49" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4150" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split50" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4151" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split51" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4152" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split52" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4153" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split53" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4154" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split54" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4155" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split55" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4156" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split56" />
+		</insert>
+		
+		<insert tableName="bet_types">
+			<column name="id" value="4157" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split57" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4158" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split58" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4159" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split59" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4160" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="split60" />
+		</insert>
+		
+		
+		
+		<insert tableName="bet_types">
+			<column name="id" value="4201" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="conner1" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4202" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="conner2" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4203" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="conner3" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4204" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="conner4" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4205" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="conner5" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4206" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="conner6" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4207" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="conner7" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4208" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="conner8" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4209" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="conner9" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4210" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="conner10" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4211" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="conner11" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4212" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="conner12" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4213" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="conner13" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4214" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="conner14" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4215" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="conner15" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4216" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="conner16" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4217" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="conner17" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4218" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="conner18" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4219" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="conner19" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4220" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="conner20" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4221" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="conner21" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4222" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="conner22" />
+		</insert>
+		
+		<insert tableName="bet_types">
+			<column name="id" value="4301" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="sixline1" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4302" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="sixline2" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4303" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="sixline3" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4304" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="sixline4" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4305" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="sixline5" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4306" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="sixline6" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4307" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="sixline7" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4308" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="sixline8" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4309" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="sixline9" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4310" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="sixline10" />
+		</insert>
+		<insert tableName="bet_types">
+			<column name="id" value="4311" />
+			<column name="game_id" value="4" />
+			<column name="bet_type_name" value="sixline11" />
+		</insert>
+		
+		
+	</changeSet>
+	
 
 </databaseChangeLog>
