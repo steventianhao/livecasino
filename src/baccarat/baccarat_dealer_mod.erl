@@ -8,9 +8,9 @@
 from_string(Cards)->
 	[Pcs,Bcs]=string:tokens(Cards,"#"),
 	CardsMap= maps:from_list([{C#card.rank,C} || C <-?ALL_CARD]),
-	CLp=lists:reverse(string_to_cards(Pcs,CardsMap)),
+	CLp=lists:reverse(casino_card:string_to_cards(Pcs,CardsMap)),
 	Mp=create_map(CLp,[?PLAYER_POS_1,?PLAYER_POS_2,?PLAYER_POS_3]),
-	CLb=lists:reverse(string_to_cards(Bcs,CardsMap)),
+	CLb=lists:reverse(casino_card:string_to_cards(Bcs,CardsMap)),
 	Mb=create_map(CLb,[?BANKER_POS_1,?BANKER_POS_2,?BANKER_POS_3]),
 	maps:merge(Mp,Mb).
 	
@@ -23,11 +23,6 @@ create_map(Cards,IndexList)->
 			maps:put(H2,H1,Rest)
 	end.
 
-string_to_cards([],_CardsMap)->
-	[];
-string_to_cards([S,N|T],CardsMap)->
-	C= maps:get(N,CardsMap),
-	[casino_card:set_suit(S,C)|string_to_cards(T,CardsMap)].
 
 cards_to_string(Pcs,Bcs)->
 	PL=casino_card:cards_to_string(Pcs),

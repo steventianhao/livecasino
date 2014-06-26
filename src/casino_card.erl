@@ -1,8 +1,9 @@
 -module(casino_card).
 -include("card.hrl").
 
--export([check_cards/1,check_one_card/2,set_suit/2,cards_to_string/1,total/1]).
--export([is_pair/2]).
+-export([check_cards/1,check_one_card/2]).
+-export([string_to_cards/2,card_to_string/1,cards_to_string/1,cards_to_map/1]).
+-export([is_pair/2,total/1]).
 
 check_cards([])->
 	true;
@@ -21,14 +22,23 @@ check_one_card(S,R) when is_integer(S) andalso is_integer(R)->
 check_one_card(_,_)->
 	false.
 
-set_suit(Suit,Card)->
-	Card#card{suit=Suit}.
 
+card_to_string(#card{rank=N,suit=S})->
+	[S,N].
 cards_to_string(Cards)->
-	lists:flatmap(fun(C)->[C#card.suit,C#card.rank] end,Cards).
+	lists:flatmap(fun(C)->card_to_string(C) end,Cards).
 
 total(Cards) ->
 	lists:foldl(fun(X,Sum)->X#card.value+Sum end,0,Cards) rem 10.
 
 is_pair(#card{rank=R1},#card{rank=R2})->
 	R1==R2.
+
+string_to_cards([],_CardsMap)->
+	[];
+string_to_cards([S,N|T],CardsMap)->
+	C= maps:get(N,CardsMap),
+	[C#card{suit=S}|string_to_cards(T,CardsMap)].
+
+cards_to_map(AllCards)->
+	maps:from_list([{C#card.rank,C} || C <-AllCards]).

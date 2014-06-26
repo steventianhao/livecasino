@@ -1,6 +1,6 @@
 -module(baccarat_player_mod).
 -include("baccarat.hrl").
--export([payout/2]).
+-export([payout/2,is_valid_bets/2]).
 
 is_valid_bets(Cats,Amounts)->
 	casino_bets:is_valid_bets(Cats,Amounts,?ALL_BET_CATS).

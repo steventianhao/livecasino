@@ -26,17 +26,12 @@ validate(Cards=#{?DRAGON_POS := _, ?TIGER_POS := _}) when map_size(Cards)==2 ->
 validate(_)->
 	false.
 	
-string_to_card([S,N],CardsMap)->
-	C=maps:get(N,CardsMap), 
-	C#card{suit=S}.
-card_to_string(#card{rank=N,suit=S})->
-	[S,N].
-
 from_string(Cards)->
-	[Dc,Tc]=string:tokens(Cards,"#"),
-	CardsMap=maps:from_list([{C#card.rank,C} || C <-?ALL_CARD]),
-	#{?DRAGON_POS=>string_to_card(Dc,CardsMap),?TIGER_POS=>string_to_card(Tc,CardsMap)}.
-
+	[Ds,Ts]=string:tokens(Cards,"#"),
+	CardsMap=casino_card:cards_to_map(?ALL_CARD),
+	Dc =casino_card:string_to_cards(Ds,CardsMap),
+	Tc =casino_card:string_to_cards(Ts,CardsMap),
+	#{?DRAGON_POS=>Dc,?TIGER_POS=>Tc}.
 
 to_string(#{?DRAGON_POS :=D,?TIGER_POS :=T})->
-	lists:append([card_to_string(D),"#",card_to_string(T)]).
+	lists:append([casino_card:card_to_string(D),"#",casino_card:card_to_string(T)]).
