@@ -1,4 +1,4 @@
--module(dragontiger_sup).
+-module(casino_sup).
 -behavior(supervisor).
 
 -export([start_link/0,players_sup_id/1]).
@@ -17,12 +17,12 @@ dragontiger_spec(Table,Countdown)->
 players_sup_id(Table)->
 	list_to_atom(lists:concat(["dragontiger_players_sup_",Table])).
 
-players_sup_spec(Table)->
-	StartFunc={dragontiger_players_sup,start_link,[Table]},
+dragontiger_players_sup_spec(Table)->
+	StartFunc={casino_players_sup,start_link,[Table,dragontiger_player]},
 	Id=players_sup_id(Table),
 	{Id,StartFunc,transient,6,supervisor,dynamic}.
 
 init([])->
-	Children=[dragontiger_spec(4,13),players_sup_spec(4)],
+	Children=[dragontiger_spec(4,13),dragontiger_players_sup_spec(4)],
 	RestartStrategy={one_for_one,1,60},
 	{ok,{RestartStrategy,Children}}.

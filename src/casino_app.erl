@@ -1,4 +1,4 @@
--module(dragontiger_app).
+-module(casino_app).
 
 -behaviour(application).
 
@@ -6,7 +6,7 @@
 
 start(_Type,_StartArgs)->
 	mysql_casino_master:add_db_pool(),
-	dragontiger_sup:start_link().
+	casino_sup:start_link().
 
 stop(_State)->
 	ok.

@@ -1,0 +1,8 @@
+{application,casino,
+[
+	{description,"casino game servers"},
+	{vsn,"0.9.0"},
+	{modules,[casino_sup]},
+	{applications,[kernel,stdlib,crypto,emysql,lager]},
+	{mod,{casino_app,[]}}
+]}.
