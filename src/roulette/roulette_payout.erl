@@ -1,4 +1,4 @@
--module(roulette_payout_roulette).
+-module(roulette_payout).
 -export([payout/1]).
 
 -record(bet,{id,ratio,nums}).

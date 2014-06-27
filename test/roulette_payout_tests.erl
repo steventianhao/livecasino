@@ -1,4 +1,4 @@
--module(roulette_payout_roulette_tests).
+-module(roulette_payout_tests).
 -include_lib("eunit/include/eunit.hrl").
 
 payout_test()->
