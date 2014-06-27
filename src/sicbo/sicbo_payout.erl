@@ -1,6 +1,5 @@
 -module(sicbo_payout).
-
--export([payout/1]).
+-export([payout/1,all_bets/0,all_bet_cats/0]).
 
 -record(range_bet,{id,ratio,min,max}).
 -record(bet,{id,ratio}).
@@ -8,29 +7,20 @@
 -record(number_bet,{id,ratio,num}).
 -record(pair_bet,{id,ratio,nums}).
 
-ratio_pair(#range_bet{id=Id,ratio=Ratio})->
-	{Id,Ratio};
-ratio_pair(#bet{id=Id,ratio=Ratio})->
-	{Id,Ratio};
-ratio_pair(#total_bet{id=Id,ratio=Ratio})->
-	{Id,Ratio};
-ratio_pair(#number_bet{id=Id,ratio=Ratio})->
-	{Id,Ratio};
-ratio_pair(#pair_bet{id=Id,ratio=Ratio})->
-	{Id,Ratio}.
+ratio_pair(Tuple)->
+	{element(2,Tuple),element(3,Tuple)}.
 
 -define(BIG,#range_bet{id=3000,ratio=1,min=11,max=17}).
 -define(SMALL,#range_bet{id=3001,ratio=1,min=4,max=10}).
-
 -define(ODD,#bet{id=3002,ratio=1}).
 -define(EVEN,#bet{id=3003,ratio=1}).
 
--define(TOTAL4,#total_bet{id=3004,ratio=50,total=4}).
--define(TOTAL5,#total_bet{id=3005,ratio=18,total=5}).
--define(TOTAL6,#total_bet{id=3006,ratio=14,total=6}).
--define(TOTAL7,#total_bet{id=3007,ratio=12,total=7}).
--define(TOTAL8,#total_bet{id=3008,ratio=8,total=8}).
--define(TOTAL9,#total_bet{id=3009,ratio=6,total=9}).
+-define(TOTAL04,#total_bet{id=3004,ratio=50,total=4}).
+-define(TOTAL05,#total_bet{id=3005,ratio=18,total=5}).
+-define(TOTAL06,#total_bet{id=3006,ratio=14,total=6}).
+-define(TOTAL07,#total_bet{id=3007,ratio=12,total=7}).
+-define(TOTAL08,#total_bet{id=3008,ratio=8,total=8}).
+-define(TOTAL09,#total_bet{id=3009,ratio=6,total=9}).
 -define(TOTAL10,#total_bet{id=3010,ratio=6,total=10}).
 -define(TOTAL11,#total_bet{id=3011,ratio=6,total=11}).
 -define(TOTAL12,#total_bet{id=3012,ratio=6,total=12}).
@@ -39,7 +29,7 @@ ratio_pair(#pair_bet{id=Id,ratio=Ratio})->
 -define(TOTAL15,#total_bet{id=3015,ratio=14,total=15}).
 -define(TOTAL16,#total_bet{id=3016,ratio=18,total=16}).
 -define(TOTAL17,#total_bet{id=3017,ratio=50,total=17}).
--define(TOTALS,[?TOTAL4,?TOTAL5,?TOTAL6,?TOTAL7,?TOTAL8,?TOTAL9,?TOTAL10,
+-define(TOTALS,[?TOTAL04,?TOTAL05,?TOTAL06,?TOTAL07,?TOTAL08,?TOTAL09,?TOTAL10,
 	?TOTAL11,?TOTAL12,?TOTAL13,?TOTAL14,?TOTAL15,?TOTAL16,?TOTAL17]).
 
 payout_total(Total)->
@@ -84,7 +74,6 @@ payout_number(Nums)->
 -define(TRIPLE4,#number_bet{id=3034,ratio=150,num=4}).
 -define(TRIPLE5,#number_bet{id=3035,ratio=150,num=5}).
 -define(TRIPLE6,#number_bet{id=3036,ratio=150,num=6}).
-
 -define(TRIPLES,[?TRIPLE1,?TRIPLE2,?TRIPLE3,?TRIPLE4,?TRIPLE5,?TRIPLE6]).
 -define(ANY_TRIPLE,#bet{id=3037,ratio=24}).
 
@@ -117,16 +106,23 @@ payout_triple(_,_,_)->
 -define(PAIR13,#pair_bet{id=3063,ratio=5,nums=[4,5]}).
 -define(PAIR14,#pair_bet{id=3064,ratio=5,nums=[4,6]}).
 -define(PAIR15,#pair_bet{id=3065,ratio=5,nums=[5,6]}).
-
 -define(PAIRS,[?DOUBLE1,?DOUBLE2,?DOUBLE3,?DOUBLE4,?DOUBLE5,?DOUBLE6,?PAIR01,?PAIR02,?PAIR03,?PAIR04,?PAIR05,?PAIR06,?PAIR07,?PAIR08,?PAIR09,?PAIR10,?PAIR11,?PAIR12,?PAIR13,?PAIR14,?PAIR15]).
+
 payout_pair(D1,D2)->
 	Dss=sets:from_list([D1,D2]),
 	[ratio_pair(B)||B<-?PAIRS,sets:from_list(B#pair_bet.nums)==Dss].
+payout_pair(D1,D2,D3)->
+	DL=payout_pair(D1,D2)++payout_pair(D2,D3)++payout_pair(D1,D3),
+	sets:to_list(sets:from_list(DL)).
 
 -define(ALL_BETS,?PAIRS++?TRIPLES++?NUMBERS++?TOTALS++[?ANY_TRIPLE,?ODD,?EVEN,?BIG,?SMALL]).
+-define(ALL_BET_CATS,[element(2,B)||B<-?ALL_BETS]).
+
+all_bets()->?ALL_BETS.
+all_bet_cats()-> ?ALL_BET_CATS.
 
 payout([D1,D2,D3]=Ds)->
-	Pair=payout_pair(D1,D2)++payout_pair(D2,D3)++payout_pair(D1,D3),
+	Pair=payout_pair(D1,D2,D3),
 	Triple=payout_triple(D1,D2,D3),
 	Number=payout_number(lists:sort(Ds)),
 	Total=payout_total(lists:sum(Ds)),

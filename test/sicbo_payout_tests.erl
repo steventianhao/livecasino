@@ -16,3 +16,7 @@ payout3_test()->
 	R=sicbo_payout:payout([4,5,6]),
 	E=#{3000=>2,3002=>2,3015=>15,3024=>2,3025=>2,3026=>2,3063=>6,3064=>6,3065=>6},
 	?assertEqual(E,R).
+
+bets_test()->
+	?assertEqual(52,length(sicbo_payout:all_bets())),
+	?assertEqual(52,length(sicbo_payout:all_bet_cats())).
