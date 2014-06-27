@@ -57,17 +57,18 @@ payout_number21(#number_bet{id=Id,ratio=Ratio,num=One},_Two,One)->
 	{true,{Id,Ratio}};
 payout_number21(_E,_Two,_One)->
 	false.
+payout_number21(X,Y)->
+	Fun=fun(E)->payout_number21(E,X,Y) end,
+	lists:filtermap(Fun,?NUMBERS).
+
 payout_number([X,X,X])->
 	[{Id,Ratio*3} ||#number_bet{id=Id,ratio=Ratio,num=Num}<-?NUMBERS,Num==X];
 payout_number([X,X,Y])->
-	Fun=fun(E)->payout_number21(E,X,Y) end,
-	lists:filtermap(Fun,?NUMBERS);
+	payout_number21(X,Y);	
 payout_number([Y,X,X])->
-	Fun=fun(E)->payout_number21(E,X,Y) end,
-	lists:filtermap(Fun,?NUMBERS);
+	payout_number21(X,Y);
 payout_number([X,Y,X])->
-	Fun=fun(E)->payout_number21(E,X,Y) end,
-	lists:filtermap(Fun,?NUMBERS);
+	payout_number21(X,Y);
 payout_number(Nums)->
 	[ratio_pair(B)||B<-?NUMBERS,lists:member(B#number_bet.num,Nums)].
 
