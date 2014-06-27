@@ -57,13 +57,16 @@ payout_number21(#number_bet{id=Id,ratio=Ratio,num=One},_Two,One)->
 	{true,{Id,Ratio}};
 payout_number21(_E,_Two,_One)->
 	false.
-payout_number([D1,D1,D1])->
-	[{Id,Ratio*3} ||#number_bet{id=Id,ratio=Ratio,num=Num}<-?NUMBERS,Num==D1];
-payout_number([D1,D1,D2])->
-	Fun=fun(E)->payout_number21(E,D1,D2) end,
+payout_number([X,X,X])->
+	[{Id,Ratio*3} ||#number_bet{id=Id,ratio=Ratio,num=Num}<-?NUMBERS,Num==X];
+payout_number([X,X,Y])->
+	Fun=fun(E)->payout_number21(E,X,Y) end,
 	lists:filtermap(Fun,?NUMBERS);
-payout_number([D1,D2,D2])->
-	Fun=fun(E)->payout_number21(E,D2,D1) end,
+payout_number([Y,X,X])->
+	Fun=fun(E)->payout_number21(E,X,Y) end,
+	lists:filtermap(Fun,?NUMBERS);
+payout_number([X,Y,X])->
+	Fun=fun(E)->payout_number21(E,X,Y) end,
 	lists:filtermap(Fun,?NUMBERS);
 payout_number(Nums)->
 	[ratio_pair(B)||B<-?NUMBERS,lists:member(B#number_bet.num,Nums)].
@@ -124,7 +127,7 @@ all_bet_cats()-> ?ALL_BET_CATS.
 payout([D1,D2,D3]=Ds)->
 	Pair=payout_pair(D1,D2,D3),
 	Triple=payout_triple(D1,D2,D3),
-	Number=payout_number(lists:sort(Ds)),
+	Number=payout_number(Ds),
 	Total=payout_total(lists:sum(Ds)),
 	Result=[{Id,Ratio+1}||{Id,Ratio}<-Pair++Triple++Number++Total],
 	maps:from_list(Result).
