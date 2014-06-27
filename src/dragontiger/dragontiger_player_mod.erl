@@ -7,5 +7,5 @@ is_valid_bets(Cats,Amounts)->
 	casino_bets:is_valid_bets(Cats,Amounts,?ALL_BET_CATS).
 
 payout(Cards=#{?DRAGON_POS := #card{}, ?TIGER_POS := #card{}},dragontiger)->
-	dragontiger_payout_dragontiger:payout(Cards).
+	dragontiger_payout:payout(Cards).
 	

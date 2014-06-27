@@ -1,4 +1,4 @@
--module(dragontiger_payout_dragontiger).
+-module(dragontiger_payout).
 -export([ratio/1,reward/1,payout/1]).
 
 -include("dragontiger.hrl").
