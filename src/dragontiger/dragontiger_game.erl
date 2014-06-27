@@ -13,7 +13,7 @@
 %% API
 -define(GAME,dragontiger).
 
--define(GAME_ROUND,dragontiger_round).
+-define(GAME_ROUND,casino_shoe_round).
 -define(GAME_DEALER_MOD,dragontiger_dealer_mod).
 -define(PLAYER_HANDLER_MOD,dragontiger_player_handler).
 -define(PLAYER_MOD,dragontiger_player).
