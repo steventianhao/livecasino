@@ -1,13 +1,12 @@
 -module(casino_players_sup).
 -behavior(supervisor).
 
--export([start_link/2]).
+-export([start_link/3]).
 
 %% supervisor callbacks
 -export([init/1]).
 
-start_link(Table,PlayerMod)->
-	Name=casino_sup:players_sup_id(Table),
+start_link(Name,Table,PlayerMod)->
 	supervisor:start_link({local,Name},?MODULE,PlayerMod).
 
 init(PlayerMod)->

@@ -12,13 +12,11 @@
 
 %% API
 -define(GAME,dragontiger).
-
 -define(GAME_ROUND,casino_shoe_round).
 -define(GAME_DEALER_MOD,dragontiger_dealer_mod).
 -define(PLAYER_HANDLER_MOD,dragontiger_player_handler).
 -define(PLAYER_MOD,dragontiger_player).
 -define(CASINO_DB,mysql_casino_master).
--define(GAME_SUP,dragontiger_sup).
 
 -record(state,{dealer,table,ticker,cards,countdown,round,eventbus}).
 
@@ -164,7 +162,7 @@ handle_sync_event(Event={player_join,User=#user{id=UserId},PlayerTableId},From,S
 		true->
 			{reply,{error,already_joined},StateName,State};
 		_->
-			Result=supervisor:start_child(?GAME_SUP:players_sup_id(Table),[self(),EventBus,PlayerTableId,User]),
+			Result=casino_sup:start_player(?GAME,Table,self(),EventBus,PlayerTableId,User),
 			{reply,Result,StateName,State}
 	end;
 
