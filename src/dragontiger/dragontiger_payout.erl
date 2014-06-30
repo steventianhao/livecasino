@@ -4,23 +4,23 @@
 -include("dragontiger.hrl").
 
 ratio(dragon)-> 
-	{?BET_DRAGON,2};
+	{?BET_DRAGON,2,?BET_DRAGON};
 ratio(tiger)-> 
-	{?BET_TIGER,2};
+	{?BET_TIGER,2,?BET_TIGER};
 ratio(tie)->
-	{?BET_TIE,9};
+	{?BET_TIE,9,?BET_TIE};
 ratio(dragon_odd)->
-	{?BET_DRAGON_ODD,2};
+	{?BET_DRAGON_ODD,2,?BET_DRAGON_ODD};
 ratio(tiger_odd)->
-	{?BET_TIGER_ODD,2};
+	{?BET_TIGER_ODD,2,?BET_TIGER_ODD};
 ratio(dragon_even)->
-	{?BET_DRAGON_EVEN,2};
+	{?BET_DRAGON_EVEN,2,?BET_DRAGON_EVEN};
 ratio(tiger_even)->
-	{?BET_TIGER_EVEN,2};
+	{?BET_TIGER_EVEN,2,?BET_TIGER_EVEN};
 ratio(tiger_tie)-> 
-	{?BET_TIGER,0.5};
+	{?BET_TIGER,0.5,?BET_TIE};
 ratio(dragon_tie) ->
-	{?BET_DRAGON,0.5}.
+	{?BET_DRAGON,0.5,?BET_TIE}.
 
 
 is_odd(7)->
@@ -44,5 +44,10 @@ reward(#{?DRAGON_POS := #card{value=Dv}, ?TIGER_POS := #card{value=Tv}})->
 	R4=casino_bets:add_reward(R3,is_odd(Tv),tiger_odd),
 	casino_bets:add_reward(R4,is_even(Tv),tiger_even).
 
-payout(Cards=#{?DRAGON_POS := #card{}, ?TIGER_POS := #card{}})->
-	casino_bets:payout(Cards,fun ratio/1,fun reward/1).
+result(Cards)->
+	Fun=fun(E)-> {_,_,B}=ratio(E),B end,
+	lists:map(Fun,reward(Cards)).
+	
+payout(Cards=#{})->
+	Fun=fun(E)->{B,R,_}=ratio(E),{B,R} end,
+	maps:from_list(lists:map(Fun,reward(Cards))).
