@@ -25,7 +25,7 @@ init({Table,Countdown})->
 	{ok,EventBus}=gen_event:start_link(),
 	{ok,stopped,#state{countdown=Countdown,table=Table,eventbus=EventBus}}.
 
-stopped(new_shoe,{Pid,_},State=#state{dealer={Pid,_},round=Round,eventbus=EventBus})->
+stopped(new_shoe,{Pid,_},State=#state{dealer={Pid,_},round=Round})->
 	lager:info("stopped#new_shoe,state ~p",[State]),
 	NewRound=?GAME_ROUND:new_shoe(Round),
 	NewState=State#state{round=NewRound},
@@ -66,7 +66,7 @@ betting(Event,_From,State)->
 	lager:error("unexpected event when betting, event ~p,state ~p",[Event,State]),
 	{reply,unexpected,betting,State}.
 
-dealing(Event={deal,Pos,Card},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},eventbus=EventBus})->
+dealing(Event={deal,Pos,Card},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,eventbus=EventBus})->
 	lager:info("dealing#deal, Event ~p, State ~p",[Event,State]),
 	case ?GAME_DEALER_MOD:put(Pos,Card,Cards) of
 		{ok,NewCards} ->
@@ -78,7 +78,7 @@ dealing(Event={deal,Pos,Card},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},ev
 	end;
 
 
-dealing(Event={scan,Card},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},eventbus=EventBus})->
+dealing(Event={scan,Card},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,eventbus=EventBus})->
 	lager:info("dealing#scan, Event ~p, State ~p",[Event,State]),
 	case ?GAME_DEALER_MOD:add(Card,Cards) of
 		{error,_} ->
@@ -89,7 +89,7 @@ dealing(Event={scan,Card},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},eventb
 	end;
 
 
-dealing(Event={clear,Pos},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},eventbus=EventBus})->
+dealing(Event={clear,Pos},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,eventbus=EventBus})->
 	lager:info("dealing#clear, Event ~p, State ~p",[Event,State]),
 	case ?GAME_DEALER_MOD:remove(Pos,Cards) of
 		{ok,NewCards} ->
