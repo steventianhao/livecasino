@@ -127,7 +127,7 @@ handle_info(tick,betting,State=#state{ticker=Ticker,table=Table,eventbus=EventBu
 	case Ticker of
 		{_,0} ->
 			gen_event:notify(EventBus,{tick,{Table,0}}),
-			{next_state,dealing,State};
+			{next_state,betting,State};
 		{_,Value}->
 			gen_event:notify(EventBus,{tick,{Table,Value}}),
 			TRef=erlang:send_after(1000,self(),tick),
@@ -180,11 +180,12 @@ handle_sync_event(Event={update_countdown,Countdown},From,StateName,State)->
 			{reply,error,StateName,State}
 	end;
 
-handle_sync_event(Event={dealer_connect,Dealer},From={Pid,_},StateName,State=#state{dealer=undefined,eventbus=EventBus})->
+handle_sync_event(Event={dealer_connect,Dealer},From={Pid,_},StateName,State=#state{dealer=undefined,table=Table,eventbus=EventBus})->
 	lager:info("dealer_connected, event ~p,from ~p,stateName ~p,state ~p",[Event,From,StateName,State]),
+	NewState=State#state{dealer={Pid,Dealer}},
 	erlang:monitor(process,Pid),
-	gen_event:notify(EventBus,{dealer_connect,Dealer}),
-	{ok,State#state{dealer={Pid,Dealer}}};
+	gen_event:notify(EventBus,{dealer_connect,{Table,Dealer}}),
+	{reply,ok,StateName,NewState};
 
 handle_sync_event(Event={dealer_connect,_Dealer},From,StateName,State)->
 	lager:info("dealer_connected, event ~p,from ~p,stateName ~p,state ~p",[Event,From,StateName,State]),
