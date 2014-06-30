@@ -4,7 +4,12 @@
 
 
 put(Pos,Card,Cards)->
-	maps:put(Pos,Card,Cards).
+	case lists:member(Pos,?ALL_POS) of
+		true->
+			{ok,maps:put(Pos,Card,Cards)};
+		false->
+			error
+	end.
 
 remove(Pos,Cards)->
 	case maps:is_key(Pos,Cards) of
@@ -14,7 +19,7 @@ remove(Pos,Cards)->
 			error
 	end.
 
-add(Card,Cards) when map_size(Cards)==0->
+add(Card,Cards=#{}) when map_size(Cards)==0->
 	{more,?DRAGON_POS, Cards#{?DRAGON_POS=>Card}};
 add(Card,Cards=#{?DRAGON_POS := _}) when map_size(Cards)==1->
 	{done,?TIGER_POS,Cards#{?TIGER_POS=>Card}};

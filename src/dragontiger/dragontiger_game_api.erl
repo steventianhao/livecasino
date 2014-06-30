@@ -8,7 +8,6 @@
 -export([update_countdown/2]).
 -export([ace/0,two/0,three/0,four/0,five/0,six/0,seven/0,eight/0,nine/0,ten/0,jack/0,queen/0,king/0]).
 
--include("dragontiger.hrl").
 -include("user.hrl").
 -include("table.hrl").
 
@@ -34,7 +33,6 @@ bet_succeed(_GameServer,_Tag,_BetBundleId)->
 bet_fail(_GameServer,_Tag)->
 	ok.
 
-
 stop_bet(GameServer)->
 	gen_fsm:sync_send_event(GameServer,stop_bet).
 
@@ -42,16 +40,10 @@ scan(GameServer,Card) when is_record(Card,card) ->
 	gen_fsm:sync_send_event(GameServer,{scan,Card}).
 
 deal(GameServer,Pos,Card) when is_integer(Pos) andalso is_record(Card,card) ->
-	case lists:member(Pos,?ALL_POS) of
-		true ->	gen_fsm:sync_send_event(GameServer,{deal,Pos,Card});
-		_ -> error
-	end.
-
+	gen_fsm:sync_send_event(GameServer,{deal,Pos,Card});
+		
 clear(GameServer,Pos)->
-	case lists:member(Pos,?ALL_POS) of
-		true -> gen_fsm:sync_send_event(GameServer,{clear,Pos});
-		_ -> error
-	end.
+	gen_fsm:sync_send_event(GameServer,{clear,Pos});
 
 commit(GameServer)->
 	gen_fsm:sync_send_event(GameServer,commit).

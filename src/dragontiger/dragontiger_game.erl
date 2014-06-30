@@ -69,9 +69,13 @@ betting(Event,_From,State)->
 
 dealing(Event={deal,Pos,Card},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,eventbus=EventBus})->
 	lager:info("dealing#deal, Event ~p, State ~p",[Event,State]),
-	NewCards=?GAME_DEALER_MOD:put(Pos,Card,Cards),
-	gen_event:notify(EventBus,{deal,{Table,Pos,Card}}),
-	{reply,ok,dealing,State#state{cards=NewCards}};
+	case ?GAME_DEALER_MOD:put(Pos,Card,Cards) of
+		{ok,NewCards} ->
+			gen_event:notify(EventBus,{deal,{Table,Pos,Card}}),
+			{reply,ok,dealing,State#state{cards=NewCards}};
+		error ->
+			{reply,error,dealing,State}
+	end;
 		
 
 dealing(Event={scan,Card},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,eventbus=EventBus})->
