@@ -29,7 +29,6 @@ stopped(new_shoe,{Pid,_},State=#state{dealer={Pid,_},round=Round,eventbus=EventB
 	lager:info("stopped#new_shoe,state ~p",[State]),
 	NewRound=?GAME_ROUND:new_shoe(Round),
 	NewState=State#state{round=NewRound},
-	gen_event:notify(EventBus,{new_shoe,NewRound}),
 	{reply,ok,stopped,NewState};
 
 stopped(start_bet,{Pid,_},State=#state{dealer={Pid,_},round=undefined})->
@@ -72,7 +71,7 @@ dealing(Event={deal,Pos,Card},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},ev
 	case ?GAME_DEALER_MOD:put(Pos,Card,Cards) of
 		{ok,NewCards} ->
 			NewState=State#state{cards=NewCards},
-			gen_event:notify(EventBus,{deal,Pos,Card}),
+			gen_event:notify(EventBus,{deal,{Table,Pos,Card}}),
 			{reply,ok,dealing,NewState};
 		error ->
 			{reply,error,dealing,State}
@@ -85,7 +84,7 @@ dealing(Event={scan,Card},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},eventb
 		{error,_} ->
 			{reply,error,dealing,State};
 		{Status,Pos,NewCards}->
-			gen_event:notify(EventBus,{deal,Pos,Card}),
+			gen_event:notify(EventBus,{deal,{Table,Pos,Card}}),
 			{reply,{Status,Pos},dealing,State#state{cards=NewCards}}
 	end;
 
@@ -95,7 +94,7 @@ dealing(Event={clear,Pos},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},eventb
 	case ?GAME_DEALER_MOD:remove(Pos,Cards) of
 		{ok,NewCards} ->
 			NewState=State#state{cards=NewCards},
-			gen_event:notify(EventBus,{clear,Pos}),
+			gen_event:notify(EventBus,{clear,{Table,Pos}}),
 			{reply,ok,dealing,NewState};
 		error ->
 			{reply,error,dealing,State}
