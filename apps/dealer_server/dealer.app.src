@@ -1,0 +1,9 @@
+{application,dealer,
+[
+	{description,"dealer connection servers"},
+	{vsn,"0.9.0"},
+	{modules,[dealer_sup]},
+	{applications,[kernel,stdlib,crypto,emysql,lager]},
+	{mod,{dealer_app,[]}}
+]}.
+

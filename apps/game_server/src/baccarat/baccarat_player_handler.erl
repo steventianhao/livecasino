@@ -1,6 +1,7 @@
 -module(baccarat_player_handler).
 -behavior(gen_event).
 
+-compile([{parse_transform, lager_transform}]).
 -record(state,{pid}).
 -include("dealer.hrl").
 

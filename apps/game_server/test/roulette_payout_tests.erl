@@ -2,30 +2,30 @@
 -include_lib("eunit/include/eunit.hrl").
 
 payout_test()->
-	P=roulette_payout_roulette:payout(1),
+	P=roulette_payout:payout(1),
 	?assertEqual(#{4000=>2,4002=>2,4005=>2,4010=>3,4020=>3,4031=>36,4071=>12,4073=>12,4101=>18,4104=>18,4137=>18,4201=>9,4301=>6},P).
 
 payout2_test()->
-	P=roulette_payout_roulette:payout(2),
+	P=roulette_payout:payout(2),
 	?assertEqual(#{4001=>2,4003=>2,4005=>2,4010=>3,4021=>3,4032=>36,4071=>12,4072=>12,4073=>12,4102=>18,4105=>18,4137=>18,4138=>18,4201=>9,4202=>9,4301=>6},P).
 
 payout3_test()->
-	P=roulette_payout_roulette:payout(3),
+	P=roulette_payout:payout(3),
 	?assertEqual(#{4000=>2,4002=>2,4005=>2,4010=>3,4022=>3,4033=>36,4072=>12,4073=>12,4103=>18,4106=>18,4138=>18,4202=>9,4301=>6},P).
 
 payout4_test()->
-	P=roulette_payout_roulette:payout(4),
+	P=roulette_payout:payout(4),
 	?assertEqual(#{4001=>2,4003=>2,4005=>2,4010=>3,4020=>3,4034=>36,4074=>12,4104=>18,4107=>18,4139=>18,4201=>9,4203=>9,4301=>6,4302=>6},P).
 
 payout5_test()->
-	P=roulette_payout_roulette:payout(5),
+	P=roulette_payout:payout(5),
 	?assertEqual(#{4000=>2,4002=>2,4005=>2,4010=>3,4021=>3,4035=>36,4074=>12,4105=>18,4108=>18,4139=>18,4140=>18,4201=>9,4202=>9,4203=>9,4204=>9,4301=>6,4302=>6},P).
 
 payout6_test()->
-	P=roulette_payout_roulette:payout(6),
+	P=roulette_payout:payout(6),
 	?assertEqual(#{4001=>2,4003=>2,4005=>2,4010=>3,4022=>3,4036=>36,4074=>12,4106=>18,4109=>18,4140=>18,4202=>9,4204=>9,4204=>9,4301=>6,4302=>6},P).
 
 payout7_test()->
-	P=roulette_payout_roulette:payout(7),
+	P=roulette_payout:payout(7),
 	?assertEqual(#{4000=>2,4002=>2,4005=>2,4010=>3,4020=>3,4037=>36,4075=>12,4107=>18,4110=>18,4141=>18,4203=>9,4205=>9,4302=>6,4303=>6},P).
 

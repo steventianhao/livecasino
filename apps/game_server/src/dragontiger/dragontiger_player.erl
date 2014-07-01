@@ -1,5 +1,6 @@
--module(baccarat_player).
+-module(dragontiger_player).
 -behavior(gen_server).
+-compile([{parse_transform, lager_transform}]).
 -include("user.hrl").
 -include("round.hrl").
 -include("table.hrl").
@@ -8,10 +9,9 @@
 -export([bet/3,start_link/4]).
 -record(state,{player_table,user,bet_ets,server,round_id}).
 
--define(CASINO_DB,mysql_casino_master).
--define(GAME_PLAYER_MOD,baccarat_player_mod).
--define(PLAYER_HANDLER_MOD,baccarat_player_handler).
--define(GAME_API,baccarat_game_api).
+-define(GAME_PLAYER_MOD,dragontiger_player_mod).
+-define(PLAYER_HANDLER_MOD,dragontiger_player_handler).
+-define(GAME_API,dragontiger_game_api).
 
 bet(Pid,Cats,Amounts)->
 	case ?GAME_PLAYER_MOD:is_valid_bets(Cats,Amounts) of
@@ -51,7 +51,8 @@ handle_call(Event={bet,Cats,Amounts},_From,State=#state{server=Server,user=User,
 		_ ->
 			do_bet(Server,BetEts,RoundId,User#user.id,PlayerTable#player_table.id,Cats,Amounts)
 	end,
-	{reply,Result,State}.
+	{reply,Result,State}.	
+	
 
 handle_cast(Request,State)->
 	lager:error("unexpected Request ~p, State ~p",[Request,State]),
