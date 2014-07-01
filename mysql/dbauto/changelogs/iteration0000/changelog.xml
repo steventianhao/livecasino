@@ -17,4 +17,6 @@
 	<include file="player.change.xml" relativeToChangelogFile="true" />
 	
 	<include file="sp.change.xml" relativeToChangelogFile="true" />
+	
+	<include file="dealer.change.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
