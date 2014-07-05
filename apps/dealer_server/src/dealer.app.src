@@ -3,7 +3,7 @@
 	{description,"dealer connection servers"},
 	{vsn,"0.9.0"},
 	{modules,[dealer_sup]},
-	{applications,[kernel,stdlib,cowboy]},
+	{applications,[kernel,stdlib,jsx,cowboy]},
 	{mod,{dealer_app,[]}},
 	{env,[{listen_port,8200}]}
 ]}.

@@ -7,7 +7,7 @@ init({tcp,http},_Req,_Otps)->
 	{upgrade,protocol,cowboy_websocket}.
 
 websocket_init(_TransportName,Req,_Otps)->
-	erlang:start_timer(1000,self(),<<"Hello!">>),
+	self()! auth,
 	{ok,Req,undefined}.
 
 websocket_handle({text,Msg},Req,State)->
@@ -15,12 +15,14 @@ websocket_handle({text,Msg},Req,State)->
 websocket_handle(_Data,Req,State)->
 	{ok,Req,State}.
 
-websocket_info({timeout,_Ref,Msg},Req,State)->
-	erlang:start_timer(1000,self(),<<"How' you doin'?">>),
-	{reply,{text,Msg},Req,State};
-websocket_info(_Info,Req,State)->
+websocket_info(auth,Req,State)->
+	Json=jsx:encode(#{<<"kind">> => <<"auth">>}),
+	io:format("json is ~p~n",[Json]),
+	{reply,{text,Json},Req,State};
+websocket_info(Info,Req,State)->
+	io:format("info is ~p~n",[Info]),
 	{ok,Req,State}.
 
-
-websocket_terminate(_Reason,_Req,_State)->
+websocket_terminate(Reason,_Req,_State)->
+	io:format("terminated reason is ~p~n",[Reason]),
 	ok.
