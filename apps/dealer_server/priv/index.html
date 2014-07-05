@@ -60,15 +60,18 @@
           $("#content").fadeIn('slow');
       };  
 
-      function onClose(evt) { 
+      function onClose(evt) {
+          console.log("websocket closed");
           showScreen('<span style="color: red;">DISCONNECTED </span>');
       };  
 
       function onMessage(evt) { 
+          console.log(evt.data);
           showScreen('<span style="color: blue;">RESPONSE: ' + evt.data+ '</span>'); 
       };  
 
       function onError(evt) {
+          console.log(evt.data);
           showScreen('<span style="color: red;">ERROR: ' + evt.data+ '</span>');
       };
 
