@@ -1,6 +1,10 @@
 -module(dealer_ws_handler).
 -behaviour(cowboy_websocket_handler).
 
+-define(KIND,<<"kind">>).
+-define(DEALERS,#{<<"simon">>=><<"111111">>,<<"valor">>=><<"222222">>}).
+
+
 -export([init/3,websocket_init/3,websocket_handle/3,websocket_info/3,websocket_terminate/3]).
 
 init({tcp,http},_Req,_Otps)->
@@ -17,7 +21,7 @@ websocket_handle(_Data,Req,State)->
 	{ok,Req,State}.
 
 websocket_info(auth,Req,State)->
-	Json=jsx:encode([{<<"kind">>,<<"auth">>}]),
+	Json=jsx:encode([{?KIND,<<"auth">>}]),
 	{reply,{text,Json},Req,State};
 websocket_info(Info,Req,State)->
 	io:format("info is ~p~n",[Info]),
@@ -27,14 +31,27 @@ websocket_terminate(Reason,_Req,_State)->
 	io:format("terminated reason is ~p~n",[Reason]),
 	ok.
 
+invalid_response()->
+	{error,jsx:encode([{?KIND,<<"invalid">>}])}.
+
 handle_msg(Msg)->
 	io:format("this is msg we got ~p~n",[Msg]),
 	case jsx:is_json(Msg) of
 		true-> 
-			{ok,handle_json(Msg)};
+			handle_json(jsx:decode(Msg));
 		false->
-			{error,jsx:encode([{<<"kind">>,<<"invalid">>}])}
+			invalid_response()
 	end.
 
-handle_json(Msg)->
-	Msg.
+handle_json(Tuples)->
+	case lists:keyfind(?KIND,1,Tuples) of
+		{?KIND,Kind}->
+			handle_action(Kind,Tuples);
+		_ ->
+			invalid_response()
+	end.
+
+handle_action(<<"auth">>,Req)->
+	{ok,jsx:encode(Req)};
+handle_action(_,_)->
+	invalid_response().
