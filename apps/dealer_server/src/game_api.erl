@@ -37,7 +37,7 @@ commit(GameServer)->
 	gen_fsm:sync_send_event(GameServer,commit).
 
 connect(GameServer,DealerId,DealerName)->
-	gen_fsm:sync_send_all_state_event(GameServer,{dealer_connect,DealerId,DealerName}).
+	gen_fsm:sync_send_all_state_event(GameServer,{dealer_connect,{dealer,DealerId,DealerName}}).
 
 disconnect(GameServer)->
 	gen_fsm:send_all_state_event(GameServer,{dealer_disconnect,self()}).
