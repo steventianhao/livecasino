@@ -188,7 +188,7 @@ handle_sync_event(Event={dealer_connect,Dealer},From={Pid,_},StateName,State=#st
 	NewState=State#state{dealer={Pid,Dealer}},
 	erlang:monitor(process,Pid),
 	gen_event:notify(EventBus,{dealer_connect,{Table,Dealer}}),
-	{reply,ok,StateName,NewState};
+	{reply,{ok,?GAME},StateName,NewState};
 
 handle_sync_event(Event={dealer_connect,_Dealer},From,StateName,State)->
 	lager:info("dealer_connected, event ~p,from ~p,stateName ~p,state ~p",[Event,From,StateName,State]),
