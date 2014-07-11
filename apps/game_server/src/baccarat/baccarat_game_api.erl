@@ -5,10 +5,8 @@
 -export([new_shoe/1,start_bet/1,stop_bet/1,commit/1,try_bet/3]).
 -export([deal/3,clear/2,scan/2]).
 -export([update_countdown/2]).
--export([ace/0,two/0,three/0,four/0,five/0,six/0,seven/0,eight/0,nine/0,ten/0,jack/0,queen/0,king/0]).
 -export([player_join/3,player_quit/3]).
 
--include("baccarat.hrl").
 -include("user.hrl").
 -include("table.hrl").
 
@@ -59,18 +57,3 @@ player_join(GameServer,User,PlayerTable) when is_record(User,user) andalso is_re
 	gen_fsm:sync_send_all_state_event(GameServer,{player_join,User,PlayerTable}).
 player_quit(GameServer,User,Reason)->
 	gen_fsm:send_all_state_event(GameServer,{player_quit,User,Reason}).
-
-
-ace()->?ACE#card{suit=?S_CLUB}.
-two()->?TWO#card{suit=?S_CLUB}.
-three()->?THREE#card{suit=?S_CLUB}.
-four()->?FOUR#card{suit=?S_CLUB}.
-five()->?FIVE#card{suit=?S_CLUB}.
-six()->?SIX#card{suit=?S_CLUB}.
-seven()->?SEVEN#card{suit=?S_CLUB}.
-eight()->?EIGHT#card{suit=?S_CLUB}.
-nine()->?NINE#card{suit=?S_CLUB}.
-ten()->?TEN#card{suit=?S_CLUB}.
-jack()->?JACK#card{suit=?S_CLUB}.
-queen()->?QUEEN#card{suit=?S_CLUB}.
-king()->?KING#card{suit=?S_CLUB}.

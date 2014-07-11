@@ -65,8 +65,9 @@ betting(Event,_From,State)->
 	lager:error("unexpected event when betting, event ~p,state ~p",[Event,State]),
 	{reply,unexpected,betting,State}.
 
-dealing(Event={deal,Pos,Card},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,eventbus=EventBus})->
+dealing(Event={deal,Pos,CardL},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,eventbus=EventBus})->
 	lager:info("dealing#deal, Event ~p, State ~p",[Event,State]),
+	Card=?GAME_DEALER_MOD:one_card(binary_to_list(CardL)),
 	case ?GAME_DEALER_MOD:put(Pos,Card,Cards) of
 		{ok,NewCards} ->
 			gen_event:notify(EventBus,{deal,{Table,Pos,Card}}),
@@ -76,8 +77,9 @@ dealing(Event={deal,Pos,Card},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},ta
 	end;
 		
 
-dealing(Event={scan,Card},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,eventbus=EventBus})->
+dealing(Event={scan,CardL},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,eventbus=EventBus})->
 	lager:info("dealing#scan, Event ~p, State ~p",[Event,State]),
+	Card=?GAME_DEALER_MOD:one_card(binary_to_list(CardL)),
 	case ?GAME_DEALER_MOD:add(Card,Cards) of
 		{error,_} ->
 			{reply,error,dealing,State};
