@@ -2,7 +2,7 @@
 -include("card.hrl").
 
 -export([check_cards/1,check_one_card/2]).
--export([string_to_cards/2,card_to_string/1,cards_to_string/1,cards_to_map/1]).
+-export([string_to_cards/2,card_to_string/1,cards_to_string/1,cards_to_map/1,one_card/2]).
 -export([is_pair/2,total/1]).
 
 check_cards([])->
@@ -36,9 +36,13 @@ is_pair(#card{rank=R1},#card{rank=R2})->
 
 string_to_cards([],_CardsMap)->
 	[];
-string_to_cards([S,N|T],CardsMap)->
-	C= maps:get(N,CardsMap),
+string_to_cards([S,R|T],CardsMap)->
+	C= maps:get(R,CardsMap),
 	[C#card{suit=S}|string_to_cards(T,CardsMap)].
 
 cards_to_map(AllCards)->
 	maps:from_list([{C#card.rank,C} || C <-AllCards]).
+
+one_card([S,R],CardsMap)->
+	C=maps:get(R,CardsMap),
+	C#card{suit=S}.

@@ -1,6 +1,6 @@
 -module(baccarat_dealer_mod).
 
--export([add/2,put/3,remove/2,validate/1,from_string/1,to_string/1]).
+-export([add/2,put/3,remove/2,validate/1,from_string/1,to_string/1,one_card/1]).
 -include("baccarat.hrl").
 
 -define(ANYONEOF(Total,Lists),lists:member(Total,Lists)).
@@ -13,6 +13,10 @@ from_string(Cards)->
 	CLb=lists:reverse(casino_card:string_to_cards(Bcs,CardsMap)),
 	Mb=create_map(CLb,[?BANKER_POS_1,?BANKER_POS_2,?BANKER_POS_3]),
 	maps:merge(Mp,Mb).
+
+one_card(Card)->
+	CardsMap=casino_card:cards_to_map(?ALL_CARD),
+	casino_card:one_card(Card,CardsMap).
 	
 create_map(Cards,IndexList)->
 	case {Cards,IndexList} of
