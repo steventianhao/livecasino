@@ -46,7 +46,7 @@ stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer={Pid,Dealer},r
 
 stopped(Event,_From,State)->
 	lager:error("unexpected event when stopped, event ~p,state ~p",[Event,State]),
-	{reply,unexpected,stopped,State}.
+	{reply,{error,unexpected},stopped,State}.
 
 betting(Event={try_bet,_Cats,_Amounts},_From,State)->
 	lager:info("bet Event ~p,State ~p",[Event,State]),
@@ -63,7 +63,7 @@ betting(stop_bet,{Pid,_},State=#state{ticker={TRef,_},dealer={Pid,_Dealer},round
 
 betting(Event,_From,State)->
 	lager:error("unexpected event when betting, event ~p,state ~p",[Event,State]),
-	{reply,unexpected,betting,State}.
+	{reply,{error,unexpected},betting,State}.
 
 dealing(Event={deal,Pos,CardL},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,eventbus=EventBus})->
 	lager:info("dealing#deal, Event ~p, State ~p",[Event,State]),
@@ -85,7 +85,7 @@ dealing(Event={scan,CardL},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table
 			{reply,error,dealing,State};
 		{Status,Pos,NewCards}->
 			gen_event:notify(EventBus,{deal,{Table,Pos,Card}}),
-			{reply,{Status,Pos},dealing,State#state{cards=NewCards}}
+			{reply,{ok,Status,Pos},dealing,State#state{cards=NewCards}}
 	end;
 
 
@@ -117,7 +117,7 @@ dealing(commit,{Pid,_},State=#state{cards=Cards,dealer={Pid,_},round=Round,table
 
 dealing(Event,_From,State)->
 	lager:error("unexpected event when dealing, event ~p,state ~p",[Event,State]),
-	{reply,unexpected,dealing,State}.
+	{reply,{error,unexpected},dealing,State}.
 
 
 handle_info(tick,betting,State=#state{ticker=Ticker,table=Table,eventbus=EventBus})->
