@@ -47,6 +47,10 @@ websocket_handle(_Data,Req,State)->
 
 websocket_info(auth,Req,State)->
 	{reply,{text,err_json(?AUTH)},Req,State};
+websocket_info({'DOWN',_Ref,process,Pid,_},Req,#state{table_server=Pid}=State)->
+	io:format("table server is down"),
+	NewState=State#state{table_id=undefined,table_server=undefined},
+	{reply,{text,err_json(?ENTER,<<"table_server_disconnected">>)},Req,NewState};
 websocket_info(Info,Req,State)->
 	io:format("info is ~p~n",[Info]),
 	{ok,Req,State}.
@@ -112,6 +116,7 @@ handle_action(#{?KIND := ?ENTER, ?TABLE := Table},#state{dealer=Dealer,table_id=
 			%% so should allow the same dealer enter into the same room multiple times).
 			case game_api:connect(Pid,Id,Username) of
 				ok ->
+					erlang:monitor(process,Pid),
 					{ok_json(?ENTER),State#state{table_server=Pid,table_id=Table}};
 				{error,dealer_existed} ->
 					{err_json(?ENTER,<<"other_dealer_existed">>),State}
