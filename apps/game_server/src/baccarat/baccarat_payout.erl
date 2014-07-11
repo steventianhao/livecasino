@@ -17,17 +17,20 @@ result4(Pt,Bt=9) when Pt<Bt ->
 result4(Pt,Bt) when Pt<Bt ->
 	[banker].
 
+total(Cards)->
+	casino_card:total(Cards,fun baccarat_dealer_mod:value/1).
+
 reward4(#{?BANKER_POS_1 := B1,?BANKER_POS_2 := B2,?PLAYER_POS_1 := P1,?PLAYER_POS_2 := P2}) ->
-	Pt=casino_card:total([P1,P2]),
-	Bt=casino_card:total([B1,B2]),
+	Pt=total([P1,P2]),
+	Bt=total([B1,B2]),
 	R1=result4(Pt,Bt),
 	R2=casino_bets:add_reward(R1,casino_card:is_pair(B1,B2),banker_pair),
 	R3=casino_bets:add_reward(R2,casino_card:is_pair(P1,P2),player_pair),
 	[small|R3].
 
 reward_morethan4(Bs=[B1,B2|_],Ps=[P1,P2|_],Func)->
-	Pt=casino_card:total(Ps),
-	Bt=casino_card:total(Bs),
+	Pt=total(Ps),
+	Bt=total(Bs),
 	R1=Func(Pt,Bt),
 	R2=casino_bets:add_reward(R1,casino_card:is_pair(B1,B2),banker_pair),
 	R3=casino_bets:add_reward(R2,casino_card:is_pair(P1,P2),player_pair),

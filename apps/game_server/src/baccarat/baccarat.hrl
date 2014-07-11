@@ -3,22 +3,6 @@
 
 -include("card.hrl").
 
--define(ACE,?C_ACE(1)).
--define(TWO,?C_TWO(2)).
--define(THREE,?C_THREE(3)).
--define(FOUR,?C_FOUR(4)).
--define(FIVE,?C_FIVE(5)).
--define(SIX,?C_SIX(6)).
--define(SEVEN,?C_SEVEN(7)).
--define(EIGHT,?C_EIGHT(8)).
--define(NINE,?C_NINE(9)).
--define(TEN,?C_TEN(0)).
--define(JACK,?C_JACK(0)).
--define(QUEEN,?C_QUEEN(0)).
--define(KING,?C_KING(0)).
-
--define(ALL_CARD,[?ACE,?TWO,?THREE,?FOUR,?FIVE,?SIX,?SEVEN,?EIGHT,?NINE,?TEN,?JACK,?QUEEN,?KING]).
-
 -define(BANKER_POS_1,2).
 -define(BANKER_POS_2,4).
 -define(BANKER_POS_3,6).

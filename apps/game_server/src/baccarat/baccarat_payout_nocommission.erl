@@ -1,6 +1,6 @@
 -module(baccarat_payout_nocommission).
 -include("baccarat.hrl").
--export([ratio/1,reward/1,payout/1]).
+-export([ratio/1,reward/1,payout/1,result/1]).
 
 ratio(banker)->
 	{?BET_BANKER,2,?BET_BANKER};

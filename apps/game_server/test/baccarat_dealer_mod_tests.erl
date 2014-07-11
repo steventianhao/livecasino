@@ -62,46 +62,45 @@ four_add_invalid_pos(L)->
 
 
 add2_test_()->
-	L1=[?ACE,?TWO,?EIGHT,?THREE,?FOUR],
-	L2=[?ACE,?TWO,?SEVEN,?THREE,?FOUR],
-	L3=[?TWO,?ACE,?THREE,?EIGHT,?FOUR],
-	L4=[?TWO,?ACE,?THREE,?SEVEN,?FOUR],
-	L5=[?ACE,?TWO,?FIVE,?FOUR,?SIX],
-	L6=[?ACE,?TWO,?FIVE,?FIVE,?SIX],
-	L7=[?ACE,?TWO,?SIX,?FOUR,?EIGHT],
-	L8=[?ACE,?TWO,?SIX,?FIVE,?EIGHT],
+	L1=[#card{rank=?ACE},#card{rank=?TWO},#card{rank=?EIGHT},#card{rank=?THREE},#card{rank=?FOUR}],
+	L2=[#card{rank=?ACE},#card{rank=?TWO},#card{rank=?SEVEN},#card{rank=?THREE},#card{rank=?FOUR}],
+	L3=[#card{rank=?TWO},#card{rank=?ACE},#card{rank=?THREE},#card{rank=?EIGHT},#card{rank=?FOUR}],
+	L4=[#card{rank=?TWO},#card{rank=?ACE},#card{rank=?THREE},#card{rank=?SEVEN},#card{rank=?FOUR}],
+	L5=[#card{rank=?ACE},#card{rank=?TWO},#card{rank=?FIVE},#card{rank=?FOUR},#card{rank=?SIX}],
+	L6=[#card{rank=?ACE},#card{rank=?TWO},#card{rank=?FIVE},#card{rank=?FIVE},#card{rank=?SIX}],
+	L7=[#card{rank=?ACE},#card{rank=?TWO},#card{rank=?SIX},#card{rank=?FOUR},#card{rank=?EIGHT}],
+	L8=[#card{rank=?ACE},#card{rank=?TWO},#card{rank=?SIX},#card{rank=?FIVE},#card{rank=?EIGHT}],
 	lists:map(fun(L)->?_assert(four_add_invalid_pos(L)) end,
 		[L1,L2,L3,L4,L5,L6,L7,L8]).	
-
-
 
 put_test_()->
 	lists:map(fun(L)-> ?_assert(put(L)) end, string_cases()).
 
 put_test()->
-	{ok,C1}=baccarat_dealer_mod:put(?PLAYER_POS_1,?TWO,#{}),
-	?assert(C1=:=#{?PLAYER_POS_1=>?TWO}),
-	{ok,C2}=baccarat_dealer_mod:put(?PLAYER_POS_1,?TWO,C1),
-	?assert(C2=:=#{?PLAYER_POS_1=>?TWO}),
-	{ok,C3}=baccarat_dealer_mod:put(?PLAYER_POS_2,?TWO,C2),
-	?assert(C3=:=#{?PLAYER_POS_1=>?TWO,?PLAYER_POS_2=>?TWO}),
-	?assert(error=:=baccarat_dealer_mod:put(-1,?ACE,#{})).
+	{ok,C1}=baccarat_dealer_mod:put(?PLAYER_POS_1,#card{rank=?TWO},#{}),
+	?assert(C1=:=#{?PLAYER_POS_1=>#card{rank=?TWO}}),
+	{ok,C2}=baccarat_dealer_mod:put(?PLAYER_POS_1,#card{rank=?TWO},C1),
+	?assert(C2=:=#{?PLAYER_POS_1=>#card{rank=?TWO}}),
+	{ok,C3}=baccarat_dealer_mod:put(?PLAYER_POS_2,#card{rank=?TWO},C2),
+	?assert(C3=:=#{?PLAYER_POS_1=>#card{rank=?TWO},?PLAYER_POS_2=>#card{rank=?TWO}}),
+	?assert(error=:=baccarat_dealer_mod:put(-1,#card{rank=?ACE},#{})).
 
 validate_test_()->
-	List1=[{?PLAYER_POS_1,?JACK},{?PLAYER_POS_2,?FOUR},{?BANKER_POS_2,?TEN},{?PLAYER_POS_3,?NINE},{?BANKER_POS_3,?THREE}],
+	List1=[{?PLAYER_POS_1,#card{rank=?JACK}},{?PLAYER_POS_2,#card{rank=?FOUR}},
+	{?BANKER_POS_2,#card{rank=?TEN}},{?PLAYER_POS_3,#card{rank=?NINE}},{?BANKER_POS_3,#card{rank=?THREE}}],
 	Result1=baccarat_dealer_mod:validate(maps:from_list(List1)),
-	List2=[{?PLAYER_POS_1,?JACK}],
+	List2=[{?PLAYER_POS_1,#card{rank=?JACK}}],
 	Result2=baccarat_dealer_mod:validate(maps:from_list(List2)),
 	[?_assertNot(Result1),?_assertNot(Result2)].
 
 remove_test()->
-	M=#{?PLAYER_POS_1=>?JACK,?PLAYER_POS_2=>?KING},
-	?assert({ok,#{?PLAYER_POS_2=>?KING}}=:=baccarat_dealer_mod:remove(?PLAYER_POS_1,M)),
+	M=#{?PLAYER_POS_1=>#card{rank=?JACK},?PLAYER_POS_2=>#card{rank=?KING}},
+	?assert({ok,#{?PLAYER_POS_2=>#card{rank=?KING}}}=:=baccarat_dealer_mod:remove(?PLAYER_POS_1,M)),
 	?assert(error=:=baccarat_dealer_mod:remove(?BANKER_POS_2,M)).
 
 one_card_test()->
 	S="D6",
-	?assertEqual(#card{suit=?S_DIAMOND,rank=?R_SIX,value=6},baccarat_dealer_mod:one_card(S)).
+	?assertEqual(#card{suit=?DIAMOND,rank=?SIX},baccarat_dealer_mod:one_card(S)).
 
 validate_7cards_test()->
 	C1="S3DACT#SKS2D8",

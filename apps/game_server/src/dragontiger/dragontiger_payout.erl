@@ -1,7 +1,21 @@
 -module(dragontiger_payout).
--export([ratio/1,reward/1,payout/1]).
+-export([ratio/1,reward/1,payout/1,result/1]).
 
 -include("dragontiger.hrl").
+
+value(#card{rank=?ACE})->1;
+value(#card{rank=?TWO})->2;
+value(#card{rank=?THREE})->3;
+value(#card{rank=?FOUR})->4;
+value(#card{rank=?FIVE})->5;
+value(#card{rank=?SIX})->6;
+value(#card{rank=?SEVEN})->7;
+value(#card{rank=?EIGHT})->8;
+value(#card{rank=?NINE})->9;
+value(#card{rank=?TEN})->10;
+value(#card{rank=?JACK})->11;
+value(#card{rank=?QUEEN})->12;
+value(#card{rank=?KING})->13.
 
 ratio(dragon)-> 
 	{?BET_DRAGON,2,?BET_DRAGON};
@@ -22,7 +36,6 @@ ratio(tiger_tie)->
 ratio(dragon_tie) ->
 	{?BET_DRAGON,0.5,?BET_TIE}.
 
-
 is_odd(7)->
 	false;
 is_odd(V)->
@@ -30,7 +43,9 @@ is_odd(V)->
 is_even(V)->
 	V rem 2 ==0.
 
-reward(#{?DRAGON_POS := #card{value=Dv}, ?TIGER_POS := #card{value=Tv}})->
+reward(#{?DRAGON_POS := D, ?TIGER_POS := T})->
+	Dv=value(D),
+	Tv=value(T),
 	R1=if
 		Dv == Tv -> 
 			[tie,tiger_tie,dragon_tie];

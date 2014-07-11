@@ -32,6 +32,6 @@ check_cards5_test()->
 	?assertNot(casino_card:check_cards([a,b])).
 
 cards_to_string_test()->
-	Cards=[#card{suit=?S_HEART,rank=?R_ACE},#card{suit=?S_CLUB,rank=?R_QUEEN}],
+	Cards=[#card{suit=?HEART,rank=?ACE},#card{suit=?CLUB,rank=?QUEEN}],
 	?assertEqual("HACQ",casino_card:cards_to_string(Cards)).
 
