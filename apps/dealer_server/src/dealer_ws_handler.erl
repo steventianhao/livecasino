@@ -23,7 +23,9 @@
 
 -define(DEALERS,#{<<"simon">>=>{1,<<"111111">>},<<"valor">>=>{2,<<"222222">>}}).
 
--record(state,{table_server=undefined,dealer=undefined,table_id=undefined}).
+-record(table,{id,server,game}).
+-record(state,{dealer=undefined,table=undefined}).
+
 -export([init/3,websocket_init/3,websocket_handle/3,websocket_info/3,websocket_terminate/3]).
 
 init({tcp,http},_Req,_Otps)->
@@ -47,20 +49,20 @@ websocket_handle(_Data,Req,State)->
 
 websocket_info(auth,Req,State)->
 	{reply,{text,err_json(?AUTH)},Req,State};
-websocket_info({'DOWN',_Ref,process,Pid,_},Req,#state{table_server=Pid}=State)->
+websocket_info({'DOWN',_Ref,process,Pid,_},Req,#state{table=#table{server=Pid}}=State)->
 	io:format("table server is down"),
-	NewState=State#state{table_id=undefined,table_server=undefined},
+	NewState=State#state{table=undefined},
 	{reply,{text,err_json(?ENTER,<<"table_server_disconnected">>)},Req,NewState};
 websocket_info(Info,Req,State)->
 	io:format("info is ~p~n",[Info]),
 	{ok,Req,State}.
 
-websocket_terminate(Reason,_Req,#state{table_server=undefined})->
+websocket_terminate(Reason,_Req,#state{table=undefined})->
 	io:format("terminated reason is ~p~n",[Reason]),
 	ok;
-websocket_terminate(Reason,_Req,#state{table_server=Table})->
+websocket_terminate(Reason,_Req,#state{table=#table{server=Server}})->
 	io:format("terminated reason is ~p~n",[Reason]),
-	game_api:disconnect(Table),
+	game_api:disconnect(Server),
 	ok.
 
 ok_json(Kind)->
@@ -77,12 +79,12 @@ handle_json(Tuples,State)->
 	io:format("this is map we get from json ~p~n",[Map]),
 	handle_action(Map,State).
 
-handle_action(#{?KIND := ?QUIT},#state{table_server=undefined}=State)->
+handle_action(#{?KIND := ?QUIT},#state{table=undefined}=State)->
 	{ok_json(?QUIT),State#state{dealer=undefined}};
 
-handle_action(#{?KIND := ?QUIT},#state{table_server=Table}=State)->
-	game_api:disconnect(Table),
-	{ok_json(?QUIT),State#state{dealer=undefined,table_id=undefined,table_server=undefined}};
+handle_action(#{?KIND := ?QUIT},#state{table=#table{server=Server}}=State)->
+	game_api:disconnect(Server),
+	{ok_json(?QUIT),State#state{dealer=undefined,table=undefined}};
 
 handle_action(#{?KIND := ?AUTH,  ?USERNAME:= Username,  ?PASSWORD:= Password}=Req,#state{dealer=undefined}=State)->
 	io:format("this is we got in handle_action(auth) ~p~n",[Req]),
@@ -95,8 +97,8 @@ handle_action(#{?KIND := ?AUTH,  ?USERNAME:= Username,  ?PASSWORD:= Password}=Re
 
 handle_action(#{?KIND := ?AUTH,  ?USERNAME:= Username}=Req,#state{dealer={_Id,Username2}}=State)->
 	io:format("this is we got in handle_action(auth) ~p~n",[Req]),
-	if 
-		Username =:= Username2 ->
+	case  Username of
+		Username2 ->
 			{ok_json(?AUTH),State};
 		true ->
 			{err_json(?AUTH,<<"other_dealer_authed">>),State}
@@ -105,7 +107,7 @@ handle_action(#{?KIND := ?AUTH,  ?USERNAME:= Username}=Req,#state{dealer={_Id,Us
 handle_action(_Req,#state{dealer=undefined}=State)->	
 	{err_json(?AUTH),State};
 
-handle_action(#{?KIND := ?ENTER, ?TABLE := Table},#state{dealer=Dealer,table_id=undefined}=State)->
+handle_action(#{?KIND := ?ENTER, ?TABLE := Table},#state{dealer=Dealer,table=undefined}=State)->
 	case game_api:find_server(Table) of
 		undefined-> 
 			{err_json(?ENTER,<<"server_not_found">>),State};
@@ -115,93 +117,67 @@ handle_action(#{?KIND := ?ENTER, ?TABLE := Table},#state{dealer=Dealer,table_id=
 			%% and timeout(when timeout, then maybe sever accept this connection, 
 			%% so should allow the same dealer enter into the same room multiple times).
 			case game_api:connect(Pid,Id,Username) of
-				ok ->
+				{ok,Game} ->
 					erlang:monitor(process,Pid),
-					{ok_json(?ENTER),State#state{table_server=Pid,table_id=Table}};
+					{ok_json(?ENTER),State#state{table=#table{id=Table,server=Pid,game=Game}}};
 				{error,dealer_existed} ->
 					{err_json(?ENTER,<<"other_dealer_existed">>),State}
 			end
 	end;
 
-handle_action(#{?KIND := ?ENTER, ?TABLE := Table},#state{table_id=Table2}=State)->
-	if
-		Table=:=Table2 ->
+handle_action(#{?KIND := ?ENTER, ?TABLE := Table},#state{table=#table{id=Table2}}=State)->
+	case Table of 
+		Table2 ->
 			{ok_json(?ENTER),State};
-		true->
+		_->
 			{err_json(?ENTER,<<"table_connected">>),State}
 	end;
 
-handle_action(_Req,#state{table_id=undefined}=State)->
+handle_action(_Req,#state{table=undefined}=State)->
 	{err_json(?ENTER),State};
 
-handle_action(#{?KIND := ?NEWSHOE},#state{table_server=Table}=State)->
-	Json=case game_api:new_shoe(Table) of
-		ok->
-			ok_json(?NEWSHOE);
-		Error ->
-			err_json(?NEWSHOE,Error)
-	end,
-	{Json,State};
+handle_action(#{?KIND := ?NEWSHOE},#state{table=#table{server=Server}}=State)->
+	handle_simple_action(?NEWSHOE,game_api:new_shoe(Server),State);
 
-handle_action(#{?KIND := ?STARTBET},#state{table_server=Table}=State)->
-	Json=case game_api:start_bet(Table) of
-		ok ->
-			ok_json(?STARTBET);
-		Error->
-			err_json(?STARTBET,Error)
-	end,
-	{Json,State};
+handle_action(#{?KIND := ?STARTBET},#state{table=#table{server=Server}}=State)->
+	handle_simple_action(?STARTBET,game_api:start_bet(Server),State);
 
-handle_action(#{?KIND := ?STOPBET},#state{table_server=Table}=State)->
-	Json=case game_api:stop_bet(Table) of
-		ok ->
-			ok_json(?STOPBET);
-		Error ->
-			err_json(?STOPBET,Error)
-	end,
-	{Json,State};
+handle_action(#{?KIND := ?STOPBET},#state{table=#table{server=Server}}=State)->
+	handle_simple_action(?STOPBET,game_api:stop_bet(Server),State);
 
-handle_action(#{?KIND := ?COMMIT},#state{table_server=Table}=State)->
-	Json=case game_api:commit(Table) of
-		ok ->
-			ok_json(?COMMIT);
-		Error->
-			err_json(?COMMIT,Error)
-	end,
-	{Json,State};
-
-
-handle_action(#{?KIND := ?DEAL, ?CARD := Card,?POS := Pos},#state{table_server=Table}=State)->
-	Json=case game_api:deal(Table,Card,Pos) of
-		ok ->
-			ok_json(?DEAL);
-		error ->
-			err_json(?DEAL)
-	end,
-	{Json,State};
-
-handle_action(#{?KIND := ?CLEAR,?POS:= Pos},#state{table_server=Table}=State)->
-	Json=case game_api:clear(Table,Pos) of
-		ok ->
-			ok_json(?CLEAR);
-		error ->
-			err_json(?CLEAR)
-	end,
-	{Json,State};
-
-handle_action(#{?KIND := ?SCAN,?CARD:= Card},#state{table_server=Table}=State)->
-	Json=case game_api:scan(Table,Card) of
+handle_action(#{?KIND := ?COMMIT},#state{table=#table{server=Server}}=State)->
+	handle_simple_action(?COMMIT,game_api:commit(Server),State);
+	
+handle_action(#{?KIND := ?DEAL, ?CARD := Card,?POS := Pos},#state{table=#table{server=Server,game=Game}}=State)->
+	handle_simple_action(?DEAL,game_api:deal(Server,Game,Card,Pos),State);
+	
+handle_action(#{?KIND := ?CLEAR,?POS:= Pos},#state{table=#table{server=Server,game=Game}}=State)->
+	handle_simple_action(?CLEAR,game_api:clear(Server,Game,Pos),State);
+	
+handle_action(#{?KIND := ?SCAN,?CARD:= Card},#state{table=#table{server=Server}}=State)->
+	Json=case game_api:scan(Server,Card) of
 		error ->
 			err_json(?SCAN);
-		{Status,Pos}->
+		{error,Error}->
+			err_json(?SCAN,Error);
+		{ok,Status,Pos}->
 			ok_json(?SCAN,[{?POS,Pos},{<<"status">>,Status}])
 	end,
 	{Json,State};
-	
 
 handle_action(Req,State)->
 	io:format("this is we got in handle_action(catch all) ~p~n",[Req]),
 	{err_json(?INVALID),State}.
+
+handle_simple_action(Kind,Result,State)->
+	case Result of
+		ok->
+			{ok_json(Kind),State};
+		error->
+			{err_json(Kind),State};
+		{error,Error}->
+			{err_json(Kind,Error),State}
+	end.
 
 handle_auth(Username,Password)->
 	case maps:find(Username,?DEALERS) of
