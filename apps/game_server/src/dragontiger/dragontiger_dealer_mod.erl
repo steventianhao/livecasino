@@ -3,20 +3,10 @@
 -export([put/3,remove/2,add/2,from_string/1,to_string/1,validate/1,one_card/1]).
 
 put(Pos,Card,Cards)->
-	case lists:member(Pos,?ALL_POS) of
-		true->
-			{ok,maps:put(Pos,Card,Cards)};
-		false->
-			error
-	end.
+	casino_card:put(Pos,Card,Cards,?ALL_POS).
 
 remove(Pos,Cards)->
-	case maps:is_key(Pos,Cards) of
-		true -> 
-			{ok,maps:remove(Pos,Cards)};
-		false->
-			error
-	end.
+	casino_card:remove(Pos,Cards).
 
 add(Card,Cards=#{}) when map_size(Cards)==0->
 	{more,?DRAGON_POS, Cards#{?DRAGON_POS=>Card}};

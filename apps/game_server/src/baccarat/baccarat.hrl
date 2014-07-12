@@ -1,8 +1,6 @@
 -ifndef(BACCARAT_HRL).
 -define(BACCARAT_HRL,true).
 
--include("card.hrl").
-
 -define(BANKER_POS_1,2).
 -define(BANKER_POS_2,4).
 -define(BANKER_POS_3,6).

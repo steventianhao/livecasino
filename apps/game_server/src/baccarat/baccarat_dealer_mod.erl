@@ -1,26 +1,13 @@
 -module(baccarat_dealer_mod).
 
--export([add/2,put/3,remove/2,validate/1,from_string/1,to_string/1,one_card/1,value/1]).
+-export([add/2,put/3,remove/2,validate/1,from_string/1,to_string/1,one_card/1]).
 -include("baccarat.hrl").
+-include("card.hrl").
 
 -define(ANYONEOF(Total,Lists),lists:member(Total,Lists)).
 
-value(#card{rank=?ACE})->1;
-value(#card{rank=?TWO})->2;
-value(#card{rank=?THREE})->3;
-value(#card{rank=?FOUR})->4;
-value(#card{rank=?FIVE})->5;
-value(#card{rank=?SIX})->6;
-value(#card{rank=?SEVEN})->7;
-value(#card{rank=?EIGHT})->8;
-value(#card{rank=?NINE})->9;
-value(#card{rank=?TEN})->0;
-value(#card{rank=?JACK})->0;
-value(#card{rank=?QUEEN})->0;
-value(#card{rank=?KING})->0.
-
 total(Cards)->
-	casino_card:total(Cards,fun value/1).
+	casino_card:total(Cards,fun baccarat_card:value/1).
 
 from_string(Cards)->
 	[Pcs,Bcs]=string:tokens(Cards,"#"),
@@ -57,21 +44,11 @@ to_string(#{?PLAYER_POS_1:=P1,?PLAYER_POS_2:=P2,?BANKER_POS_1:=B1,?BANKER_POS_2:
 	cards_to_string([P2,P1],[B2,B1]).
 
 
-put(Pos,Card,Cards) when is_map(Cards) andalso is_record(Card,card) andalso is_integer(Pos)->
-	case lists:member(Pos,?ALL_POS) of
-		true->
-			{ok,maps:put(Pos,Card,Cards)};
-		false->
-			error
-	end.
+put(Pos,Card,Cards)->
+	casino_card:put(Pos,Card,Cards,?ALL_POS).
 
-remove(Pos,Cards) when is_map(Cards) andalso is_integer(Pos)->
-	case maps:is_key(Pos,Cards) of
-		true -> 
-			{ok,maps:remove(Pos,Cards)};
-		false->
-			error
-	end.
+remove(Pos,Cards)->
+	casino_card:remove(Pos,Cards).
 
 validate(Cards=#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?BANKER_POS_1 :=B1,?BANKER_POS_2 :=B2})->
 	Bt=total([B1,B2]),
@@ -80,7 +57,7 @@ validate(Cards=#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?BANKER_POS_1 :=B1,?BANKE
 		{4,_}->
 			?ANYONEOF(Pt,?TOTAL89) orelse ?ANYONEOF(Bt,?TOTAL89) orelse (?ANYONEOF(Pt,?TOTAL67) andalso ?ANYONEOF(Bt,?TOTAL67));
 		{5,#{?PLAYER_POS_3 := P3}}->
-			P3v=value(P3),
+			P3v=baccarat_card:value(P3),
 			Bt3=(Bt==3 andalso P3v ==8),
 			Bt4=(Bt==4 andalso ?ANYONEOF(P3v,[0,1,8,9])),
 			Bt5=(Bt==5 andalso (not ?ANYONEOF(P3v,[4,5,6,7]))),
@@ -89,7 +66,7 @@ validate(Cards=#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?BANKER_POS_1 :=B1,?BANKE
 		{5,#{?BANKER_POS_3 :=_}}->
 			?ANYONEOF(Pt,?TOTAL67) andalso Bt < 6;
 		{6,#{?PLAYER_POS_3 :=P3,?BANKER_POS_3 :=_}}->
-			P3v=value(P3),
+			P3v=baccarat_card:value(P3),
 			Bt3=(Bt==3 andalso P3v /=8) ,
 			Bt4=(Bt==4 andalso (not ?ANYONEOF(P3v,[0,1,8,9]))),
 			Bt5=(Bt==5 andalso ?ANYONEOF(P3v,[4,5,6,7])),
@@ -121,7 +98,7 @@ add(Card,Cards) when is_map(Cards) andalso is_record(Card,card)->
 			(Pt== 6 orelse Pt == 7) andalso Bt < 6 -> 
 				{done,?BANKER_POS_3};
 			true ->
-				P3v=value(Card),
+				P3v=baccarat_card:value(Card),
 				case Bt of
 					T when T< 3 ->
 						{more,?PLAYER_POS_3};
@@ -168,7 +145,7 @@ add(Card,Cards) when is_map(Cards) andalso is_record(Card,card)->
 		{4,#{?PLAYER_POS_1 :=P1, ?BANKER_POS_1 :=B1,?PLAYER_POS_2 :=P2,?BANKER_POS_2 := B2}}->
 			Calc4(total([P1,P2]),total([B1,B2]));
 		{5,#{?PLAYER_POS_1:=_,?PLAYER_POS_2:=_,?PLAYER_POS_3:=P3,?BANKER_POS_1:=B1,?BANKER_POS_2:=B2}}->
-			Calc5(total([B1,B2]),value(P3));
+			Calc5(total([B1,B2]),baccarat_card:value(P3));
 		_ -> 
 			error
 	end,

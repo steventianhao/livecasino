@@ -1,8 +1,6 @@
 -ifndef(DRAGONTIGER_HRL).
 -define(DRAGONTIGER_HRL,true).
 
--include("card.hrl").
-
 -define(DRAGON_POS,1).
 -define(TIGER_POS,2).
 -define(ALL_POS,[?DRAGON_POS,?TIGER_POS]).

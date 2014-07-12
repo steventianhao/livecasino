@@ -18,7 +18,7 @@ result4(Pt,Bt) when Pt<Bt ->
 	[banker].
 
 total(Cards)->
-	casino_card:total(Cards,fun baccarat_dealer_mod:value/1).
+	casino_card:total(Cards,fun baccarat_card:value/1).
 
 reward4(#{?BANKER_POS_1 := B1,?BANKER_POS_2 := B2,?PLAYER_POS_1 := P1,?PLAYER_POS_2 := P2}) ->
 	Pt=total([P1,P2]),
