@@ -1,7 +1,7 @@
 -module(dragontiger_player_tests).
 -include_lib("eunit/include/eunit.hrl").
 -include("../src/dragontiger/dragontiger.hrl").
-
+-include("card.hrl").
 
 payout_test()->
 	Cards=#{?DRAGON_POS=>#card{rank=?ACE},?TIGER_POS=>#card{rank=?ACE}},

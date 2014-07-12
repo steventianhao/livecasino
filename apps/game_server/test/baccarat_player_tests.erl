@@ -2,6 +2,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 -include("../src/baccarat/baccarat.hrl").
+-include("card.hrl").
 
 payout_test()->
 	Cards=#{?BANKER_POS_1=>#card{rank=?ACE},?BANKER_POS_2=>#card{rank=?ACE},
