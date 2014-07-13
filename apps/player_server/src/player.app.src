@@ -3,7 +3,8 @@
 	{description,"player connection servers"},
 	{vsn,"0.9.0"},
 	{modules,[player_sup]},
-	{applications,[kernel,stdlib,crypto,emysql,lager]},
-	{mod,{player_app,[]}}
+	{applications,[kernel,stdlib,jsx,cowboy]},
+	{mod,{player_app,[]}},
+	{env,[{listen_port,8201}]}
 ]}.
 
