@@ -1,4 +1,4 @@
--module(dragontiger).
+-module(dealer_dragontiger).
 -export([check_pos/1]).
 
 -define(DRAGON_POS,1).

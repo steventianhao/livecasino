@@ -1,4 +1,4 @@
--module(baccarat).
+-module(dealer_baccarat).
 -export([check_pos/1]).
 
 -define(BANKER_POS_1,2).

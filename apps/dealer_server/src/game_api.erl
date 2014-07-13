@@ -12,6 +12,11 @@ check_one_card([S,R]) when is_integer(S) andalso is_integer(R)->
 check_one_card(_)->
 	false.
 
+check_pos(Pos,dragontiger)->
+	dealer_dragontiger:check_pos(Pos);
+check_pos(Pos,baccarat)->
+	dealer_baccarat:check_pos(Pos).
+
 find_server(Table)->
 	global:whereis_name({game_server,Table}).
 
@@ -33,7 +38,7 @@ scan(GameServer,Card)->
 	end.
 
 deal(GameServer,Game,Pos,Card)->
-	case Game:check_pos(Pos) andalso check_one_card(binary_to_list(Card)) of
+	case check_pos(Pos,Game) andalso check_one_card(binary_to_list(Card)) of
 		true ->
 			gen_fsm:sync_send_event(GameServer,{deal,Pos,Card});
 		false->
@@ -41,7 +46,7 @@ deal(GameServer,Game,Pos,Card)->
 	end.
 		
 clear(GameServer,Game,Pos)->
-	case Game:check_pos(Pos) of
+	case check_pos(Pos,Game) of
 		true ->
 			gen_fsm:sync_send_event(GameServer,{clear,Pos});
 		false->
