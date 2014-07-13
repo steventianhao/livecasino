@@ -1,4 +1,4 @@
--module(game_api).
+-module(dealer_game_api).
 
 -export([find_server/1,connect/3,disconnect/1,new_shoe/1,start_bet/1,stop_bet/1]).
 -export([scan/2,deal/4,clear/3,commit/1,update_countdown/2]).
