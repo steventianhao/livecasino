@@ -62,7 +62,7 @@ websocket_terminate(Reason,_Req,#state{table=undefined})->
 	ok;
 websocket_terminate(Reason,_Req,#state{table=#table{server=Server}})->
 	io:format("terminated reason is ~p~n",[Reason]),
-	game_api:disconnect(Server),
+	dealer_game_api:disconnect(Server),
 	ok.
 
 ok_json(Kind)->
@@ -83,7 +83,7 @@ handle_action(#{?KIND := ?QUIT},#state{table=undefined}=State)->
 	{ok_json(?QUIT),State#state{dealer=undefined}};
 
 handle_action(#{?KIND := ?QUIT},#state{table=#table{server=Server}}=State)->
-	game_api:disconnect(Server),
+	dealer_game_api:disconnect(Server),
 	{ok_json(?QUIT),State#state{dealer=undefined,table=undefined}};
 
 handle_action(#{?KIND := ?AUTH,  ?USERNAME:= Username,  ?PASSWORD:= Password}=Req,#state{dealer=undefined}=State)->
@@ -137,25 +137,25 @@ handle_action(_Req,#state{table=undefined}=State)->
 	{err_json(?ENTER),State};
 
 handle_action(#{?KIND := ?NEWSHOE},#state{table=#table{server=Server}}=State)->
-	handle_simple_action(?NEWSHOE,game_api:new_shoe(Server),State);
+	handle_simple_action(?NEWSHOE,dealer_game_api:new_shoe(Server),State);
 
 handle_action(#{?KIND := ?STARTBET},#state{table=#table{server=Server}}=State)->
-	handle_simple_action(?STARTBET,game_api:start_bet(Server),State);
+	handle_simple_action(?STARTBET,dealer_game_api:start_bet(Server),State);
 
 handle_action(#{?KIND := ?STOPBET},#state{table=#table{server=Server}}=State)->
-	handle_simple_action(?STOPBET,game_api:stop_bet(Server),State);
+	handle_simple_action(?STOPBET,dealer_game_api:stop_bet(Server),State);
 
 handle_action(#{?KIND := ?COMMIT},#state{table=#table{server=Server}}=State)->
-	handle_simple_action(?COMMIT,game_api:commit(Server),State);
+	handle_simple_action(?COMMIT,dealer_game_api:commit(Server),State);
 	
 handle_action(#{?KIND := ?DEAL, ?CARD := Card,?POS := Pos},#state{table=#table{server=Server,game=Game}}=State)->
-	handle_simple_action(?DEAL,game_api:deal(Server,Game,Card,Pos),State);
+	handle_simple_action(?DEAL,dealer_game_api:deal(Server,Game,Card,Pos),State);
 	
 handle_action(#{?KIND := ?CLEAR,?POS:= Pos},#state{table=#table{server=Server,game=Game}}=State)->
-	handle_simple_action(?CLEAR,game_api:clear(Server,Game,Pos),State);
+	handle_simple_action(?CLEAR,dealer_game_api:clear(Server,Game,Pos),State);
 	
 handle_action(#{?KIND := ?SCAN,?CARD:= Card},#state{table=#table{server=Server}}=State)->
-	Json=case game_api:scan(Server,Card) of
+	Json=case dealer_game_api:scan(Server,Card) of
 		error ->
 			err_json(?SCAN);
 		{error,Error}->
