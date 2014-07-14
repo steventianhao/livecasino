@@ -13,7 +13,6 @@
 
 -define(CASINO_DB,mysql_casino_master).
 -define(GAME_PLAYER_MOD,baccarat_player_mod).
--define(PLAYER_HANDLER_MOD,baccarat_player_handler).
 -define(GAME_API,baccarat_game_api).
 
 
@@ -21,7 +20,7 @@ start_link(Server,EventBus,PlayerTable,User) when is_record(PlayerTable,player_t
 	gen_server:start_link(?MODULE,{Server,EventBus,PlayerTable,User},[]).
 
 init({Server,EventBus,PlayerTable,User})->
-	gen_event:add_handler(EventBus,{?PLAYER_HANDLER_MOD,User#user.id},self()),
+	gen_event:add_handler(EventBus,{player_handler,User#user.id},self()),
 	BetEts=ets:new(player_bets,[set,private]),
 	{ok,#state{player_table=PlayerTable,user=User,server=Server,bet_ets=BetEts}}.
 

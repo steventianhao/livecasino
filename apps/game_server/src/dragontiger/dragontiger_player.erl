@@ -10,14 +10,13 @@
 -record(state,{player_table,user,bet_ets,server,round_id}).
 
 -define(GAME_PLAYER_MOD,dragontiger_player_mod).
--define(PLAYER_HANDLER_MOD,dragontiger_player_handler).
 -define(GAME_API,dragontiger_game_api).
 
 start_link(Server,EventBus,PlayerTable,User) when is_record(PlayerTable,player_table) andalso is_record(User,user)->
 	gen_server:start_link(?MODULE,{Server,EventBus,PlayerTable,User},[]).
 
 init({Server,EventBus,PlayerTable,User})->
-	gen_event:add_handler(EventBus,{?PLAYER_HANDLER_MOD,User#user.id},self()),
+	gen_event:add_handler(EventBus,{player_handler,User#user.id},self()),
 	BetEts=ets:new(player_bets,[set,private]),
 	{ok,#state{player_table=PlayerTable,user=User,server=Server,bet_ets=BetEts}}.
 
