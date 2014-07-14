@@ -6,20 +6,12 @@
 -include("table.hrl").
 
 -export([init/1,handle_call/3,handle_cast/2,handle_info/2,terminate/2,code_change/3]).
--export([bet/3,start_link/4]).
+-export([start_link/4]).
 -record(state,{player_table,user,bet_ets,server,round_id}).
 
 -define(GAME_PLAYER_MOD,dragontiger_player_mod).
 -define(PLAYER_HANDLER_MOD,dragontiger_player_handler).
 -define(GAME_API,dragontiger_game_api).
-
-bet(Pid,Cats,Amounts)->
-	case ?GAME_PLAYER_MOD:is_valid_bets(Cats,Amounts) of
-		true ->
-			gen_server:call(Pid,{bet,Cats,Amounts});
-		_ ->
-			{error,invalid_bets}
-	end.
 
 start_link(Server,EventBus,PlayerTable,User) when is_record(PlayerTable,player_table) andalso is_record(User,user)->
 	gen_server:start_link(?MODULE,{Server,EventBus,PlayerTable,User},[]).

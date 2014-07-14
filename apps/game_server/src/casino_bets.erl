@@ -1,6 +1,6 @@
 -module(casino_bets).
 
--export([is_valid_bets/3,insert_bets/4]).
+-export([insert_bets/4]).
 -export([create_bet_req/5,create_payout_req/5]).
 -export([add_reward/3,payout/3]).
 -export([player_payout/2,persist_payout/5,persist_bet/5]).
@@ -8,24 +8,6 @@
 
 -include("db.hrl").
 -include("card.hrl").
-
-is_valid_bet_cats(Cats,AllBetCats)->
-	Cs=sets:from_list(Cats),
-	L= sets:size(Cs),
-	case length(Cats) of
-		L->
-			sets:is_subset(Cs,sets:from_list(AllBetCats));
-		_ ->
-			false
-	end.
-	
-is_valid_bet_amounts(Amounts)->
-	lists:all(fun(E)-> E>0 end,Amounts).
-		
-is_valid_bets(Cats=[C1|_],Amounts=[A1|_],AllBetCats=[_|_]) when is_integer(C1) andalso is_number(A1) andalso length(Cats)==length(Amounts)->
-	is_valid_bet_cats(Cats,AllBetCats) andalso is_valid_bet_amounts(Amounts);
-is_valid_bets(_,_,_)->
-	false.
 
 create_bet_req(RoundId,UserId,TableId,Cats,Amounts)->
 	Cstr = string:join([integer_to_list(C) || C <-Cats],","),
