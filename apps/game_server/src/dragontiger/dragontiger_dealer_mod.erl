@@ -1,6 +1,6 @@
 -module(dragontiger_dealer_mod).
 -include("dragontiger.hrl").
--export([put/3,remove/2,add/2,from_string/1,to_string/1,validate/1,one_card/1]).
+-export([put/3,remove/2,add/2,from_string/1,to_string/1,validate/1]).
 
 put(Pos,Card,Cards)->
 	casino_card:put(Pos,Card,Cards,?ALL_POS).
@@ -28,6 +28,3 @@ from_string(Cards)->
 
 to_string(#{?DRAGON_POS :=D,?TIGER_POS :=T})->
 	lists:append([casino_card:card_to_string(D),"#",casino_card:card_to_string(T)]).
-
-one_card(Card)->
-	casino_card:one_card(Card).

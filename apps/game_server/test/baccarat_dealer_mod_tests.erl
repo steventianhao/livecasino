@@ -99,14 +99,10 @@ remove_test()->
 	?assert({ok,#{?PLAYER_POS_2=>#card{rank=?KING}}}=:=baccarat_dealer_mod:remove(?PLAYER_POS_1,M)),
 	?assert(error=:=baccarat_dealer_mod:remove(?BANKER_POS_2,M)).
 
-one_card_test()->
-	S="D6",
-	?assertEqual(#card{suit=?DIAMOND,rank=?SIX},baccarat_dealer_mod:one_card(S)).
-
 validate_7cards_test()->
 	C1="S3DACT#SKS2D8",
 	Cards=baccarat_dealer_mod:from_string(C1),
-	C2=maps:merge(#{7 =>baccarat_dealer_mod:one_card("H2")},Cards),
+	C2=maps:merge(#{7 =>casino_card:one_card(<<"H2">>)},Cards),
 	?assertEqual(false,baccarat_dealer_mod:validate(C2)).
 
 validate_3cards_test()->

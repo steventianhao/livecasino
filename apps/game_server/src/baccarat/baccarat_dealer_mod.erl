@@ -1,6 +1,6 @@
 -module(baccarat_dealer_mod).
 
--export([add/2,put/3,remove/2,validate/1,from_string/1,to_string/1,one_card/1]).
+-export([add/2,put/3,remove/2,validate/1,from_string/1,to_string/1]).
 -include("baccarat.hrl").
 -include("card.hrl").
 
@@ -26,9 +26,6 @@ create_map(Cards,IndexList)->
 			maps:put(H2,H1,Rest)
 	end.
 
-one_card(Card)->
-	casino_card:one_card(Card).
-	
 cards_to_string(Pcs,Bcs)->
 	PL=casino_card:cards_to_string(Pcs),
 	BL=casino_card:cards_to_string(Bcs),
