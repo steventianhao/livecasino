@@ -8,3 +8,11 @@ check_bets(Cats,Amounts,dragontiger)->
 
 find_server(Table)->
 	global:whereis_name({game_server,Table}).
+
+bet(Pid,Game,Cats,Amounts)->
+	case check_bets(Cats,Amounts,Game) of
+		true->
+			gen_server:call(Pid,{bet,Cats,Amounts});
+		false->
+			{error,invalid_bets}
+	end.
