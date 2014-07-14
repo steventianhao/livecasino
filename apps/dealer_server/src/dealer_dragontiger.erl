@@ -6,4 +6,4 @@
 -define(ALL_POS,[?DRAGON_POS,?TIGER_POS]).
 
 check_pos(Pos)->
-	is_integer(Pos) andalso lists:member(Pos,?ALL_POS).
+	lists:member(Pos,?ALL_POS).

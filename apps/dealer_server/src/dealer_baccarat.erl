@@ -10,4 +10,4 @@
 -define(ALL_POS,[?PLAYER_POS_1,?BANKER_POS_1,?PLAYER_POS_2,?BANKER_POS_2,?PLAYER_POS_3,?BANKER_POS_3]).
 
 check_pos(Pos)->
-	is_integer(Pos) andalso lists:member(Pos,?ALL_POS).
+	lists:member(Pos,?ALL_POS).
