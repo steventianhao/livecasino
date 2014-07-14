@@ -1,9 +1,21 @@
 -module(dealer_cards).
--export([check_one_card/1,check_pos/2]).
--export([check_deal/3,check_clear/2,check_scan/2]).
+-export([check_one_card/1,check_pos/2,check_cards/1]).
+-export([check_deal/3,check_clear/2,check_scan/1]).
 
 -define(ALL_SUIT,[$H,$S,$D,$C]).
 -define(ALL_RANK,[$A,$2,$3,$4,$5,$6,$7,$8,$9,$T,$J,$Q,$K]).
+
+check_cards([S,R])->
+	check_one_card([S,R]);
+check_cards([S,R|T])->
+	case check_one_card([S,R]) of
+	 	true ->
+			check_cards(T);
+		_ -> 
+			false
+	end;
+check_cards(_)->
+	false.
 
 check_one_card([S,R]) when is_integer(S) andalso is_integer(R)->
 	lists:member(S,?ALL_SUIT) andalso lists:member(R,?ALL_RANK);
