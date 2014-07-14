@@ -16,7 +16,7 @@
 -define(GAME,baccarat).
 -define(GAME_ROUND,casino_shoe_round).
 -define(GAME_DEALER_MOD,baccarat_dealer_mod).
--define(PLAYER_HANDLER_MOD,baccarat_player_handler).
+-define(PLAYER_HANDLER_MOD,player_handler).
 -define(CASINO_DB,mysql_casino_master).
 
 

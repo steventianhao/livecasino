@@ -1,5 +1,6 @@
--module(dragontiger_player_handler).
+-module(player_handler).
 -behavior(gen_event).
+
 -compile([{parse_transform, lager_transform}]).
 -record(state,{pid}).
 -include("dealer.hrl").
