@@ -3,7 +3,7 @@
 
 check_bets(Cats,Amounts,baccarat)->
 	player_baccarat:check_bets(Cats,Amounts);
-check_bets(Cats,Amounts,draontiger)->
+check_bets(Cats,Amounts,dragontiger)->
 	player_dragontiger:check_bets(Cats,Amounts).
 
 find_server(Table)->

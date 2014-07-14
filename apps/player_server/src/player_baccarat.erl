@@ -19,4 +19,4 @@
 	?BET_BIG,?BET_SMALL]).
 
 check_bets(Cats,Amounts)->
-	player_cards:is_valid_bets(Cats,Amounts,?ALL_BET_CATS).
+	player_bets:is_valid_bets(Cats,Amounts,?ALL_BET_CATS).

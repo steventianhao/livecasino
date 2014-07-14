@@ -12,4 +12,4 @@
 -define(ALL_BET_CATS,[?BET_DRAGON,?BET_TIGER,?BET_TIE,?BET_DRAGON_ODD,?BET_TIGER_ODD,?BET_DRAGON_EVEN,?BET_TIGER_EVEN]).
 
 check_bets(Cats,Amounts)->
-	player_cards:is_valid_bets(Cats,Amounts,?ALL_BET_CATS).
+	player_bets:is_valid_bets(Cats,Amounts,?ALL_BET_CATS).
