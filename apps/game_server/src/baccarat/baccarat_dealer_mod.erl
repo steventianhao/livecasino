@@ -4,7 +4,7 @@
 -include("baccarat.hrl").
 -include("card.hrl").
 
--define(ANYONEOF(Total,Lists),lists:member(Total,Lists)).
+-define(ANY(Total,Lists),lists:member(Total,Lists)).
 
 total(Cards)->
 	casino_card:total(Cards,fun baccarat_card:value/1).
@@ -47,23 +47,31 @@ put(Pos,Card,Cards)->
 remove(Pos,Cards)->
 	casino_card:remove(Pos,Cards).
 
+check6cards(Pt,Bt,P3v)->
+	Pt < 6 andalso 
+	(Bt <3 orelse 
+		(Bt==3 andalso P3v /=8) orelse 
+		(Bt==4 andalso (not ?ANY(P3v,[0,1,8,9]))) orelse
+		(Bt==5 andalso ?ANY(P3v,[4,5,6,7])) orelse 
+		(Bt==6 andalso ?ANY(P3v,?TOTAL67))
+	).
+
+check4cards(Pt,Bt)->
+	?ANY(Pt,?TOTAL89) orelse ?ANY(Bt,?TOTAL89) orelse (?ANY(Pt,?TOTAL67) andalso ?ANY(Bt,?TOTAL67)).
+
 validate(Cards=#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?BANKER_POS_1 :=B1,?BANKER_POS_2 :=B2})->
 	Bt=total([B1,B2]),
 	Pt=total([P1,P2]),
 	case {map_size(Cards),Cards} of
 		{4,_}->
-			?ANYONEOF(Pt,?TOTAL89) orelse ?ANYONEOF(Bt,?TOTAL89) orelse (?ANYONEOF(Pt,?TOTAL67) andalso ?ANYONEOF(Bt,?TOTAL67));
+			check4cards(Pt,Bt);
 		{5,#{?PLAYER_POS_3 := _}}->
-			Pt < 6 andalso (not ?ANYONEOF(Bt,?TOTAL89));
+			Pt < 6 andalso (not ?ANY(Bt,?TOTAL89));
 		{5,#{?BANKER_POS_3 :=_}}->
-			?ANYONEOF(Pt,?TOTAL67) andalso Bt < 6;
+			?ANY(Pt,?TOTAL67) andalso Bt < 6;
 		{6,#{?PLAYER_POS_3 :=P3,?BANKER_POS_3 :=_}}->
 			P3v=baccarat_card:value(P3),
-			Bt3=(Bt==3 andalso P3v /=8) ,
-			Bt4=(Bt==4 andalso (not ?ANYONEOF(P3v,[0,1,8,9]))),
-			Bt5=(Bt==5 andalso ?ANYONEOF(P3v,[4,5,6,7])),
-			Bt6=(Bt==6 andalso ?ANYONEOF(P3v,?TOTAL67)),
-			Pt < 6 andalso (Bt <3 orelse Bt3 orelse Bt4 orelse Bt5 orelse Bt6);
+			check6cards(Pt,Bt,P3v);
 		_ -> false
 	end;
 validate(_Cards)->
@@ -71,12 +79,10 @@ validate(_Cards)->
 
 add(Card,Cards) when is_map(Cards) andalso is_record(Card,card)->
 	Calc3 = fun(Pt,Bt)->
-		if
-			Pt ==8 orelse Pt==9 orelse Bt ==8 orelse Bt==9 -> 
+		case check4cards(Pt,Bt) of
+			true ->
 				{done,?BANKER_POS_2};
-			(Pt==6 orelse Pt ==7) andalso (Bt==6 orelse Bt==7) ->
-				{done,?BANKER_POS_2};
-			true -> 
+			false -> 
 				{more,?BANKER_POS_2}
 		end
 	end,
@@ -91,16 +97,8 @@ add(Card,Cards) when is_map(Cards) andalso is_record(Card,card)->
 				{done,?BANKER_POS_3};
 			true ->
 				P3v=baccarat_card:value(Card),
-				case Bt of
-					T when T< 3 ->
-						{more,?PLAYER_POS_3};
-					3 when P3v /=8 ->
-						{more,?PLAYER_POS_3};
-					4 when P3v /= 8 orelse P3v /= 9 orelse P3v /=1 orelse P3v /=0 -> 
-						{more,?PLAYER_POS_3};
-					5 when P3v == 4 orelse P3v == 5 orelse P3v ==6 orelse P3v ==7 -> 
-						{more,?PLAYER_POS_3};
-					6 when P3v == 6 orelse P3v == 7 -> 
+				case check6cards(Pt,Bt,P3v) of
+					true->
 						{more,?PLAYER_POS_3};
 					_ -> 
 						{done,?PLAYER_POS_3}
@@ -108,17 +106,9 @@ add(Card,Cards) when is_map(Cards) andalso is_record(Card,card)->
 		end
 	end,
 
-	Calc5 = fun(Bt,P3v)->
-		case Bt of
-			T  when T< 3 -> 
-				{done,?BANKER_POS_3};
-			3 when  P3v /= 8 -> 
-				{done,?BANKER_POS_3};
-			4 when P3v /= 8 orelse P3v /= 9 orelse P3v /=1 orelse P3v /=0 -> 
-				{done,?BANKER_POS_3};
-			5 when P3v == 4 orelse P3v == 5 orelse P3v ==6 orelse P3v ==7 -> 
-				{done,?BANKER_POS_3};
-			6 when P3v == 6 orelse P3v == 7 -> 
+	Calc5 = fun(Pt,Bt,P3v)->
+		case check6cards(Pt,Bt,P3v) of
+			true->
 				{done,?BANKER_POS_3};
 			_ -> 
 				error
@@ -132,12 +122,12 @@ add(Card,Cards) when is_map(Cards) andalso is_record(Card,card)->
 			{more,?BANKER_POS_1};
 		{2,#{?PLAYER_POS_1 := _, ?BANKER_POS_1 := _}}->
 			{more,?PLAYER_POS_2};
-		{3,#{?PLAYER_POS_1 := P1, ?BANKER_POS_1 := B1, ?PLAYER_POS_2 := P2}}->
+		{3,#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?BANKER_POS_1 := B1}}->
 			Calc3(total([P1,P2]),total([B1,Card]));
-		{4,#{?PLAYER_POS_1 :=P1, ?BANKER_POS_1 :=B1,?PLAYER_POS_2 :=P2,?BANKER_POS_2 := B2}}->
+		{4,#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?BANKER_POS_1 :=B1,?BANKER_POS_2 := B2}}->
 			Calc4(total([P1,P2]),total([B1,B2]));
-		{5,#{?PLAYER_POS_1:=_,?PLAYER_POS_2:=_,?PLAYER_POS_3:=P3,?BANKER_POS_1:=B1,?BANKER_POS_2:=B2}}->
-			Calc5(total([B1,B2]),baccarat_card:value(P3));
+		{5,#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?PLAYER_POS_3 :=P3,?BANKER_POS_1:=B1,?BANKER_POS_2:=B2}}->
+			Calc5(total([P1,P2]),total([B1,B2]),baccarat_card:value(P3));
 		_ -> 
 			error
 	end,
