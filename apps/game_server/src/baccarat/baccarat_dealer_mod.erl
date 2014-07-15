@@ -53,8 +53,7 @@ check6cards(Pt,Bt,P3v)->
 		(Bt==3 andalso P3v /=8) orelse 
 		(Bt==4 andalso (not ?ANY(P3v,[0,1,8,9]))) orelse
 		(Bt==5 andalso ?ANY(P3v,[4,5,6,7])) orelse 
-		(Bt==6 andalso ?ANY(P3v,?TOTAL67))
-	).
+		(Bt==6 andalso ?ANY(P3v,?TOTAL67))).
 
 check4cards(Pt,Bt)->
 	?ANY(Pt,?TOTAL89) orelse ?ANY(Bt,?TOTAL89) orelse (?ANY(Pt,?TOTAL67) andalso ?ANY(Bt,?TOTAL67)).
