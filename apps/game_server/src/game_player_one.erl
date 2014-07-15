@@ -1,4 +1,4 @@
--module(baccarat_player).
+-module(game_player_one).
 -behavior(gen_server).
 
 -compile([{parse_transform, lager_transform}]).
@@ -6,28 +6,28 @@
 -include("user.hrl").
 -include("round.hrl").
 -include("table.hrl").
+-include("game.hrl").
 
 -export([init/1,handle_call/3,handle_cast/2,handle_info/2,terminate/2,code_change/3]).
--export([start_link/4,bet/3]).
--record(state,{player_table,user,bet_ets,server,round_id}).
+-export([start_link/5,bet/3]).
+-record(state,{game,player_table,user,bet_ets,server,round_id}).
 
 -define(CASINO_DB,mysql_casino_master).
--define(GAME_PLAYER_MOD,baccarat_player_mod).
--define(GAME_API,baccarat_game_api).
 
 bet(GameServer,Cats,Amounts)->
 	gen_server:call(GameServer,{bet,Cats,Amounts}).
 
-start_link(Server,EventBus,PlayerTable,User) when is_record(PlayerTable,player_table) andalso is_record(User,user)->
-	gen_server:start_link(?MODULE,{Server,EventBus,PlayerTable,User},[]).
+start_link(Game,Server,EventBus,PlayerTable,User) 
+	when is_record(PlayerTable,player_table) andalso is_record(User,user) andalso is_record(Game,game)->
+	gen_server:start_link(?MODULE,{Game,Server,EventBus,PlayerTable,User},[]).
 
-init({Server,EventBus,PlayerTable,User})->
+init({Game,Server,EventBus,PlayerTable,User})->
 	gen_event:add_handler(EventBus,{player_handler,User#user.id},self()),
 	BetEts=ets:new(player_bets,[set,private]),
-	{ok,#state{player_table=PlayerTable,user=User,server=Server,bet_ets=BetEts}}.
+	{ok,#state{game=Game,player_table=PlayerTable,user=User,server=Server,bet_ets=BetEts}}.
 
-do_bet(Server,BetEts,RoundId,UserId,PlayerTableId,Cats,Amounts)->
-	case ?GAME_API:try_bet(Server,Cats,Amounts) of
+do_bet(Module,Server,BetEts,RoundId,UserId,PlayerTableId,Cats,Amounts)->
+	case Module:try_bet(Server,Cats,Amounts) of
 		ok->
 			case casino_bets:persist_bet(RoundId,UserId,PlayerTableId,Cats,Amounts) of
 				{ok,Bundle={BetBundleId,_BalanceAfter}}->
@@ -40,13 +40,13 @@ do_bet(Server,BetEts,RoundId,UserId,PlayerTableId,Cats,Amounts)->
 			Res
 	end.
 					
-handle_call(Event={bet,Cats,Amounts},_From,State=#state{server=Server,user=User,player_table=PlayerTable,bet_ets=BetEts,round_id=RoundId})->
+handle_call(Event={bet,Cats,Amounts},_From,State=#state{game=Game,server=Server,user=User,player_table=PlayerTable,bet_ets=BetEts,round_id=RoundId})->
 	lager:info("bet module ~p, event ~p, state ~p",[?MODULE,Event,State]),
 	Result=case RoundId of
 		undefined->
 			{error,round_not_found};
 		_ ->
-			do_bet(Server,BetEts,RoundId,User#user.id,PlayerTable#player_table.id,Cats,Amounts)
+			do_bet(Game#game.module,Server,BetEts,RoundId,User#user.id,PlayerTable#player_table.id,Cats,Amounts)
 	end,
 	{reply,Result,State}.
 
@@ -64,8 +64,8 @@ handle_info({start_bet,{_Table,Round,_Countdown}},State=#state{bet_ets=BetEts})-
 	lager:info("start_bet, round is ~p",[Round]),
 	{noreply,State#state{round_id=RoundId}};
 
-handle_info({commit,{_Table,Cards}},State=#state{bet_ets=BetEts,round_id=RoundId,user=User,player_table=#player_table{id=PlayerTableId,payout=PayoutSchema}})->
-	RatioMap=?GAME_PLAYER_MOD:payout(Cards,PayoutSchema),
+handle_info({commit,{_Table,Cards}},State=#state{game=#game{module=Module},bet_ets=BetEts,round_id=RoundId,user=User,player_table=#player_table{id=PlayerTableId,payout=PayoutSchema}})->
+	RatioMap=Module:payout(Cards,PayoutSchema),
 	{Pb,Pt}=casino_bets:player_payout(BetEts,RatioMap),
 	casino_bets:persist_payout(RoundId,User#user.id,PlayerTableId,Pb,Pt),
 	lager:info("payout by bundles ~p, payout total ~p",[Pb,Pt]),
@@ -75,9 +75,9 @@ handle_info(Info,State)->
 	lager:error("module ~p, Info ~p, State ~p",[?MODULE,Info,State]),
 	{noreply,State}.
 
-terminate(Reason,State=#state{user=User,server=Server,bet_ets=BetEts})->
+terminate(Reason,State=#state{game=#game{module=Module},user=User,server=Server,bet_ets=BetEts})->
 	lager:info("terminate, Reason ~p, State ~p",[Reason,State]),
-	?GAME_API:player_quit(Server,User,Reason),
+	Module:player_quit(Server,User,Reason),
 	ets:delete(BetEts),
 	ok.
 

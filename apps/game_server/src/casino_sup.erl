@@ -31,7 +31,8 @@ dragontiger_spec(Table,Countdown)->
 
 dragontiger_players_sup_spec(Table)->
 	Id=dragontiger_players_sup_id(Table),
-	StartFunc={casino_players_sup,start_link,[Id,Table,dragontiger_player]},
+	Game=#game{name=dragontiger,module=dragontiger_player_mod},
+	StartFunc={casino_players_sup,start_link,[Id,Game]},
 	{Id,StartFunc,transient,6,supervisor,dynamic}.
 
 baccarat_spec(Table,Countdown)->
@@ -42,7 +43,8 @@ baccarat_spec(Table,Countdown)->
 
 baccarat_players_sup_spec(Table)->
 	Id=baccarat_players_sup_id(Table),
-	StartFunc={casino_players_sup,start_link,[Id,Table,baccarat_player]},
+	Game=#game{name=baccarat,module=baccarat_player_mod},
+	StartFunc={casino_players_sup,start_link,[Id,Game]},
 	{Id,StartFunc,transient,6,supervisor,dynamic}.	
 
 dragontiger(Table,Countdown)->
