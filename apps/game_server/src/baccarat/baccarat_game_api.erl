@@ -1,6 +1,5 @@
 -module(baccarat_game_api).
 
--export([start_game_server/2]).
 -export([dealer_connect/2,dealer_disconnect/1]).
 -export([new_shoe/1,start_bet/1,stop_bet/1,commit/1,try_bet/3]).
 -export([deal/3,clear/2,scan/2]).
@@ -9,17 +8,7 @@
 
 -include("user.hrl").
 -include("table.hrl").
-
--define(SERVER,baccarat_game).
-
-
-start_game_server(DealerTableId,Countdown) when is_integer(DealerTableId) andalso is_integer(Countdown)->
-	GameServer=global_game_server(DealerTableId),
-	gen_fsm:start_link(GameServer,?SERVER,{DealerTableId,Countdown},[]).
-
-global_game_server(DealerTableId)->
-	{global,{game_server,DealerTableId}}.
-
+	
 new_shoe(GameServer)->
 	gen_fsm:sync_send_event(GameServer,new_shoe).
 

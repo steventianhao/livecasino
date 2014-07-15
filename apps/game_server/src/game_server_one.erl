@@ -5,18 +5,19 @@
 -include("round.hrl").
 -include("dealer.hrl").
 -include("user.hrl").
+-include("game.hrl").
 
--record(game,{name,module}).
-
-%% gen_fsm callbacks
--export([init/1,code_change/4,handle_event/3,handle_info/3,handle_sync_event/4,terminate/3]).
-
-%% all states transitions
--export([stopped/3,dealing/3,betting/3]).
-
-%% API
--define(CASINO_DB,mysql_casino_master).
 -record(state,{dealer,table,ticker,cards,countdown,round,eventbus,game}).
+
+-export([init/1,code_change/4,handle_event/3,handle_info/3,handle_sync_event/4,terminate/3]).
+-export([stopped/3,dealing/3,betting/3]).
+-export([start_game_server/3]).
+
+-define(CASINO_DB,mysql_casino_master).
+-define(GLOBAL_GAME_SERVER(DealerTableId),{global,{game_server,DealerTableId}}).
+
+start_game_server(Game,DealerTableId,Countdown) when  is_integer(DealerTableId) andalso is_integer(Countdown)->
+	gen_fsm:start_link(?GLOBAL_GAME_SERVER(DealerTableId),?MODULE,{Game,DealerTableId,Countdown},[]).
 
 init({Game,Table,Countdown})->
 	{ok,EventBus}=gen_event:start_link(),

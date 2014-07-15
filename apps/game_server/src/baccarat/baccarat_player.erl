@@ -8,13 +8,15 @@
 -include("table.hrl").
 
 -export([init/1,handle_call/3,handle_cast/2,handle_info/2,terminate/2,code_change/3]).
--export([start_link/4]).
+-export([start_link/4,bet/3]).
 -record(state,{player_table,user,bet_ets,server,round_id}).
 
 -define(CASINO_DB,mysql_casino_master).
 -define(GAME_PLAYER_MOD,baccarat_player_mod).
 -define(GAME_API,baccarat_game_api).
 
+bet(GameServer,Cats,Amounts)->
+	gen_server:call(GameServer,{bet,Cats,Amounts}).
 
 start_link(Server,EventBus,PlayerTable,User) when is_record(PlayerTable,player_table) andalso is_record(User,user)->
 	gen_server:start_link(?MODULE,{Server,EventBus,PlayerTable,User},[]).
