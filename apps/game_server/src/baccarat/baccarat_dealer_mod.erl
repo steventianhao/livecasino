@@ -68,10 +68,9 @@ validate(Cards=#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?BANKER_POS_1 :=B1,?BANKE
 		{5,#{?PLAYER_POS_3 := _}}->
 			Pt < 6 andalso (not ?ANY(Bt,?TOTAL89));
 		{5,#{?BANKER_POS_3 :=_}}->
-			?ANY(Pt,?TOTAL67) andalso Bt < 6;
+			Bt < 6 andalso ?ANY(Pt,?TOTAL67)  ;
 		{6,#{?PLAYER_POS_3 :=P3,?BANKER_POS_3 :=_}}->
-			P3v=baccarat_card:value(P3),
-			check6cards(Pt,Bt,P3v);
+			check6cards(Pt,Bt,baccarat_card:value(P3));
 		_ -> false
 	end;
 validate(_Cards)->
