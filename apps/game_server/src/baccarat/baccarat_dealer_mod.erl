@@ -77,21 +77,8 @@ validate(_Cards)->
 	false.
 
 add(Card,Cards) when is_map(Cards) andalso is_record(Card,card)->
-	Calc3 = fun(Pt,Bt)->
-		case check4cards(Pt,Bt) of
-			true ->
-				{done,?BANKER_POS_2};
-			false -> 
-				{more,?BANKER_POS_2}
-		end
-	end,
-
 	Calc4 = fun(Pt,Bt)->
 		if
-			Pt == 8 orelse Pt ==9 orelse Bt==8 orelse Bt==9 -> 
-				error;
-			(Pt== 6 orelse Pt == 7) andalso (Bt == 6 orelse Bt ==7) ->
-				error;
 			(Pt== 6 orelse Pt == 7) andalso Bt < 6 -> 
 				{done,?BANKER_POS_3};
 			true ->
@@ -105,15 +92,6 @@ add(Card,Cards) when is_map(Cards) andalso is_record(Card,card)->
 		end
 	end,
 
-	Calc5 = fun(Pt,Bt,P3v)->
-		case check6cards(Pt,Bt,P3v) of
-			true->
-				{done,?BANKER_POS_3};
-			_ -> 
-				error
-		end
-	end,
-
 	Result=case {maps:size(Cards),Cards} of
 		{0,_}-> 
 			{more,?PLAYER_POS_1};
@@ -122,11 +100,28 @@ add(Card,Cards) when is_map(Cards) andalso is_record(Card,card)->
 		{2,#{?PLAYER_POS_1 := _, ?BANKER_POS_1 := _}}->
 			{more,?PLAYER_POS_2};
 		{3,#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?BANKER_POS_1 := B1}}->
-			Calc3(total([P1,P2]),total([B1,Card]));
+			case check4cards(total([P1,P2]),total([B1,Card])) of
+				true ->
+					{done,?BANKER_POS_2};
+				false -> 
+					{more,?BANKER_POS_2}
+			end;
 		{4,#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?BANKER_POS_1 :=B1,?BANKER_POS_2 := B2}}->
-			Calc4(total([P1,P2]),total([B1,B2]));
+			Pt=total([P1,P2]),
+			Bt=total([B1,B2]),
+			case check4cards(Pt,Bt) of
+				true->
+					error;
+				false->
+					Calc4(Pt,Bt)
+			end;
 		{5,#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?PLAYER_POS_3 :=P3,?BANKER_POS_1:=B1,?BANKER_POS_2:=B2}}->
-			Calc5(total([P1,P2]),total([B1,B2]),baccarat_card:value(P3));
+			case check6cards(total([P1,P2]),total([B1,B2]),baccarat_card:value(P3)) of
+				true->
+					{done,?BANKER_POS_3};
+				_ -> 
+					error
+			end	;
 		_ -> 
 			error
 	end,
