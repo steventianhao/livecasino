@@ -5,6 +5,7 @@
 -include("card.hrl").
 
 -define(ANY(Total,Lists),lists:member(Total,Lists)).
+-define(ADDCARD(Status,Pos,Card,Cards),{Status,Pos,maps:put(Pos,Card,Cards)}).
 
 total(Cards)->
 	casino_card:total(Cards,fun baccarat_card:value/1).
@@ -80,52 +81,46 @@ add(Card,Cards) when is_map(Cards) andalso is_record(Card,card)->
 	Calc4 = fun(Pt,Bt)->
 		if
 			(Pt== 6 orelse Pt == 7) andalso Bt < 6 -> 
-				{done,?BANKER_POS_3};
+				?ADDCARD(done,?BANKER_POS_3,Card,Cards);
 			true ->
-				P3v=baccarat_card:value(Card),
-				case check6cards(Pt,Bt,P3v) of
+				case check6cards(Pt,Bt,baccarat_card:value(Card)) of
 					true->
-						{more,?PLAYER_POS_3};
+						?ADDCARD(more,?PLAYER_POS_3,Card,Cards);
 					_ -> 
-						{done,?PLAYER_POS_3}
+						?ADDCARD(done,?PLAYER_POS_3,Card,Cards)
 				end
 		end
 	end,
-
-	Result=case {maps:size(Cards),Cards} of
-		{0,_}-> 
-			{more,?PLAYER_POS_1};
+	case {maps:size(Cards),Cards} of
+		{0,#{}}-> 
+			?ADDCARD(more,?PLAYER_POS_1,Card,Cards);
 		{1,#{?PLAYER_POS_1 := _}}->
-			{more,?BANKER_POS_1};
+			?ADDCARD(more,?BANKER_POS_1,Card,Cards);
 		{2,#{?PLAYER_POS_1 := _, ?BANKER_POS_1 := _}}->
-			{more,?PLAYER_POS_2};
+			?ADDCARD(more,?PLAYER_POS_2,Card,Cards);
 		{3,#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?BANKER_POS_1 := B1}}->
 			case check4cards(total([P1,P2]),total([B1,Card])) of
 				true ->
-					{done,?BANKER_POS_2};
+					?ADDCARD(done,?BANKER_POS_2,Card,Cards);
 				false -> 
-					{more,?BANKER_POS_2}
+					?ADDCARD(more,?BANKER_POS_2,Card,Cards)
 			end;
 		{4,#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?BANKER_POS_1 :=B1,?BANKER_POS_2 := B2}}->
 			Pt=total([P1,P2]),
 			Bt=total([B1,B2]),
 			case check4cards(Pt,Bt) of
 				true->
-					error;
+					{error,Cards};
 				false->
 					Calc4(Pt,Bt)
 			end;
 		{5,#{?PLAYER_POS_1 :=P1,?PLAYER_POS_2 :=P2,?PLAYER_POS_3 :=P3,?BANKER_POS_1:=B1,?BANKER_POS_2:=B2}}->
 			case check6cards(total([P1,P2]),total([B1,B2]),baccarat_card:value(P3)) of
 				true->
-					{done,?BANKER_POS_3};
+					?ADDCARD(done,?BANKER_POS_3,Card,Cards);
 				_ -> 
-					error
+					{error,Cards}
 			end	;
 		_ -> 
 			error
-	end,
-	case Result of
-		error -> {error,Cards};
-		{Status,Pos}-> {Status,Pos,maps:put(Pos,Card,Cards)}
 	end.
