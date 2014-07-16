@@ -6,8 +6,9 @@
 -include("dealer.hrl").
 -include("user.hrl").
 -include("game.hrl").
+-include("table.hrl").
 
--record(state,{dealer,table,ticker,cards,countdown,round,eventbus,game}).
+-record(state,{dealer,table,ticker,cards,countdown,round,game}).
 
 -export([init/1,code_change/4,handle_event/3,handle_info/3,handle_sync_event/4,terminate/3]).
 -export([stopped/3,dealing/3,betting/3]).
@@ -16,12 +17,12 @@
 -define(CASINO_DB,mysql_casino_master).
 -define(GLOBAL_GAME_SERVER(DealerTableId),{global,{game_server,DealerTableId}}).
 
+
 start_game_server(Game,DealerTableId,Countdown) when  is_integer(DealerTableId) andalso is_integer(Countdown)->
 	gen_fsm:start_link(?GLOBAL_GAME_SERVER(DealerTableId),?MODULE,{Game,DealerTableId,Countdown},[]).
 
 init({Game,Table,Countdown})->
-	{ok,EventBus}=gen_event:start_link(),
-	{ok,stopped,#state{countdown=Countdown,table=Table,eventbus=EventBus,game=Game}}.
+	{ok,stopped,#state{countdown=Countdown,table=Table,game=Game}}.
 
 stopped(new_shoe,{Pid,_},State=#state{dealer={Pid,_},round=Round})->
 	lager:info("stopped#new_shoe,state ~p",[State]),
@@ -33,12 +34,12 @@ stopped(start_bet,{Pid,_},State=#state{dealer={Pid,_},round=undefined})->
 	lager:info("stopped#start_bet,state ~p",[State]),
 	{reply,{error,need_new_shoe},stopped,State};
 
-stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer={Pid,Dealer},round=Round,table=Table,eventbus=EventBus})->
+stopped(start_bet,{Pid,_},State=#state{countdown=Countdown,dealer={Pid,Dealer},round=Round,table=Table})->
 	lager:info("stopped#start_bet,state ~p",[State]),
 	NewRound=casino_shoe_round:new_round(Round),
 	NewRoundId=casino_shoe_round:persist_round(NewRound,Dealer#dealer.id,Table),
 	NewRound2=NewRound#round{id=NewRoundId},
-	gen_event:notify(EventBus,{start_bet,{Table,NewRound2,Countdown}}),
+	casino_events:publish(Table,{start_bet,{Table,NewRound2,Countdown}}),
 	TRef=erlang:send_after(1000,self(),tick),
 	NewState=State#state{ticker={TRef,Countdown},cards=#{},round=NewRound2},
 	{reply,ok,betting,NewState};
@@ -52,11 +53,11 @@ betting(Event={try_bet,_Cats,_Amounts},_From,State)->
 	lager:info("bet Event ~p,State ~p",[Event,State]),
 	{reply,ok,betting,State};
 	
-betting(stop_bet,{Pid,_},State=#state{ticker={TRef,_},dealer={Pid,_},round=Round,table=Table,eventbus=EventBus})->
+betting(stop_bet,{Pid,_},State=#state{ticker={TRef,_},dealer={Pid,_},round=Round,table=Table})->
 	lager:info("betting#stop_bet,state ~p",[State]),
 	erlang:cancel_timer(TRef),
 	1=mysql_db:update_round(?CASINO_DB,Round#round.id,casino_utils:mills()),
-	gen_event:notify(EventBus,{stop_bet,Table}),
+	casino_events:publish(Table,{stop_bet,Table}),
 	NewState=State#state{ticker=undefined},
 	{reply,ok,dealing,NewState};
 
@@ -64,44 +65,44 @@ betting(Event,_From,State)->
 	lager:error("unexpected event when betting, event ~p,state ~p",[Event,State]),
 	{reply,{error,unexpected},betting,State}.
 
-dealing(Event={deal,Pos,CardL},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,eventbus=EventBus,game=#game{module=Module}})->
+dealing(Event={deal,Pos,CardL},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,game=#game{module=Module}})->
 	lager:info("dealing#deal, Event ~p, State ~p",[Event,State]),
 	Card=casino_card:one_card(CardL),
 	case Module:put(Pos,Card,Cards) of
 		{ok,NewCards} ->
 			NewState=State#state{cards=NewCards},
-			gen_event:notify(EventBus,{deal,{Table,Pos,Card}}),
+			casino_events:publish(Table,{deal,{Table,Pos,Card}}),
 			{reply,ok,dealing,NewState};
 		error ->
 			{reply,error,dealing,State}
 	end;
 
 
-dealing(Event={scan,CardL},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,eventbus=EventBus,game=#game{module=Module}})->
+dealing(Event={scan,CardL},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,game=#game{module=Module}})->
 	lager:info("dealing#scan, Event ~p, State ~p",[Event,State]),
 	Card=casino_card:one_card(CardL),
 	case Module:add(Card,Cards) of
 		{error,_} ->
 			{reply,error,dealing,State};
 		{Status,Pos,NewCards}->
-			gen_event:notify(EventBus,{deal,{Table,Pos,Card}}),
+			casino_events:publish(Table,{deal,{Table,Pos,Card}}),
 			{reply,{ok,Status,Pos},dealing,State#state{cards=NewCards}}
 	end;
 
 
-dealing(Event={clear,Pos},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,eventbus=EventBus,game=#game{module=Module}})->
+dealing(Event={clear,Pos},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,game=#game{module=Module}})->
 	lager:info("dealing#clear, Event ~p, State ~p",[Event,State]),
 	case Module:remove(Pos,Cards) of
 		{ok,NewCards} ->
 			NewState=State#state{cards=NewCards},
-			gen_event:notify(EventBus,{clear,{Table,Pos}}),
+			casino_events:publish(Table,{clear,{Table,Pos}}),
 			{reply,ok,dealing,NewState};
 		error ->
 			{reply,error,dealing,State}
 	end;
 
 
-dealing(commit,{Pid,_},State=#state{cards=Cards,dealer={Pid,_},round=Round,table=Table,eventbus=EventBus,game=#game{module=Module}})->
+dealing(commit,{Pid,_},State=#state{cards=Cards,dealer={Pid,_},round=Round,table=Table,game=#game{module=Module}})->
 	lager:info("dealing#commit, State ~p",[State]),
 	%%check the cards are valid in accordence with the game rule
 	case Module:validate(Cards) of
@@ -109,7 +110,7 @@ dealing(commit,{Pid,_},State=#state{cards=Cards,dealer={Pid,_},round=Round,table
 			Mills=casino_utils:mills(),
 			Cstr=Module:to_string(Cards),
 			1=mysql_db:update_round(?CASINO_DB,Round#round.id,Cstr,Mills),
-			gen_event:notify(EventBus,{commit,{Table,Cards}}),				
+			casino_events:publish(Table,{commit,{Table,Cards}}),				
 			{reply,ok,stopped,State};
 		false->
 			{reply,error,dealing,State}
@@ -121,36 +122,36 @@ dealing(Event,_From,State)->
 	{reply,{error,unexpected},dealing,State}.
 
 
-handle_info(tick,betting,State=#state{ticker=Ticker,table=Table,eventbus=EventBus})->
+handle_info(tick,betting,State=#state{ticker=Ticker,table=Table})->
 	%%send the tick to all players intrested in
 	lager:info("handle tick when betting, state ~p",[State]),	
 	case Ticker of
 		{_,0} ->
-			gen_event:notify(EventBus,{tick,{Table,0}}),
+			casino_events:publish(Table,{tick,{Table,0}}),
 			{next_state,betting,State};
 		{_,Value}->
-			gen_event:notify(EventBus,{tick,{Table,Value}}),
+			casino_events:publish(Table,{tick,{Table,Value}}),
 			TRef=erlang:send_after(1000,self(),tick),
 			NewState=State#state{ticker={TRef,Value-1}},
 			{next_state,betting,NewState}
 	end;
-handle_info(Info={'DOWN',_Ref,process,Pid,_},StateName,State=#state{dealer={Pid,Dealer},table=Table,eventbus=EventBus})->
+handle_info(Info={'DOWN',_Ref,process,Pid,_},StateName,State=#state{dealer={Pid,Dealer},table=Table})->
 	lager:error("handle dealer process DOWN, info ~p,stateName ~p,state ~p",[Info,StateName,State]),
 	NewState=State#state{dealer=undefined},
-	gen_event:notify(EventBus,{dealer_disconnect,{Table,Dealer}}),
+	casino_events:publish(Table,{dealer_disconnect,{Table,Dealer}}),
 	{next_state,StateName,NewState};
 	
 handle_info(Info,StateName,State)->
 	lager:error("unexpected handle info, info ~p,stateName ~p,state ~p",[Info,StateName,State]),
 	{next_state,StateName,State}.
 
-handle_event(Event={player_quit,#user{id=UserId},Reason},StateName,State=#state{eventbus=EventBus})->
-	lager:info("player_quit handle_event, event ~p,stateName ~p,state ~p",[Event,StateName,State]),
-	gen_event:delete_handler(EventBus,{player_handler,UserId},Reason);
+% handle_event(Event={player_quit,#user{id=UserId},Reason},StateName,State=#state{eventbus=EventBus})->
+% 	lager:info("player_quit handle_event, event ~p,stateName ~p,state ~p",[Event,StateName,State]),
+% 	gen_event:delete_handler(EventBus,{player_handler,UserId},Reason);
 
-handle_event(Event={dealer_disconnect,Pid},StateName,State=#state{dealer={Pid,Dealer},table=Table,eventbus=EventBus})->
+handle_event(Event={dealer_disconnect,Pid},StateName,State=#state{dealer={Pid,Dealer},table=Table})->
 	lager:info("dealer_disconnect handle_event, event ~p,stateName ~p,state ~p",[Event,StateName,State]),
-	gen_event:notify(EventBus,{dealer_disconnect,{Table,Dealer}}),
+	casino_events:publish(Table,{dealer_disconnect,{Table,Dealer}}),
 	NewState=State#state{dealer=undefined},
 	{next_state,StateName,NewState};
 
@@ -159,15 +160,15 @@ handle_event(Event,StateName,State)->
 	{next_state,StateName,State}.
 
 
-handle_sync_event(Event={player_join,User=#user{id=UserId},PlayerTableId},From,StateName,State=#state{table=Table,eventbus=EventBus,game=#game{name=GameName}})->
+handle_sync_event(Event={player_join,User,PlayerTable},From={UserPid,_},StateName,State=#state{table=Table,game=#game{name=GameName}})->
 	lager:info("player_join, event ~p,from ~p,stateName ~p,state ~p",[Event,From,StateName,State]),
-	Handlers=gen_event:which_handlers(EventBus),
-	case lists:member({player_handler,UserId},Handlers) of
-		true->
-			{reply,{error,already_joined},StateName,State};
-		_->
-			Result=casino_sup:start_player(GameName,Table,self(),EventBus,PlayerTableId,User),
-			{reply,Result,StateName,State}
+	case gproc:where({n,l,{PlayerTable#player_table.id,User#user.id}}) of
+		undefined->
+			Result=casino_sup:start_player(GameName,Table,self(),PlayerTable,User,UserPid),
+			{reply,Result,StateName,State};
+		Pid->
+			%% should update player process's user_pid
+			{reply,{ok,Pid},StateName,State}
 	end;
 
 handle_sync_event(Event={update_countdown,Countdown},From,StateName,State)->
@@ -180,11 +181,11 @@ handle_sync_event(Event={update_countdown,Countdown},From,StateName,State)->
 			{reply,error,StateName,State}
 	end;
 
-handle_sync_event(Event={dealer_connect,Dealer},From={Pid,_},StateName,State=#state{dealer=undefined,table=Table,eventbus=EventBus,game=#game{name=GameName}})->
+handle_sync_event(Event={dealer_connect,Dealer},From={Pid,_},StateName,State=#state{dealer=undefined,table=Table,game=#game{name=GameName}})->
 	lager:info("dealer_connected, event ~p,from ~p,stateName ~p,state ~p",[Event,From,StateName,State]),
 	NewState=State#state{dealer={Pid,Dealer}},
 	erlang:monitor(process,Pid),
-	gen_event:notify(EventBus,{dealer_connect,{Table,Dealer}}),
+	casino_events:publish(Table,{dealer_connect,{Table,Dealer}}),
 	{reply,{ok,GameName},StateName,NewState};
 
 handle_sync_event(Event={dealer_connect,_Dealer},From,StateName,State)->

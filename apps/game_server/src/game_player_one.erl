@@ -9,22 +9,22 @@
 -include("game.hrl").
 
 -export([init/1,handle_call/3,handle_cast/2,handle_info/2,terminate/2,code_change/3]).
--export([start_link/5,bet/3]).
--record(state,{game,player_table,user,bet_ets,server,round_id}).
+-export([start_link/6,bet/3]).
+-record(state,{game,player_table,user,bet_ets,server,round_id,user_pid}).
 
 -define(CASINO_DB,mysql_casino_master).
 
 bet(GameServer,Cats,Amounts)->
 	gen_server:call(GameServer,{bet,Cats,Amounts}).
 
-start_link(Game,Server,EventBus,PlayerTable,User) 
-	when is_record(PlayerTable,player_table) andalso is_record(User,user) andalso is_record(Game,game)->
-	gen_server:start_link(?MODULE,{Game,Server,EventBus,PlayerTable,User},[]).
+start_link(Game,DealerTable,Server,PlayerTable,User,UserPid)->
+	gen_server:start_link(?MODULE,{Game,DealerTable,Server,PlayerTable,User,UserPid},[]).
 
-init({Game,Server,EventBus,PlayerTable,User})->
-	gen_event:add_handler(EventBus,{player_handler,User#user.id},self()),
+init({Game,DealerTable,Server,PlayerTable,User,UserPid})->
+	gproc:reg({n,l,{PlayerTable#player_table.id,User#user.id}}),
+	casino_events:subscribe(DealerTable),
 	BetEts=ets:new(player_bets,[set,private]),
-	{ok,#state{game=Game,player_table=PlayerTable,user=User,server=Server,bet_ets=BetEts}}.
+	{ok,#state{game=Game,player_table=PlayerTable,user=User,server=Server,bet_ets=BetEts,user_pid=UserPid}}.
 
 do_bet(Module,Server,BetEts,RoundId,UserId,PlayerTableId,Cats,Amounts)->
 	case Module:try_bet(Server,Cats,Amounts) of
@@ -75,9 +75,8 @@ handle_info(Info,State)->
 	lager:error("module ~p, Info ~p, State ~p",[?MODULE,Info,State]),
 	{noreply,State}.
 
-terminate(Reason,State=#state{game=#game{module=Module},user=User,server=Server,bet_ets=BetEts})->
+terminate(Reason,State=#state{bet_ets=BetEts})->
 	lager:info("terminate, Reason ~p, State ~p",[Reason,State]),
-	Module:player_quit(Server,User,Reason),
 	ets:delete(BetEts),
 	ok.
 

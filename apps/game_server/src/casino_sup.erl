@@ -3,55 +3,41 @@
 -include("game.hrl").
 
 -export([start_link/0,start_player/6]).
-%% supervisor callbacks
 -export([init/1]).
 
 start_link()->
 	supervisor:start_link({local,?MODULE},?MODULE,[]).
 
-start_player(baccarat,DealerTableId,Server,EventBus,PlayerTableId,User)->
-	supervisor:start_child(baccarat_players_sup_id(DealerTableId),[Server,EventBus,PlayerTableId,User]);
-start_player(dragontiger,DealerTableId,Server,EventBus,PlayerTableId,User)->
-	supervisor:start_child(dragontiger_players_sup_id(DealerTableId),[Server,EventBus,PlayerTableId,User]).
+start_player(GameName,DealerTableId,Server,PlayerTable,User,UserPid)->
+	Id=players_sup_id(GameName,DealerTableId),
+	supervisor:start_child(Id,[Server,PlayerTable,User,UserPid]).
 
-child_id(Prefix,Table)->
-	list_to_atom(lists:concat([Prefix,Table])).
+game_server_id(GameName,Table)->
+	unique_id(GameName,"_game_",Table).
 
-dragontiger_players_sup_id(Table)->
-	child_id("dragontiger_players_sup_",Table).
+players_sup_id(GameName,Table)->
+	unique_id(GameName,"_players_sup_",Table).
 
-baccarat_players_sup_id(Table)->
-	child_id("baccarat_players_sup_",Table).
+unique_id(GameName,Middle,Table)->
+	list_to_atom(lists:concat([GameName,Middle,Table])).
 
-dragontiger_spec(Table,Countdown)->
-	Game=#game{name=dragontiger,module=dragontiger_game_mod},
-	StartFunc={game_server_one,start_game_server,[Game,Table,Countdown]},
-	Id=child_id("dragontiger_game_",Table),
-	{Id,StartFunc,permanent,6,worker,[dragontiger_game]}.
-
-dragontiger_players_sup_spec(Table)->
-	Id=dragontiger_players_sup_id(Table),
-	Game=#game{name=dragontiger,module=dragontiger_player_mod},
-	StartFunc={casino_players_sup,start_link,[Id,Game]},
+players_sup_spec(Game,Table)->
+	Id=players_sup_id(Game#game.name,Table),
+	StartFunc={casino_players_sup,start_link,[Id,Game,Table]},
 	{Id,StartFunc,transient,6,supervisor,dynamic}.
 
-baccarat_spec(Table,Countdown)->
-	Game=#game{name=baccarat,module=baccarat_game_mod},
+game_server_spec(Game,Table,Countdown)->
 	StartFunc={game_server_one,start_game_server,[Game,Table,Countdown]},
-	Id=child_id("baccarat_game_",Table),
-	{Id,StartFunc,permanent,6,worker,[baccarat_game]}.
-
-baccarat_players_sup_spec(Table)->
-	Id=baccarat_players_sup_id(Table),
-	Game=#game{name=baccarat,module=baccarat_player_mod},
-	StartFunc={casino_players_sup,start_link,[Id,Game]},
-	{Id,StartFunc,transient,6,supervisor,dynamic}.	
+	Id=game_server_id(Game#game.name,Table),
+	{Id,StartFunc,permanent,6,worker,[game_server_one]}.
 
 dragontiger(Table,Countdown)->
-	[dragontiger_spec(Table,Countdown),dragontiger_players_sup_spec(Table)].
+	[game_server_spec(#game{name=dragontiger,module=dragontiger_game_mod},Table,Countdown),
+	players_sup_spec(#game{name=dragontiger,module=dragontiger_player_mod},Table)].
 
 baccarat(Table,Countdown)->
-	[baccarat_spec(Table,Countdown),baccarat_players_sup_spec(Table)].
+	[game_server_spec(#game{name=baccarat,module=baccarat_game_mod},Table,Countdown),
+	players_sup_spec(#game{name=baccarat,module=baccarat_player_mod},Table)].
 
 init([])->
 	Children=baccarat(1,15)++dragontiger(4,13),
