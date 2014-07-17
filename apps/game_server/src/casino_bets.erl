@@ -40,18 +40,17 @@ payout_bet(Key={_,Cat},BetEts,RatioMap)->
 payout_bets(BetEts,RatioMap)->
 	payout_bet(ets:first(BetEts),BetEts,RatioMap).
 
+fold_bundle({{_BetBundleId,_C},_A,0},Acc)->
+	Acc;
+fold_bundle({{BetBundleId,_C},A,R},Acc)->
+	case maps:find(BetBundleId,Acc) of
+		{ok,Total}->
+			maps:put(BetBundleId,A*R+Total,Acc);
+		error->
+			maps:put(BetBundleId,A*R,Acc)
+	end.
 payout_bundles(BetEts)->
-	Fun = fun({{_BetBundleId,_C},_A,0},Acc)->
-					Acc;
-			 ({{BetBundleId,_C},A,R},Acc)->
-			 	case maps:find(BetBundleId,Acc) of
-			 		{ok,Total}->
-			 			maps:put(BetBundleId,A*R+Total,Acc);
-			 		error->
-			 			maps:put(BetBundleId,A*R,Acc)
-			 	end
-	end,
-	ets:foldl(Fun,#{},BetEts).
+	ets:foldl(fun fold_bundle/2,#{},BetEts).
 
 player_payout(BetEts,RatioMap)->
 	payout_bets(BetEts,RatioMap),
