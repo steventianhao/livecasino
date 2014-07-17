@@ -110,7 +110,7 @@ dealing(commit,{Pid,_},State=#state{cards=Cards,dealer={Pid,_},round=Round,table
 			Mills=casino_utils:mills(),
 			Cstr=Module:to_string(Cards),
 			1=mysql_db:update_round(?CASINO_DB,Round#round.id,Cstr,Mills),
-			casino_events:publish(Table,{commit,{Table,Cards}}),				
+			casino_events:publish(Table,{commit,{Table,Cards,list_to_binary(Cstr)}}),				
 			{reply,ok,stopped,State};
 		false->
 			{reply,error,dealing,State}
