@@ -1,14 +1,8 @@
 -module(dealer_app).
 -behavior(application).
 -export([start/2,stop/1]).
--export([start/0]).
 
 -define(APP,dealer).
-
-start()->
-	application:ensure_started(sasl),
-	application:ensure_all_started(cowboy),
-	application:ensure_started(dealer).
 
 start(_StartType,_StartArgs)->
 	{ok,Port}=application:get_env(?APP,listen_port),
