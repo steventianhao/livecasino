@@ -1,5 +1,5 @@
 -module(player_game_api).
--export([find_server/1,check_bets/3]).
+-export([find_server/1,check_bets/3,bet/4]).
 
 check_bets(Cats,Amounts,baccarat)->
 	player_baccarat:check_bets(Cats,Amounts);

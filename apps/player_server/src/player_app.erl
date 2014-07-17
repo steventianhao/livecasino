@@ -14,7 +14,7 @@ start(_StartType,_StartArgs)->
 	Dispatch=cowboy_router:compile(Routes),
 	{ok,_}=cowboy:start_http(player_http,100,[{port,Port}],
 		[{env,[{dispatch,Dispatch}]}]),
-	dealer_sup:start_link().
+	player_sup:start_link().
 
 stop(_State)->
 	cowboy:stop_listener(player_http),
