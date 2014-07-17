@@ -105,7 +105,7 @@ remove_test()->
 validate_7cards_test()->
 	C1="S3DACT#SKS2D8",
 	Cards=baccarat_dealer_mod:from_string(C1),
-	C2=maps:merge(#{7 =>casino_card:one_card(<<"H2">>)},Cards),
+	C2=maps:merge(#{7 =>casino_card:binary_to_card(<<"H2">>)},Cards),
 	?assertEqual(false,baccarat_dealer_mod:validate(C2)).
 
 validate_3cards_test()->

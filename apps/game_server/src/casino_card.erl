@@ -1,7 +1,7 @@
 -module(casino_card).
 -include("card.hrl").
 
--export([string_to_cards/1,card_to_string/1,cards_to_string/1,one_card/1]).
+-export([string_to_cards/1,card_to_string/1,cards_to_string/1,binary_to_card/1,card_to_binary/1]).
 -export([is_pair/2,total/2]).
 -export([put/4,remove/2]).
 
@@ -37,6 +37,9 @@ string_to_cards([])->
 string_to_cards([S,R|T])->
 	[#card{suit=S,rank=R}|string_to_cards(T)].
 
-one_card(Card)->
-	[S,R]=binary_to_list(Card),
+binary_to_card(CardB)->
+	[S,R]=binary_to_list(CardB),
 	#card{suit=S,rank=R}.
+
+card_to_binary(#card{rank=N,suit=S})->
+	list_to_binary([S,N]).

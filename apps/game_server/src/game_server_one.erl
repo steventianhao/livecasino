@@ -67,11 +67,11 @@ betting(Event,_From,State)->
 
 dealing(Event={deal,Pos,CardL},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,game=#game{module=Module}})->
 	lager:info("dealing#deal, Event ~p, State ~p",[Event,State]),
-	Card=casino_card:one_card(CardL),
+	Card=casino_card:binary_to_card(CardL),
 	case Module:put(Pos,Card,Cards) of
 		{ok,NewCards} ->
 			NewState=State#state{cards=NewCards},
-			casino_events:publish(Table,{deal,{Table,Pos,Card}}),
+			casino_events:publish(Table,{deal,{Table,Pos,CardL}}),
 			{reply,ok,dealing,NewState};
 		error ->
 			{reply,error,dealing,State}
@@ -80,12 +80,12 @@ dealing(Event={deal,Pos,CardL},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},t
 
 dealing(Event={scan,CardL},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,game=#game{module=Module}})->
 	lager:info("dealing#scan, Event ~p, State ~p",[Event,State]),
-	Card=casino_card:one_card(CardL),
+	Card=casino_card:binary_to_card(CardL),
 	case Module:add(Card,Cards) of
 		{error,_} ->
 			{reply,error,dealing,State};
 		{Status,Pos,NewCards}->
-			casino_events:publish(Table,{deal,{Table,Pos,Card}}),
+			casino_events:publish(Table,{deal,{Table,Pos,CardL}}),
 			{reply,{ok,Status,Pos},dealing,State#state{cards=NewCards}}
 	end;
 

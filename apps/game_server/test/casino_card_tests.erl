@@ -7,6 +7,10 @@ cards_to_string_test()->
 	?assertEqual("HACQ",casino_card:cards_to_string(Cards)).
 
 
-one_card_test()->
+binary_to_card_test()->
 	S = <<"D6">>,
-	?assertEqual(#card{suit=?DIAMOND,rank=?SIX},casino_card:one_card(S)).
+	?assertEqual(#card{suit=?DIAMOND,rank=?SIX},casino_card:binary_to_card(S)).
+
+card_to_binary_test()->
+	S = <<"D6">>,
+	?assertEqual(S,casino_card:card_to_binary(#card{suit=?DIAMOND,rank=?SIX})).
