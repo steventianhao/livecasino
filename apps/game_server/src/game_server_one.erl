@@ -49,9 +49,9 @@ stopped(Event,_From,State)->
 	{reply,{error,unexpected},stopped,State}.
 
 
-betting(Event={try_bet,_Cats,_Amounts},_From,State)->
+betting(Event={try_bet,_Cats,_Amounts},_From,State=#state{round=Round})->
 	lager:info("bet Event ~p,State ~p",[Event,State]),
-	{reply,ok,betting,State};
+	{reply,{ok,Round#round.id},betting,State};
 	
 betting(stop_bet,{Pid,_},State=#state{ticker={TRef,_},dealer={Pid,_},round=Round,table=Table})->
 	lager:info("betting#stop_bet,state ~p",[State]),
@@ -110,7 +110,7 @@ dealing(commit,{Pid,_},State=#state{cards=Cards,dealer={Pid,_},round=Round,table
 			Mills=casino_utils:mills(),
 			Cstr=Module:to_string(Cards),
 			1=mysql_db:update_round(?CASINO_DB,Round#round.id,Cstr,Mills),
-			casino_events:publish(Table,{commit,{Table,Cards,list_to_binary(Cstr)}}),				
+			casino_events:publish(Table,{commit,{Table,Round,Cards,list_to_binary(Cstr)}}),				
 			{reply,ok,stopped,State};
 		false->
 			{reply,error,dealing,State}
