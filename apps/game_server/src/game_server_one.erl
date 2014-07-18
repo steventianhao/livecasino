@@ -17,7 +17,6 @@
 -define(CASINO_DB,mysql_casino_master).
 -define(GLOBAL_GAME_SERVER(DealerTableId),{global,{game_server,DealerTableId}}).
 
-
 start_game_server(Game,DealerTableId,Countdown,PlayerTables) when  is_integer(DealerTableId) andalso is_integer(Countdown)->
 	gen_fsm:start_link(?GLOBAL_GAME_SERVER(DealerTableId),?MODULE,{Game,DealerTableId,Countdown,PlayerTables},[]).
 
@@ -48,7 +47,6 @@ stopped(Event,_From,State)->
 	lager:error("unexpected event when stopped, event ~p,state ~p",[Event,State]),
 	{reply,{error,unexpected},stopped,State}.
 
-
 betting(Event={try_bet,_Cats,_Amounts},_From,State=#state{round=Round})->
 	lager:info("bet Event ~p,State ~p",[Event,State]),
 	{reply,{ok,Round#round.id},betting,State};
@@ -77,7 +75,6 @@ dealing(Event={deal,Pos,CardL},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},t
 			{reply,error,dealing,State}
 	end;
 
-
 dealing(Event={scan,CardL},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,game=#game{module=Module}})->
 	lager:info("dealing#scan, Event ~p, State ~p",[Event,State]),
 	Card=casino_card:binary_to_card(CardL),
@@ -89,7 +86,6 @@ dealing(Event={scan,CardL},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table
 			{reply,{ok,Status,Pos},dealing,State#state{cards=NewCards}}
 	end;
 
-
 dealing(Event={clear,Pos},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table})->
 	lager:info("dealing#clear, Event ~p, State ~p",[Event,State]),
 	case casino_card:remove(Pos,Cards) of
@@ -100,7 +96,6 @@ dealing(Event={clear,Pos},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=
 		error ->
 			{reply,error,dealing,State}
 	end;
-
 
 dealing(commit,{Pid,_},State=#state{cards=Cards,dealer={Pid,_},round=Round,table=Table,game=#game{module=Module}})->
 	lager:info("dealing#commit, State ~p",[State]),
@@ -116,11 +111,9 @@ dealing(commit,{Pid,_},State=#state{cards=Cards,dealer={Pid,_},round=Round,table
 			{reply,error,dealing,State}
 	end;
 
-
 dealing(Event,_From,State)->
 	lager:error("unexpected event when dealing, event ~p,state ~p",[Event,State]),
 	{reply,{error,unexpected},dealing,State}.
-
 
 handle_info(tick,betting,State=#state{ticker=Ticker,table=Table})->
 	%%send the tick to all players intrested in
@@ -135,6 +128,7 @@ handle_info(tick,betting,State=#state{ticker=Ticker,table=Table})->
 			NewState=State#state{ticker={TRef,Value-1}},
 			{next_state,betting,NewState}
 	end;
+
 handle_info(Info={'DOWN',_Ref,process,Pid,_},StateName,State=#state{dealer={Pid,Dealer},table=Table})->
 	lager:error("handle dealer process DOWN, info ~p,stateName ~p,state ~p",[Info,StateName,State]),
 	NewState=State#state{dealer=undefined},
@@ -145,10 +139,6 @@ handle_info(Info,StateName,State)->
 	lager:error("unexpected handle info, info ~p,stateName ~p,state ~p",[Info,StateName,State]),
 	{next_state,StateName,State}.
 
-% handle_event(Event={player_quit,#user{id=UserId},Reason},StateName,State=#state{eventbus=EventBus})->
-% 	lager:info("player_quit handle_event, event ~p,stateName ~p,state ~p",[Event,StateName,State]),
-% 	gen_event:delete_handler(EventBus,{player_handler,UserId},Reason);
-
 handle_event(Event={dealer_disconnect,Pid},StateName,State=#state{dealer={Pid,Dealer},table=Table})->
 	lager:info("dealer_disconnect handle_event, event ~p,stateName ~p,state ~p",[Event,StateName,State]),
 	casino_events:publish(Table,{dealer_disconnect,{Table,Dealer}}),
@@ -158,8 +148,6 @@ handle_event(Event={dealer_disconnect,Pid},StateName,State=#state{dealer={Pid,De
 handle_event(Event,StateName,State)->
 	lager:error("unexpected handle_event, event ~p,stateName ~p,state ~p",[Event,StateName,State]),
 	{next_state,StateName,State}.
-
-
 
 handle_sync_event(Event={player_join,User,PlayerTableId},From={UserPid,_},StateName,State=#state{table=Table,game=#game{name=GameName},player_tables=PlayerTables})->
 	lager:info("player_join, event ~p,from ~p,stateName ~p,state ~p",[Event,From,StateName,State]),
