@@ -32,11 +32,11 @@ game_server_spec(Game,Table,Countdown,PlayerTables)->
 	{Id,StartFunc,permanent,6,worker,[game_server_one]}.
 
 dragontiger(Table,Countdown)->
-	[game_server_spec(#game{name=dragontiger,module=dragontiger_game_mod},Table,Countdown,[?PLAYER_TAB4]),
+	[game_server_spec(#game{name=dragontiger,module=dragontiger_dealer_mod},Table,Countdown,[?PLAYER_TAB4]),
 	players_sup_spec(#game{name=dragontiger,module=dragontiger_player_mod},Table)].
 
 baccarat(Table,Countdown)->
-	[game_server_spec(#game{name=baccarat,module=baccarat_game_mod},Table,Countdown,[?PLAYER_TAB1,?PLAYER_TAB101]),
+	[game_server_spec(#game{name=baccarat,module=baccarat_dealer_mod},Table,Countdown,[?PLAYER_TAB1,?PLAYER_TAB101]),
 	players_sup_spec(#game{name=baccarat,module=baccarat_player_mod},Table)].
 
 init([])->
