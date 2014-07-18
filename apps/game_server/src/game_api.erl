@@ -1,4 +1,4 @@
--module(baccarat_game_api).
+-module(game_api).
 
 -export([dealer_connect/2,dealer_disconnect/1]).
 -export([new_shoe/1,start_bet/1,stop_bet/1,commit/1,try_bet/3]).
@@ -42,7 +42,7 @@ dealer_disconnect(GameServer)->
 update_countdown(GameServer,Countdown)->
 	gen_fsm:sync_send_all_state_event(GameServer,{update_countdown,Countdown}).
 
-player_join(GameServer,User,PlayerTable) when is_record(User,user) andalso is_record(PlayerTable,player_table)->
-	gen_fsm:sync_send_all_state_event(GameServer,{player_join,User,PlayerTable}).
+player_join(GameServer,User,PlayerTableId) when is_record(User,user) andalso is_integer(PlayerTableId)->
+	gen_fsm:sync_send_all_state_event(GameServer,{player_join,User,PlayerTableId}).
 player_quit(GameServer,User,Reason)->
 	gen_fsm:send_all_state_event(GameServer,{player_quit,User,Reason}).

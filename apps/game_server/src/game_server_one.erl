@@ -8,21 +8,21 @@
 -include("game.hrl").
 -include("table.hrl").
 
--record(state,{dealer,table,ticker,cards,countdown,round,game}).
+-record(state,{dealer,table,ticker,cards,countdown,round,game,player_tables}).
 
 -export([init/1,code_change/4,handle_event/3,handle_info/3,handle_sync_event/4,terminate/3]).
 -export([stopped/3,dealing/3,betting/3]).
--export([start_game_server/3]).
+-export([start_game_server/4]).
 
 -define(CASINO_DB,mysql_casino_master).
 -define(GLOBAL_GAME_SERVER(DealerTableId),{global,{game_server,DealerTableId}}).
 
 
-start_game_server(Game,DealerTableId,Countdown) when  is_integer(DealerTableId) andalso is_integer(Countdown)->
-	gen_fsm:start_link(?GLOBAL_GAME_SERVER(DealerTableId),?MODULE,{Game,DealerTableId,Countdown},[]).
+start_game_server(Game,DealerTableId,Countdown,PlayerTables) when  is_integer(DealerTableId) andalso is_integer(Countdown)->
+	gen_fsm:start_link(?GLOBAL_GAME_SERVER(DealerTableId),?MODULE,{Game,DealerTableId,Countdown,PlayerTables},[]).
 
-init({Game,Table,Countdown})->
-	{ok,stopped,#state{countdown=Countdown,table=Table,game=Game}}.
+init({Game,Table,Countdown,PlayerTables})->
+	{ok,stopped,#state{countdown=Countdown,table=Table,game=Game,player_tables=PlayerTables}}.
 
 stopped(new_shoe,{Pid,_},State=#state{dealer={Pid,_},round=Round})->
 	lager:info("stopped#new_shoe,state ~p",[State]),
@@ -160,15 +160,26 @@ handle_event(Event,StateName,State)->
 	{next_state,StateName,State}.
 
 
-handle_sync_event(Event={player_join,User,PlayerTable},From={UserPid,_},StateName,State=#state{table=Table,game=#game{name=GameName}})->
+
+handle_sync_event(Event={player_join,User,PlayerTableId},From={UserPid,_},StateName,State=#state{table=Table,game=#game{name=GameName},player_tables=PlayerTables})->
 	lager:info("player_join, event ~p,from ~p,stateName ~p,state ~p",[Event,From,StateName,State]),
-	case gproc:where({n,l,{PlayerTable#player_table.id,User#user.id}}) of
-		undefined->
-			Result=casino_sup:start_player(GameName,Table,self(),PlayerTable,User,UserPid),
-			{reply,Result,StateName,State};
-		Pid->
-			%% should update player process's user_pid
-			{reply,{ok,Pid},StateName,State}
+	case lists:keyfind(PlayerTableId,#player_table.id,PlayerTables) of
+		false->
+			{reply,{error,not_found},StateName,State};
+		#player_table{payout=Payout}=PlayerTable->
+			case gproc:where({n,l,{PlayerTableId,User#user.id}}) of
+				undefined->
+					Result=casino_sup:start_player(GameName,Table,self(),PlayerTable,User,UserPid),
+					case Result of
+						{ok,NewPid}->
+							{reply,{ok,{NewPid,GameName,Payout}},StateName,State};
+						_->
+							{reply,Result,StateName,State}
+					end;
+				Pid->
+					%% should update player process's user_pid
+					{reply,{ok,{Pid,GameName,Payout}},StateName,State}
+			end
 	end;
 
 handle_sync_event(Event={update_countdown,Countdown},From,StateName,State)->

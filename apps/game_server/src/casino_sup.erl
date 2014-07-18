@@ -1,7 +1,7 @@
 -module(casino_sup).
 -behavior(supervisor).
 -include("game.hrl").
-
+-include("table.hrl").
 -export([start_link/0,start_player/6]).
 -export([init/1]).
 
@@ -26,17 +26,17 @@ players_sup_spec(Game,Table)->
 	StartFunc={casino_players_sup,start_link,[Id,Game,Table]},
 	{Id,StartFunc,transient,6,supervisor,dynamic}.
 
-game_server_spec(Game,Table,Countdown)->
-	StartFunc={game_server_one,start_game_server,[Game,Table,Countdown]},
+game_server_spec(Game,Table,Countdown,PlayerTables)->
+	StartFunc={game_server_one,start_game_server,[Game,Table,Countdown,PlayerTables]},
 	Id=game_server_id(Game#game.name,Table),
 	{Id,StartFunc,permanent,6,worker,[game_server_one]}.
 
 dragontiger(Table,Countdown)->
-	[game_server_spec(#game{name=dragontiger,module=dragontiger_game_mod},Table,Countdown),
+	[game_server_spec(#game{name=dragontiger,module=dragontiger_game_mod},Table,Countdown,[?PLAYER_TAB4]),
 	players_sup_spec(#game{name=dragontiger,module=dragontiger_player_mod},Table)].
 
 baccarat(Table,Countdown)->
-	[game_server_spec(#game{name=baccarat,module=baccarat_game_mod},Table,Countdown),
+	[game_server_spec(#game{name=baccarat,module=baccarat_game_mod},Table,Countdown,[?PLAYER_TAB1,?PLAYER_TAB101]),
 	players_sup_spec(#game{name=baccarat,module=baccarat_player_mod},Table)].
 
 init([])->
