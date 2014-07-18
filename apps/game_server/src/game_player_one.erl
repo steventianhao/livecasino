@@ -29,8 +29,8 @@ init({Game,DealerTable,Server,PlayerTable,User,UserPid})->
 	BetEts=ets:new(player_bets,[set,private]),
 	{ok,#state{game=Game,player_table=PlayerTable,user=User,server=Server,bet_ets=BetEts,user_pid=UserPid}}.
 
-do_bet(Module,Server,BetEts,UserId,PlayerTableId,Cats,Amounts)->
-	case Module:try_bet(Server,Cats,Amounts) of
+do_bet(Server,BetEts,UserId,PlayerTableId,Cats,Amounts)->
+	case game_api:try_bet(Server,Cats,Amounts) of
 		{ok,RoundId}->
 			case casino_bets:persist_bet(RoundId,UserId,PlayerTableId,Cats,Amounts) of
 				{ok,Bundle={BetBundleId,_BalanceAfter}}->
@@ -43,9 +43,9 @@ do_bet(Module,Server,BetEts,UserId,PlayerTableId,Cats,Amounts)->
 			Res
 	end.
 					
-handle_call(Event={bet,Cats,Amounts},_From,State=#state{game=Game,server=Server,user=User,player_table=PlayerTable,bet_ets=BetEts})->
+handle_call(Event={bet,Cats,Amounts},_From,State=#state{server=Server,user=User,player_table=PlayerTable,bet_ets=BetEts})->
 	lager:info("bet module ~p, event ~p, state ~p",[?MODULE,Event,State]),
-	Result=do_bet(Game#game.module,Server,BetEts,User#user.id,PlayerTable#player_table.id,Cats,Amounts),
+	Result=do_bet(Server,BetEts,User#user.id,PlayerTable#player_table.id,Cats,Amounts),
 	{reply,Result,State}.
 
 handle_cast(Request,State)->
