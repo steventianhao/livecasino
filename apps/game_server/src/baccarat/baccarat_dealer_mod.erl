@@ -1,6 +1,6 @@
 -module(baccarat_dealer_mod).
 
--export([add/2,put/3,remove/2,validate/1,from_string/1,to_string/1]).
+-export([add/2,put/3,validate/1,from_string/1,to_string/1]).
 -include("baccarat.hrl").
 -include("card.hrl").
 
@@ -44,9 +44,6 @@ to_string(#{?PLAYER_POS_1:=P1,?PLAYER_POS_2:=P2,?BANKER_POS_1:=B1,?BANKER_POS_2:
 
 put(Pos,Card,Cards)->
 	casino_card:put(Pos,Card,Cards,?ALL_POS).
-
-remove(Pos,Cards)->
-	casino_card:remove(Pos,Cards).
 
 check6cards(Pt,Bt,P3v)->
 	Pt < 6 andalso 

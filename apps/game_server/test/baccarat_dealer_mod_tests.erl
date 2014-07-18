@@ -97,11 +97,6 @@ validate_test_()->
 	Result2=baccarat_dealer_mod:validate(maps:from_list(List2)),
 	[?_assertNot(Result1),?_assertNot(Result2)].
 
-remove_test()->
-	M=#{?PLAYER_POS_1=>c(?JACK),?PLAYER_POS_2=>c(?KING)},
-	?assert({ok,#{?PLAYER_POS_2=>c(?KING)}}=:=baccarat_dealer_mod:remove(?PLAYER_POS_1,M)),
-	?assert(error=:=baccarat_dealer_mod:remove(?BANKER_POS_2,M)).
-
 validate_7cards_test()->
 	C1="S3DACT#SKS2D8",
 	Cards=baccarat_dealer_mod:from_string(C1),

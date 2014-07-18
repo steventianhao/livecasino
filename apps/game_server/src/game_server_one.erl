@@ -90,9 +90,9 @@ dealing(Event={scan,CardL},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table
 	end;
 
 
-dealing(Event={clear,Pos},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table,game=#game{module=Module}})->
+dealing(Event={clear,Pos},{Pid,_},State=#state{cards=Cards,dealer={Pid,_},table=Table})->
 	lager:info("dealing#clear, Event ~p, State ~p",[Event,State]),
-	case Module:remove(Pos,Cards) of
+	case casino_card:remove(Pos,Cards) of
 		{ok,NewCards} ->
 			NewState=State#state{cards=NewCards},
 			casino_events:publish(Table,{clear,{Table,Pos}}),

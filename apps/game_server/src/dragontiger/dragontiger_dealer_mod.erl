@@ -1,12 +1,9 @@
 -module(dragontiger_dealer_mod).
 -include("dragontiger.hrl").
--export([put/3,remove/2,add/2,from_string/1,to_string/1,validate/1]).
+-export([put/3,add/2,from_string/1,to_string/1,validate/1]).
 
 put(Pos,Card,Cards)->
 	casino_card:put(Pos,Card,Cards,?ALL_POS).
-
-remove(Pos,Cards)->
-	casino_card:remove(Pos,Cards).
 
 add(Card,Cards=#{}) when map_size(Cards)==0->
 	{more,?DRAGON_POS, Cards#{?DRAGON_POS=>Card}};
