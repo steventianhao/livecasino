@@ -91,15 +91,6 @@ handle_action(#{?KIND := ?AUTH,  ?USERNAME:= Username,  ?PASSWORD:= Password}=Re
 			{err_json(?AUTH),State}
 	end;
 
-handle_action(#{?KIND := ?AUTH,  ?USERNAME:= Username}=Req,#state{dealer={_Id,Username2}}=State)->
-	io:format("this is we got in handle_action(auth) ~p~n",[Req]),
-	case  Username of
-		Username2 ->
-			{ok_json(?AUTH),State};
-		true ->
-			{err_json(?AUTH,<<"other_dealer_authed">>),State}
-	end;
-
 handle_action(_Req,#state{dealer=undefined}=State)->	
 	{err_json(?AUTH),State};
 
