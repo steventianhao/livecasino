@@ -39,7 +39,8 @@ websocket_handle({text,Msg},Req,State)->
 	io:format("this is msg we got ~p~n",[Msg]),
 	{Json,NewState}=case jsx:is_json(Msg) of
 		true-> 
-			handle_json(jsx:decode(Msg),State);
+			Map=maps:from_list(jsx:decode(Msg)),
+			handle_action(Map,State);
 		false->
 			{err_json(?INVALID),State}
 	end,
@@ -73,11 +74,6 @@ err_json(Kind)->
 	jsx:encode([{?KIND,Kind},{?CODE,-1}]).
 err_json(Kind,Error)->
 	jsx:encode([{?KIND,Kind},{?CODE,-1},{?ERROR,Error}]).
-
-handle_json(Tuples,State)->
-	Map=maps:from_list(Tuples),
-	io:format("this is map we get from json ~p~n",[Map]),
-	handle_action(Map,State).
 
 handle_action(#{?KIND := ?QUIT},#state{table=undefined}=State)->
 	{ok_json(?QUIT),State#state{dealer=undefined}};
