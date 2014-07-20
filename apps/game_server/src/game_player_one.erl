@@ -10,7 +10,7 @@
 -include("dealer.hrl").
 
 -export([init/1,handle_call/3,handle_cast/2,handle_info/2,terminate/2,code_change/3]).
--export([start_link/6,bet/3]).
+-export([start_link/6,bet/3,user_disconnect/2]).
 -record(state,{game,player_table,user,bet_ets,server,user_pid}).
 
 -define(JST(Kind,Table,Content),[{<<"kind">>,Kind},{<<"content">>,[{<<"table">>,Table}|Content]}]).
@@ -20,12 +20,16 @@
 bet(GameServer,Cats,Amounts)->
 	gen_server:call(GameServer,{bet,Cats,Amounts}).
 
+user_disconnect(GameServer,UserPid)->
+	gen_server:cast(GameServer,{user_disconnect,UserPid}).
+
 start_link(Game,DealerTable,Server,PlayerTable,User,UserPid)->
 	gen_server:start_link(?MODULE,{Game,DealerTable,Server,PlayerTable,User,UserPid},[]).
 
 init({Game,DealerTable,Server,PlayerTable,User,UserPid})->
 	gproc:reg({n,l,{PlayerTable#player_table.id,User#user.id}}),
 	casino_events:subscribe(DealerTable),
+	erlang:monitor(process,UserPid),
 	BetEts=ets:new(player_bets,[set,private]),
 	{ok,#state{game=Game,player_table=PlayerTable,user=User,server=Server,bet_ets=BetEts,user_pid=UserPid}}.
 
@@ -48,9 +52,19 @@ handle_call(Event={bet,Cats,Amounts},_From,State=#state{server=Server,user=User,
 	Result=do_bet(Server,BetEts,User#user.id,PlayerTable#player_table.id,Cats,Amounts),
 	{reply,Result,State}.
 
+handle_cast({user_disconnect,UserPid},State=#state{user_pid=UserPid})->
+	{noreply,State#state{user_pid=undefined}};
+
 handle_cast(Request,State)->
 	lager:error("unexpected Request ~p, State ~p",[Request,State]),
 	{noreply,State}.
+
+handle_info(Info={'DOWN',_Ref,process,UserPid,_},State=#state{user_pid=UserPid})->
+	lager:error("handle player process DOWN, info ~p,state ~p",[Info,State]),
+	{noreply,State#state{user_pid=undefined}};
+
+handle_info({user_reconnect,UserPid},State=#state{user_pid=undefined})->
+	{noreply,State#state{user_pid=UserPid}};
 
 handle_info({start_bet,_}=Info,State=#state{bet_ets=BetEts,user_pid=UserPid})->
 	ets:delete_all_objects(BetEts),
@@ -78,8 +92,10 @@ code_change(_OldVsn,State,_Extra)->
 	{ok,State}.
 
 send_json(UserPid,Json)->
-	case Json of
-		error->
+	case {UserPid,Json} of
+		{undefined,_}->
+			ok;
+		{_,error}->
 			ok;
 		_ ->
 			UserPid ! {json,jsx:encode(Json)}

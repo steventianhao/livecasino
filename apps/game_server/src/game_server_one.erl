@@ -165,7 +165,7 @@ handle_sync_event(Event={player_join,User,PlayerTableId},From={UserPid,_},StateN
 							{reply,Result,StateName,State}
 					end;
 				Pid->
-					%% should update player process's user_pid
+					Pid ! {user_reconnect,UserPid},
 					{reply,{ok,{Pid,GameName,Payout}},StateName,State}
 			end
 	end;
