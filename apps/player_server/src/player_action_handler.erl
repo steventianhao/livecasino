@@ -53,11 +53,11 @@ handle_action(#{?CMD := ?ENTER,?TABLE := Table},#state{player={Id,Name},tables=T
 		error ->
 			case player_game_api:find_server(Table) of
 				undefined->
-					{err_json(?ENTER),State};
+					{err_json(?ENTER,<<"game_server_not_found">>),State};
 				GameServerPid->
 					case player_game_api:join(GameServerPid,{user,Id,Name},Table) of
 						{ok,{_PlayerPid,_GameName,_Payout}=Result}->
-							{ok_json(?ENTER,State#state{tables=maps:put(Table,Result,Tables)})};
+							{ok_json(?ENTER),State#state{tables=maps:put(Table,Result,Tables)}};
 						{error,Error}->
 							{err_json(?ENTER,Error),State}
 					end
@@ -76,7 +76,7 @@ handle_action(#{?CMD:=?BET,?TABLE:=Table,?CATS:=Cats,?AMOUNTS:=Amounts},#state{t
 		{ok,{PlayerPid,GameName,_}}->
 			case player_game_api:bet(PlayerPid,GameName,Cats,Amounts) of
 				{ok,{BundleId,BalanceAfter}}->
-					{ok_json(?BET,[{<<"bundle_id">>,BundleId},<<"balance_after">>,BalanceAfter]),State};
+					{ok_json(?BET,[{<<"bundle_id">>,BundleId},{<<"balance_after">>,BalanceAfter}]),State};
 				{error,Error}->
 					{err_json(?BET,Error),State};
 				error ->
