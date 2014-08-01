@@ -1,0 +1,24 @@
+-ifndef (DEALER_JSON_HRL).
+-define(DEALER_JSON_HRL,true).
+
+-define(KIND,<<"kind">>).
+-define(CODE,<<"code">>).
+-define(AUTH,<<"auth">>).
+-define(ENTER,<<"enter">>).
+-define(QUIT,<<"quit">>).
+-define(DEAL,<<"deal">>).
+-define(CLEAR,<<"clear">>).
+-define(ERROR,<<"error">>).
+-define(POS,<<"pos">>).
+-define(CARD,<<"card">>).
+-define(SCAN,<<"scan">>).
+-define(TABLE,<<"table">>).
+-define(NEWSHOE,<<"newshoe">>).
+-define(STARTBET,<<"startbet">>).
+-define(STOPBET,<<"stopbet">>).
+-define(COMMIT,<<"commit">>).
+-define(USERNAME,<<"username">>).
+-define(PASSWORD,<<"password">>).
+-define(INVALID,<<"invalid">>).
+
+-endif.
