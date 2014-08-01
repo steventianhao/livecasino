@@ -115,15 +115,27 @@ dealing(Event,_From,State)->
 	lager:error("unexpected event when dealing, event ~p,state ~p",[Event,State]),
 	{reply,{error,unexpected},dealing,State}.
 
-handle_info(tick,betting,State=#state{ticker=Ticker,table=Table})->
+send_tick(Dealer,Msg)->
+	case Dealer of
+		undefined->
+			ok;
+		{Pid,_}->
+			Pid ! Msg
+	end.
+
+handle_info(tick,betting,State=#state{ticker=Ticker,table=Table,dealer=Dealer})->
 	%%send the tick to all players intrested in
 	lager:info("handle tick when betting, state ~p",[State]),	
 	case Ticker of
 		{_,0} ->
-			casino_events:publish(Table,{tick,{Table,0}}),
+			Msg={tick,{Table,0}},
+			casino_events:publish(Table,Msg),
+			send_tick(Dealer,Msg),
 			{next_state,betting,State};
 		{_,Value}->
-			casino_events:publish(Table,{tick,{Table,Value}}),
+			Msg={tick,{Table,Value}},
+			casino_events:publish(Table,Msg),
+			send_tick(Dealer,Msg),
 			TRef=erlang:send_after(1000,self(),tick),
 			NewState=State#state{ticker={TRef,Value-1}},
 			{next_state,betting,NewState}
